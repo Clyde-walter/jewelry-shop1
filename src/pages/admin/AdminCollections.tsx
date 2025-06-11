@@ -23,7 +23,8 @@ export function AdminCollections() {
   const [collectionForm, setCollectionForm] = useState({
     name: '',
     description: '',
-    images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+    category: 'rings' as 'rings' | 'necklaces' | 'earrings' | 'bracelets' | 'watches' | 'pendants',
+    images: [] as string[]
   });
   const [productForm, setProductForm] = useState({
     name: '',
@@ -32,7 +33,7 @@ export function AdminCollections() {
     category: '',
     stock: '',
     collectionId: '',
-    images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+    images: [] as string[]
   });
 
   const filteredCollections = collections.filter(collection =>
@@ -50,8 +51,8 @@ export function AdminCollections() {
         return URL.createObjectURL(file);
       });
       
-      const updatedImages = [...collectionForm.images.filter(img => !img.includes('unsplash')), ...newImages].slice(0, 5);
-      setCollectionForm({...collectionForm, images: updatedImages.length > 0 ? updatedImages : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']});
+      const updatedImages = [...collectionForm.images, ...newImages].slice(0, 5);
+      setCollectionForm({...collectionForm, images: updatedImages});
     }
   };
 
@@ -62,25 +63,25 @@ export function AdminCollections() {
         return URL.createObjectURL(file);
       });
       
-      const updatedImages = [...productForm.images.filter(img => !img.includes('unsplash')), ...newImages].slice(0, 5);
-      setProductForm({...productForm, images: updatedImages.length > 0 ? updatedImages : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']});
+      const updatedImages = [...productForm.images, ...newImages].slice(0, 5);
+      setProductForm({...productForm, images: updatedImages});
     }
   };
 
   const removeImage = (index: number) => {
     const updatedImages = collectionForm.images.filter((_, i) => i !== index);
-    setCollectionForm({...collectionForm, images: updatedImages.length > 0 ? updatedImages : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']});
+    setCollectionForm({...collectionForm, images: updatedImages});
   };
 
   const removeProductImage = (index: number) => {
     const updatedImages = productForm.images.filter((_, i) => i !== index);
-    setProductForm({...productForm, images: updatedImages.length > 0 ? updatedImages : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']});
+    setProductForm({...productForm, images: updatedImages});
   };
 
   const handleCollectionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!collectionForm.name || !collectionForm.description) {
+    if (!collectionForm.name || !collectionForm.description || !collectionForm.category) {
       toast({
         title: "Please fill in all required fields",
         variant: "destructive"
@@ -91,7 +92,8 @@ export function AdminCollections() {
     const collectionData = {
       name: collectionForm.name,
       description: collectionForm.description,
-      images: collectionForm.images,
+      category: collectionForm.category,
+      images: collectionForm.images.length > 0 ? collectionForm.images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'],
       productCount: editingCollection ? getCollectionProducts(editingCollection.id).length : 0,
       status: 'Active' as const
     };
@@ -163,7 +165,8 @@ export function AdminCollections() {
     setCollectionForm({
       name: '',
       description: '',
-      images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+      category: 'rings',
+      images: []
     });
     setEditingCollection(null);
   };
@@ -176,7 +179,7 @@ export function AdminCollections() {
       category: '',
       stock: '',
       collectionId: selectedCollection?.id || '',
-      images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+      images: []
     });
     setEditingProduct(null);
   };
@@ -186,7 +189,8 @@ export function AdminCollections() {
     setCollectionForm({
       name: collection.name,
       description: collection.description,
-      images: collection.images || ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+      category: collection.category || 'rings',
+      images: collection.images || []
     });
     setIsCollectionDialogOpen(true);
   };
@@ -509,6 +513,22 @@ export function AdminCollections() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium mb-2">Category *</label>
+                <Select value={collectionForm.category} onValueChange={(value: any) => setCollectionForm({...collectionForm, category: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select jewelry category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rings">Rings</SelectItem>
+                    <SelectItem value="necklaces">Necklaces</SelectItem>
+                    <SelectItem value="earrings">Earrings</SelectItem>
+                    <SelectItem value="bracelets">Bracelets</SelectItem>
+                    <SelectItem value="watches">Watches</SelectItem>
+                    <SelectItem value="pendants">Pendants</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium mb-2">Description *</label>
                 <Textarea
                   value={collectionForm.description}
@@ -538,15 +558,15 @@ export function AdminCollections() {
                       </Button>
                     </label>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {collectionForm.images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={image}
-                          alt={`Collection ${index + 1}`}
-                          className="w-full h-20 object-cover rounded border"
-                        />
-                        {collectionForm.images.length > 1 && (
+                  {collectionForm.images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {collectionForm.images.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={image}
+                            alt={`Collection ${index + 1}`}
+                            className="w-full h-20 object-cover rounded border"
+                          />
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
@@ -554,10 +574,10 @@ export function AdminCollections() {
                           >
                             <X className="w-3 h-3" />
                           </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               <Button type="submit" className="w-full">

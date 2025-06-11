@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, Upload, Package, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ export function AdminProducts() {
     description: '',
     category: '',
     stock: '',
-    images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+    images: [] as string[]
   });
 
   const filteredProducts = products.filter(product => {
@@ -46,14 +45,14 @@ export function AdminProducts() {
         return URL.createObjectURL(file);
       });
       
-      const updatedImages = [...productForm.images.filter(img => !img.includes('unsplash') && img !== 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'), ...newImages].slice(0, 5);
-      setProductForm({...productForm, images: updatedImages.length > 0 ? updatedImages : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']});
+      const updatedImages = [...productForm.images, ...newImages].slice(0, 5);
+      setProductForm({...productForm, images: updatedImages});
     }
   };
 
   const removeImage = (index: number) => {
     const updatedImages = productForm.images.filter((_, i) => i !== index);
-    setProductForm({...productForm, images: updatedImages.length > 0 ? updatedImages : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']});
+    setProductForm({...productForm, images: updatedImages});
   };
 
   const handleProductSubmit = (e: React.FormEvent) => {
@@ -73,8 +72,8 @@ export function AdminProducts() {
       description: productForm.description,
       category: productForm.category,
       stock: parseInt(productForm.stock) || 0,
-      image: productForm.images[0],
-      images: productForm.images
+      image: productForm.images.length > 0 ? productForm.images[0] : 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
+      images: productForm.images.length > 0 ? productForm.images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
     };
 
     if (editingProduct) {
@@ -100,7 +99,7 @@ export function AdminProducts() {
       description: '',
       category: '',
       stock: '',
-      images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+      images: []
     });
     setEditingProduct(null);
   };
@@ -152,12 +151,12 @@ export function AdminProducts() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="Electronics">Electronics</SelectItem>
-            <SelectItem value="Clothing">Clothing</SelectItem>
-            <SelectItem value="Accessories">Accessories</SelectItem>
-            <SelectItem value="Home">Home</SelectItem>
-            <SelectItem value="Fitness">Fitness</SelectItem>
-            <SelectItem value="Jewelry">Jewelry</SelectItem>
+            <SelectItem value="Rings">Rings</SelectItem>
+            <SelectItem value="Necklaces">Necklaces</SelectItem>
+            <SelectItem value="Earrings">Earrings</SelectItem>
+            <SelectItem value="Bracelets">Bracelets</SelectItem>
+            <SelectItem value="Watches">Watches</SelectItem>
+            <SelectItem value="Pendants">Pendants</SelectItem>
           </SelectContent>
         </Select>
         <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
@@ -210,12 +209,12 @@ export function AdminProducts() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Electronics">Electronics</SelectItem>
-                    <SelectItem value="Clothing">Clothing</SelectItem>
-                    <SelectItem value="Accessories">Accessories</SelectItem>
-                    <SelectItem value="Home">Home</SelectItem>
-                    <SelectItem value="Fitness">Fitness</SelectItem>
-                    <SelectItem value="Jewelry">Jewelry</SelectItem>
+                    <SelectItem value="Rings">Rings</SelectItem>
+                    <SelectItem value="Necklaces">Necklaces</SelectItem>
+                    <SelectItem value="Earrings">Earrings</SelectItem>
+                    <SelectItem value="Bracelets">Bracelets</SelectItem>
+                    <SelectItem value="Watches">Watches</SelectItem>
+                    <SelectItem value="Pendants">Pendants</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -240,19 +239,15 @@ export function AdminProducts() {
                       </Button>
                     </label>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {productForm.images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={image}
-                          alt={`Product ${index + 1}`}
-                          className="w-full h-20 object-cover rounded border"
-                          onError={(e) => {
-                            console.log('Image failed to load:', image);
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
-                          }}
-                        />
-                        {productForm.images.length > 1 && (
+                  {productForm.images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {productForm.images.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={image}
+                            alt={`Product ${index + 1}`}
+                            className="w-full h-20 object-cover rounded border"
+                          />
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
@@ -260,10 +255,10 @@ export function AdminProducts() {
                           >
                             <X className="w-3 h-3" />
                           </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
@@ -307,7 +302,11 @@ export function AdminProducts() {
               {filteredProducts.map((product) => {
                 const stockStatus = getStockStatus(product.stock);
                 const productImages = product.images || [product.image];
-                const validImages = productImages.filter(img => img && img !== '/placeholder.svg');
+                const validImages = productImages.filter(img => 
+                  img && 
+                  img !== '/placeholder.svg' && 
+                  (img.startsWith('http') || img.startsWith('data:') || img.startsWith('/'))
+                );
                 return (
                   <TableRow key={product.id}>
                     <TableCell>
@@ -319,10 +318,6 @@ export function AdminProducts() {
                               src={image}
                               alt={product.name}
                               className="w-8 h-8 object-cover rounded-full border-2 border-white"
-                              onError={(e) => {
-                                console.log('Table image failed to load:', image);
-                                e.currentTarget.src = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
-                              }}
                             />
                           ))}
                           {validImages.length > 3 && (

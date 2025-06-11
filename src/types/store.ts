@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -22,6 +23,16 @@ export interface WishlistItem {
   image: string;
   description?: string;
   originalPrice?: number;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  images: string[];
+  productCount: number;
+  status: 'Active' | 'Inactive';
+  category: 'rings' | 'necklaces' | 'earrings' | 'bracelets' | 'watches' | 'pendants';
 }
 
 export interface Order {
