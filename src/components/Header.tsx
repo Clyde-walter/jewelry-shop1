@@ -25,10 +25,10 @@ export function Header() {
       <header className="bg-white shadow-lg sticky top-0 z-40 border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo - Always on the left */}
+            {/* Logo - Text-based */}
             <div className="flex items-center">
               <Link to="/" className="text-2xl font-bold text-ecommerce-600 hover:text-ecommerce-700 transition-colors">
-                ShopEase
+                <span className="font-serif">Ston&Soul</span>
               </Link>
             </div>
 
