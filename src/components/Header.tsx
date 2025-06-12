@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Heart, Search, Menu, X, Bell, MessageCircle } from 'lucide-react';
+import { ShoppingCart, Heart, Search, Menu, X, Bell, MessageCircle, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,8 +18,7 @@ export function Header() {
   const location = useLocation();
   const { cart } = useStore();
   const { unreadCount } = useNotifications();
-  const { language } = useLanguage();
-  const { chat } = useChat();
+  const { t } = useLanguage();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -73,14 +73,6 @@ export function Header() {
               >
                 Orders
               </Link>
-              <Link
-                to="/live-map"
-                className={`font-medium transition-colors hover:text-ecommerce-600 ${
-                  isActive('/live-map') ? 'text-ecommerce-600' : 'text-gray-700'
-                }`}
-              >
-                Live Map
-              </Link>
             </nav>
 
             {/* Right Side - Actions */}
@@ -134,17 +126,10 @@ export function Header() {
                 </Button>
               </Link>
 
-              {/* Profile */}
-              <Link to="/profile">
-                <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
-                  <User className="w-5 h-5" />
-                </Button>
-              </Link>
-
               {/* Auth Button */}
               <AuthButton />
 
-              {/* Mobile Menu - Now on the right */}
+              {/* Mobile Menu */}
               <MobileNav />
             </div>
           </div>
