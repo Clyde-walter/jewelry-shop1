@@ -1,17 +1,30 @@
 
 import React from 'react';
-import { Package, DollarSign, ShoppingCart, Users, TrendingUp, Clock } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Users, TrendingUp, Clock, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStore } from '@/contexts/StoreContext';
 
 export function Admin() {
-  const { products, orders } = useStore();
+  const { products, orders, loading } = useStore();
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin text-ecommerce-600" />
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const totalProducts = products.length;
   const totalOrders = orders.length;
   const pendingOrders = orders.filter(order => order.status === 'pending').length;
-  const lowStockProducts = products.filter(product => product.stock <= 5).length;
+  const lowStockProducts =  products.filter(product => product.stock <= 5).length;
   const recentOrders = orders.slice(0, 5);
 
   return (

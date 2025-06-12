@@ -26,26 +26,28 @@ interface StoreContextType {
   addToWishlist: (item: WishlistItem) => void;
   removeFromWishlist: (itemId: string) => void;
   isInWishlist: (itemId: string) => boolean;
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  updateProduct: (id: string, product: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
-  addCollection: (collection: Omit<Collection, 'id'>) => void;
-  updateCollection: (id: string, collection: Partial<Collection>) => void;
-  deleteCollection: (id: string) => void;
-  createOrder: (customerInfo: any) => Order;
-  updateOrderStatus: (orderId: string, status: Order['status']) => void;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  addCollection: (collection: Omit<Collection, 'id'>) => Promise<void>;
+  updateCollection: (id: string, collection: Partial<Collection>) => Promise<void>;
+  deleteCollection: (id: string) => Promise<void>;
+  createOrder: (customerInfo: any) => Promise<Order | null>;
+  updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
   lastUpdated: number;
+  loading: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 function StoreContextProvider({ children }: { children: React.ReactNode }) {
-  const { products, addProduct, updateProduct, deleteProduct } = useProducts();
-  const { collections, addCollection, updateCollection, deleteCollection } = useCollections();
+  const { products, addProduct, updateProduct, deleteProduct, loading: productsLoading } = useProducts();
+  const { collections, addCollection, updateCollection, deleteCollection, loading: collectionsLoading } = useCollections();
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
   const { wishlist, addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { orders, createOrder: createOrderBase, updateOrderStatus } = useOrders();
+  const { orders, createOrder: createOrderBase, updateOrderStatus, loading: ordersLoading } = useOrders();
   const [lastUpdated, setLastUpdated] = useState(Date.now());
+  const loading = productsLoading || collectionsLoading || ordersLoading;
 
   // Listen for real-time updates
   useEffect(() => {
@@ -61,9 +63,11 @@ function StoreContextProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const createOrder = (customerInfo: any): Order => {
-    const order = createOrderBase(customerInfo, cart, getCartTotal());
-    clearCart();
+  const createOrder = async (customerInfo: any): Promise<Order | null> => {
+    const order = await createOrderBase(customerInfo, cart, getCartTotal());
+    if (order) {
+      clearCart();
+    }
     return order;
   };
 
@@ -91,7 +95,8 @@ function StoreContextProvider({ children }: { children: React.ReactNode }) {
         deleteCollection,
         createOrder,
         updateOrderStatus,
-        lastUpdated
+        lastUpdated,
+        loading
       }}
     >
       {children}

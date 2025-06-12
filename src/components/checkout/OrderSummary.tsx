@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CartItem } from '@/types/store';
+import { Loader2 } from 'lucide-react';
 
 interface OrderSummaryProps {
   cart: CartItem[];
@@ -76,7 +77,14 @@ export function OrderSummary({
             className="w-full bg-ecommerce-600 hover:bg-ecommerce-700"
             disabled={isProcessing}
           >
-            {isProcessing ? 'Processing...' : `Pay $${finalTotal.toFixed(2)}`}
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              `Pay $${finalTotal.toFixed(2)}`
+            )}
           </Button>
         </form>
         

@@ -1,34 +1,68 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product } from '@/types/store';
-import { initialProducts } from '@/data/initialProducts';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface ProductsContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  updateProduct: (id: string, product: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
   lastUpdated: number;
+  loading: boolean;
 }
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
 
 export function ProductsProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(() => {
-    // Try to load from localStorage first, fallback to initial products
-    const stored = localStorage.getItem('shopease_products');
-    return stored ? JSON.parse(stored) : initialProducts;
-  });
+  const [products, setProducts] = useState<Product[]>([]);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
+  const [loading, setLoading] = useState(true);
 
-  // Save to localStorage whenever products change
+  // Fetch products from Supabase
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        toast({
+          title: "Error loading products",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const formattedProducts: Product[] = data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        price: parseFloat(item.price),
+        description: item.description || '',
+        category: item.category,
+        stock: item.stock || 0,
+        image: item.image || item.images?.[0] || '/placeholder.svg',
+        images: item.images || [item.image || '/placeholder.svg']
+      }));
+
+      setProducts(formattedProducts);
+    } catch (error) {
+      console.error('Error in fetchProducts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem('shopease_products', JSON.stringify(products));
-  }, [products]);
+    fetchProducts();
+  }, []);
 
   const triggerUpdate = () => {
     setLastUpdated(Date.now());
-    // Trigger a custom event for real-time updates across components
     window.dispatchEvent(new CustomEvent('productsUpdated', { 
       detail: { 
         timestamp: Date.now(),
@@ -37,37 +71,121 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
-  const addProduct = (productData: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...productData,
-      id: Date.now().toString()
-    };
-    setProducts(currentProducts => {
-      const updated = [...currentProducts, newProduct];
-      // Trigger update after state is set
-      setTimeout(() => triggerUpdate(), 0);
-      return updated;
-    });
+  const addProduct = async (productData: Omit<Product, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert([{
+          name: productData.name,
+          price: productData.price,
+          description: productData.description,
+          category: productData.category,
+          stock: productData.stock,
+          image: productData.image,
+          images: productData.images || [productData.image]
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error adding product",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await fetchProducts();
+      triggerUpdate();
+      
+      toast({
+        title: "Product added successfully!",
+        description: `${productData.name} has been added to your inventory.`
+      });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast({
+        title: "Error adding product",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const updateProduct = (id: string, productData: Partial<Product>) => {
-    setProducts(currentProducts => {
-      const updated = currentProducts.map(product =>
-        product.id === id ? { ...product, ...productData } : product
-      );
-      // Trigger update after state is set
-      setTimeout(() => triggerUpdate(), 0);
-      return updated;
-    });
+  const updateProduct = async (id: string, productData: Partial<Product>) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({
+          name: productData.name,
+          price: productData.price,
+          description: productData.description,
+          category: productData.category,
+          stock: productData.stock,
+          image: productData.image,
+          images: productData.images,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) {
+        toast({
+          title: "Error updating product",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await fetchProducts();
+      triggerUpdate();
+      
+      toast({
+        title: "Product updated successfully!",
+        description: "Your product has been updated."
+      });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast({
+        title: "Error updating product",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts(currentProducts => {
-      const updated = currentProducts.filter(product => product.id !== id);
-      // Trigger update after state is set
-      setTimeout(() => triggerUpdate(), 0);
-      return updated;
-    });
+  const deleteProduct = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        toast({
+          title: "Error deleting product",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await fetchProducts();
+      triggerUpdate();
+      
+      toast({
+        title: "Product deleted successfully!",
+        description: "The product has been removed from your inventory."
+      });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error deleting product",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -77,7 +195,8 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         addProduct,
         updateProduct,
         deleteProduct,
-        lastUpdated
+        lastUpdated,
+        loading
       }}
     >
       {children}

@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export interface Collection {
   id: string;
@@ -8,53 +10,66 @@ export interface Collection {
   images: string[];
   productCount: number;
   status: 'Active' | 'Inactive';
+  category: string;
 }
 
 interface CollectionsContextType {
   collections: Collection[];
-  addCollection: (collection: Omit<Collection, 'id'>) => void;
-  updateCollection: (id: string, collection: Partial<Collection>) => void;
-  deleteCollection: (id: string) => void;
+  addCollection: (collection: Omit<Collection, 'id'>) => Promise<void>;
+  updateCollection: (id: string, collection: Partial<Collection>) => Promise<void>;
+  deleteCollection: (id: string) => Promise<void>;
   lastUpdated: number;
+  loading: boolean;
 }
 
 const CollectionsContext = createContext<CollectionsContextType | undefined>(undefined);
 
-const initialCollections: Collection[] = [
-  {
-    id: '1',
-    name: 'Summer Collection',
-    description: 'Fresh summer styles for the season',
-    productCount: 12,
-    images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'],
-    status: 'Active'
-  },
-  {
-    id: '2',
-    name: 'Winter Collection',
-    description: 'Cozy winter essentials',
-    productCount: 8,
-    images: ['https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=400&fit=crop'],
-    status: 'Active'
-  }
-];
-
 export function CollectionsProvider({ children }: { children: React.ReactNode }) {
-  const [collections, setCollections] = useState<Collection[]>(() => {
-    // Try to load from localStorage first, fallback to initial collections
-    const stored = localStorage.getItem('shopease_collections');
-    return stored ? JSON.parse(stored) : initialCollections;
-  });
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
+  const [loading, setLoading] = useState(true);
 
-  // Save to localStorage whenever collections change
+  const fetchCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching collections:', error);
+        toast({
+          title: "Error loading collections",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const formattedCollections: Collection[] = data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || '',
+        images: item.images || [],
+        productCount: item.product_count || 0,
+        status: item.status as 'Active' | 'Inactive',
+        category: item.category
+      }));
+
+      setCollections(formattedCollections);
+    } catch (error) {
+      console.error('Error in fetchCollections:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem('shopease_collections', JSON.stringify(collections));
-  }, [collections]);
+    fetchCollections();
+  }, []);
 
   const triggerUpdate = () => {
     setLastUpdated(Date.now());
-    // Trigger a custom event for real-time updates across components
     window.dispatchEvent(new CustomEvent('collectionsUpdated', { 
       detail: { 
         timestamp: Date.now(),
@@ -63,37 +78,118 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
     }));
   };
 
-  const addCollection = (collectionData: Omit<Collection, 'id'>) => {
-    const newCollection: Collection = {
-      ...collectionData,
-      id: Date.now().toString()
-    };
-    setCollections(currentCollections => {
-      const updated = [...currentCollections, newCollection];
-      // Trigger update after state is set
-      setTimeout(() => triggerUpdate(), 0);
-      return updated;
-    });
+  const addCollection = async (collectionData: Omit<Collection, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .insert([{
+          name: collectionData.name,
+          description: collectionData.description,
+          category: collectionData.category.toLowerCase(),
+          images: collectionData.images,
+          product_count: 0,
+          status: collectionData.status
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error adding collection",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await fetchCollections();
+      triggerUpdate();
+      
+      toast({
+        title: "Collection added successfully!",
+        description: `${collectionData.name} has been created.`
+      });
+    } catch (error) {
+      console.error('Error adding collection:', error);
+      toast({
+        title: "Error adding collection",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const updateCollection = (id: string, collectionData: Partial<Collection>) => {
-    setCollections(currentCollections => {
-      const updated = currentCollections.map(collection =>
-        collection.id === id ? { ...collection, ...collectionData } : collection
-      );
-      // Trigger update after state is set
-      setTimeout(() => triggerUpdate(), 0);
-      return updated;
-    });
+  const updateCollection = async (id: string, collectionData: Partial<Collection>) => {
+    try {
+      const { error } = await supabase
+        .from('collections')
+        .update({
+          name: collectionData.name,
+          description: collectionData.description,
+          category: collectionData.category?.toLowerCase(),
+          images: collectionData.images,
+          status: collectionData.status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) {
+        toast({
+          title: "Error updating collection",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await fetchCollections();
+      triggerUpdate();
+      
+      toast({
+        title: "Collection updated successfully!",
+        description: "Your collection has been updated."
+      });
+    } catch (error) {
+      console.error('Error updating collection:', error);
+      toast({
+        title: "Error updating collection",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const deleteCollection = (id: string) => {
-    setCollections(currentCollections => {
-      const updated = currentCollections.filter(collection => collection.id !== id);
-      // Trigger update after state is set
-      setTimeout(() => triggerUpdate(), 0);
-      return updated;
-    });
+  const deleteCollection = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('collections')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        toast({
+          title: "Error deleting collection",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await fetchCollections();
+      triggerUpdate();
+      
+      toast({
+        title: "Collection deleted successfully!",
+        description: "The collection has been removed."
+      });
+    } catch (error) {
+      console.error('Error deleting collection:', error);
+      toast({
+        title: "Error deleting collection",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -103,7 +199,8 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
         addCollection,
         updateCollection,
         deleteCollection,
-        lastUpdated
+        lastUpdated,
+        loading
       }}
     >
       {children}
