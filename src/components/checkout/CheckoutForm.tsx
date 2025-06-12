@@ -49,13 +49,15 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       // Simulate Stripe payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const order = createOrder(customerInfo);
-      onOrderCreated(order);
-      
-      toast({
-        title: "Order placed successfully!",
-        description: `Order #${order.id} has been created.`
-      });
+      const order = await createOrder(customerInfo);
+      if (order) {
+        onOrderCreated(order);
+        
+        toast({
+          title: "Order placed successfully!",
+          description: `Order #${order.orderNumber || order.id} has been created.`
+        });
+      }
     } catch (error) {
       toast({
         title: "Payment failed",

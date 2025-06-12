@@ -38,11 +38,11 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       const formattedOrders: Order[] = data.map((item: any) => ({
         id: item.id,
         orderNumber: item.order_number,
-        items: item.items,
-        total: parseFloat(item.total),
-        status: item.status,
+        items: Array.isArray(item.items) ? item.items as CartItem[] : [],
+        total: parseFloat(item.total.toString()),
+        status: item.status as Order['status'],
         createdAt: item.created_at,
-        customerInfo: item.customer_info
+        customerInfo: typeof item.customer_info === 'object' ? item.customer_info : JSON.parse(item.customer_info)
       }));
 
       setOrders(formattedOrders);
@@ -76,18 +76,19 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
       const { data, error } = await supabase
         .from('orders')
-        .insert([{
+        .insert({
           user_id: user.id,
           order_number: orderNumber,
-          items: cartItems,
+          items: cartItems as any,
           total: cartTotal,
           status: 'pending',
-          customer_info: customerInfo
-        }])
+          customer_info: customerInfo as any
+        })
         .select()
         .single();
 
       if (error) {
+        console.error('Error creating order:', error);
         toast({
           title: "Error creating order",
           description: error.message,
@@ -99,11 +100,11 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       const newOrder: Order = {
         id: data.id,
         orderNumber: data.order_number,
-        items: data.items,
-        total: parseFloat(data.total),
-        status: data.status,
+        items: Array.isArray(data.items) ? data.items as CartItem[] : [],
+        total: parseFloat(data.total.toString()),
+        status: data.status as Order['status'],
         createdAt: data.created_at,
-        customerInfo: data.customer_info
+        customerInfo: typeof data.customer_info === 'object' ? data.customer_info : JSON.parse(data.customer_info)
       };
 
       await fetchOrders();
