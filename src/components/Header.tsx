@@ -1,24 +1,37 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Search, Bell, MessageCircle } from 'lucide-react';
+import { ShoppingCart, User, Search, Bell, MessageCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/contexts/StoreContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { CartSidebar } from './CartSidebar';
 import { LanguageSelector } from './LanguageSelector';
 import { MobileNav } from './MobileNav';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function Header() {
   const location = useLocation();
   const { cart } = useStore();
   const { unreadCount } = useNotifications();
+  const { user, signOut } = useAuth();
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <>
@@ -58,25 +71,29 @@ export function Header() {
               >
                 Collections
               </Link>
-              <Link
-                to="/orders"
-                className={`font-medium transition-colors hover:text-ecommerce-600 ${
-                  isActive('/orders') ? 'text-ecommerce-600' : 'text-gray-700'
-                }`}
-              >
-                Orders
-              </Link>
-              <Link
-                to="/live-map"
-                className={`font-medium transition-colors hover:text-ecommerce-600 ${
-                  isActive('/live-map') ? 'text-ecommerce-600' : 'text-gray-700'
-                }`}
-              >
-                Live Map
-              </Link>
+              {user && (
+                <>
+                  <Link
+                    to="/orders"
+                    className={`font-medium transition-colors hover:text-ecommerce-600 ${
+                      isActive('/orders') ? 'text-ecommerce-600' : 'text-gray-700'
+                    }`}
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    to="/live-map"
+                    className={`font-medium transition-colors hover:text-ecommerce-600 ${
+                      isActive('/live-map') ? 'text-ecommerce-600' : 'text-gray-700'
+                    }`}
+                  >
+                    Live Map
+                  </Link>
+                </>
+              )}
             </nav>
 
-            {/* Actions - Mobile menu included here on the right */}
+            {/* Actions */}
             <div className="flex items-center space-x-2 md:space-x-4">
               <div className="hidden md:block">
                 <LanguageSelector />
@@ -91,27 +108,31 @@ export function Header() {
                 <Search className="w-5 h-5" />
               </Button>
 
-              <Link to="/notifications">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative hover:bg-ecommerce-50"
-                >
-                  <Bell className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-bounce-subtle">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </Link>
-
-              <div className="hidden md:block">
-                <Link to="/chat">
-                  <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
-                    <MessageCircle className="w-5 h-5" />
+              {user && (
+                <Link to="/notifications">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative hover:bg-ecommerce-50"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-bounce-subtle">
+                        {unreadCount}
+                      </span>
+                    )}
                   </Button>
                 </Link>
+              )}
+
+              <div className="hidden md:block">
+                {user && (
+                  <Link to="/chat">
+                    <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
+                      <MessageCircle className="w-5 h-5" />
+                    </Button>
+                  </Link>
+                )}
               </div>
 
               <Link to="/cart">
@@ -129,13 +150,43 @@ export function Header() {
                 </Button>
               </Link>
 
-              <Link to="/profile">
-                <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
-                  <User className="w-5 h-5" />
-                </Button>
-              </Link>
+              {/* User Menu */}
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
+                      <User className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile">My Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders">My Orders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist">Wishlist</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile/settings">Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to="/auth">
+                  <Button variant="outline" size="sm" className="border-ecommerce-600 text-ecommerce-600 hover:bg-ecommerce-50">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
 
-              {/* Mobile Menu - Now on the right */}
+              {/* Mobile Menu */}
               <MobileNav />
             </div>
           </div>

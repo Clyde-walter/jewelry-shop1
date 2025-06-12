@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User, ShoppingBag, Heart, Settings, CreditCard, MapPin, Phone, Mail, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/contexts/StoreContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export function Profile() {
   const { orders } = useStore();
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
   const recentOrders = orders.slice(0, 3);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        setProfile(data);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  const getInitials = () => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name[0]}${profile.last_name[0]}`;
+    }
+    return user?.email?.[0]?.toUpperCase() || 'U';
+  };
+
+  const getFullName = () => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name} ${profile.last_name}`;
+    }
+    return user?.email || 'User';
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -24,10 +57,10 @@ export function Profile() {
               <CardContent className="p-6 text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="text-2xl">JD</AvatarFallback>
+                  <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
                 </Avatar>
-                <h2 className="text-xl font-semibold mb-2">John Doe</h2>
-                <p className="text-gray-600 mb-4">john.doe@example.com</p>
+                <h2 className="text-xl font-semibold mb-2">{getFullName()}</h2>
+                <p className="text-gray-600 mb-4">{user?.email}</p>
                 <Badge variant="secondary">Premium Member</Badge>
               </CardContent>
             </Card>
@@ -84,13 +117,13 @@ export function Profile() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-gray-600">Full Name</label>
-                      <p className="font-medium">John Doe</p>
+                      <p className="font-medium">{getFullName()}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Email</label>
                       <div className="flex items-center space-x-2">
                         <Mail className="w-4 h-4 text-gray-400" />
-                        <p className="font-medium">john.doe@example.com</p>
+                        <p className="font-medium">{user?.email}</p>
                       </div>
                     </div>
                   </div>
@@ -99,12 +132,14 @@ export function Profile() {
                       <label className="text-sm font-medium text-gray-600">Phone</label>
                       <div className="flex items-center space-x-2">
                         <Phone className="w-4 h-4 text-gray-400" />
-                        <p className="font-medium">+1 (555) 123-4567</p>
+                        <p className="font-medium">{profile?.phone || 'Not provided'}</p>
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Member Since</label>
-                      <p className="font-medium">January 2024</p>
+                      <p className="font-medium">
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Recent'}
+                      </p>
                     </div>
                   </div>
                 </div>
