@@ -12,18 +12,6 @@ export function Profile() {
   const { orders } = useStore();
   const recentOrders = orders.slice(0, 3);
 
-  // Mock user data since authentication is removed
-  const mockUser = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    memberSince: 'January 2024'
-  };
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
@@ -35,13 +23,12 @@ export function Profile() {
             <Card>
               <CardContent className="p-6 text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarFallback className="text-2xl bg-ecommerce-100 text-ecommerce-600">
-                    {getInitials(mockUser.name)}
-                  </AvatarFallback>
+                  <AvatarImage src="/placeholder.svg" />
+                  <AvatarFallback className="text-2xl">JD</AvatarFallback>
                 </Avatar>
-                <h2 className="text-xl font-semibold mb-2">{mockUser.name}</h2>
-                <p className="text-gray-600 mb-4">{mockUser.email}</p>
-                <Badge variant="secondary">Soul & Stone Member</Badge>
+                <h2 className="text-xl font-semibold mb-2">John Doe</h2>
+                <p className="text-gray-600 mb-4">john.doe@example.com</p>
+                <Badge variant="secondary">Premium Member</Badge>
               </CardContent>
             </Card>
 
@@ -97,13 +84,13 @@ export function Profile() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-gray-600">Full Name</label>
-                      <p className="font-medium">{mockUser.name}</p>
+                      <p className="font-medium">John Doe</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Email</label>
                       <div className="flex items-center space-x-2">
                         <Mail className="w-4 h-4 text-gray-400" />
-                        <p className="font-medium">{mockUser.email}</p>
+                        <p className="font-medium">john.doe@example.com</p>
                       </div>
                     </div>
                   </div>
@@ -112,12 +99,12 @@ export function Profile() {
                       <label className="text-sm font-medium text-gray-600">Phone</label>
                       <div className="flex items-center space-x-2">
                         <Phone className="w-4 h-4 text-gray-400" />
-                        <p className="font-medium">{mockUser.phone}</p>
+                        <p className="font-medium">+1 (555) 123-4567</p>
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Member Since</label>
-                      <p className="font-medium">{mockUser.memberSince}</p>
+                      <p className="font-medium">January 2024</p>
                     </div>
                   </div>
                 </div>
