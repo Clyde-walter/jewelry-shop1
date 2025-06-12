@@ -8,11 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/contexts/StoreContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
-import { useChat } from '@/contexts/ChatContext';
 import { CartSidebar } from '@/components/CartSidebar';
 import { MobileNav } from '@/components/MobileNav';
 import { LanguageSelector } from '@/components/LanguageSelector';
-import { AuthButton } from '@/components/AuthButton';
 
 export function Header() {
   const location = useLocation();
@@ -126,8 +124,13 @@ export function Header() {
                 </Button>
               </Link>
 
-              {/* Auth Button */}
-              <AuthButton />
+              {/* Simple User Icon */}
+              <Link to="/profile">
+                <Button variant="outline" size="sm">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
 
               {/* Mobile Menu */}
               <MobileNav />

@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { StoreProvider } from '@/contexts/StoreContext';
-import { AuthProvider } from '@/contexts/AuthContext';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import Index from '@/pages/Index';
@@ -25,7 +24,6 @@ import { PaymentMethods } from '@/pages/PaymentMethods';
 import { CustomDesign } from '@/pages/CustomDesign';
 import { AuthGuard } from '@/components/AuthGuard';
 import { LiveMap } from '@/pages/LiveMap';
-import { Auth } from '@/pages/Auth';
 import { Notifications } from '@/pages/Notifications';
 
 const queryClient = new QueryClient();
@@ -35,38 +33,35 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <NotificationsProvider>
         <LanguageProvider>
-          <AuthProvider>
-            <StoreProvider>
-              <Router>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <main>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/home" element={<Home />} />
-                      <Route path="/products" element={<Products />} />
-                      <Route path="/product/:id" element={<ProductDetail />} />
-                      <Route path="/collections" element={<Collections />} />
-                      <Route path="/collection/:id" element={<CollectionDetail />} />
-                      <Route path="/cart" element={<Cart />} />
-                      <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/wishlist" element={<Wishlist />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/profile/settings" element={<ProfileSettings />} />
-                      <Route path="/orders" element={<Orders />} />
-                      <Route path="/manage-addresses" element={<ManageAddresses />} />
-                      <Route path="/payment-methods" element={<PaymentMethods />} />
-                      <Route path="/custom-design" element={<CustomDesign />} />
-                      <Route path="/livemap/:orderId" element={<LiveMap />} />
-                      <Route path="/notifications" element={<Notifications />} />
-                    </Routes>
-                  </main>
-                  <Footer />
-                </div>
-              </Router>
-            </StoreProvider>
-          </AuthProvider>
+          <StoreProvider>
+            <Router>
+              <div className="min-h-screen bg-background">
+                <Header />
+                <main>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/collections" element={<Collections />} />
+                    <Route path="/collection/:id" element={<CollectionDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/profile/settings" element={<ProfileSettings />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/manage-addresses" element={<ManageAddresses />} />
+                    <Route path="/payment-methods" element={<PaymentMethods />} />
+                    <Route path="/custom-design" element={<CustomDesign />} />
+                    <Route path="/livemap/:orderId" element={<LiveMap />} />
+                    <Route path="/notifications" element={<Notifications />} />
+                  </Routes>
+                </main>
+                <Footer />
+              </div>
+            </Router>
+          </StoreProvider>
         </LanguageProvider>
       </NotificationsProvider>
       <Toaster />

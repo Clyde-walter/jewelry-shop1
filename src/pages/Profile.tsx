@@ -1,75 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { User, ShoppingBag, Heart, Settings, CreditCard, MapPin, Phone, Mail, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/contexts/StoreContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-
-interface UserProfile {
-  id: string;
-  username?: string;
-  full_name?: string;
-  avatar_url?: string;
-  phone?: string;
-}
 
 export function Profile() {
   const { orders } = useStore();
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const recentOrders = orders.slice(0, 3);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-      return;
-    }
+  // Mock user data since authentication is removed
+  const mockUser = {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    phone: '+1 (555) 123-4567',
+    memberSince: 'January 2024'
+  };
 
-    if (user) {
-      // Fetch user profile from Supabase
-      const fetchProfile = async () => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (data) {
-          setProfile(data);
-        } else if (error) {
-          console.log('Profile fetch error:', error);
-          // Use user metadata as fallback
-          setProfile({
-            id: user.id,
-            full_name: user.user_metadata?.full_name,
-            phone: user.user_metadata?.phone,
-          });
-        }
-      };
-
-      fetchProfile();
-    }
-  }, [user, loading, navigate]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-ecommerce-600"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  const getInitials = (name: string | undefined | null) => {
-    if (!name) return user.email?.[0]?.toUpperCase() || 'U';
+  const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
@@ -84,13 +35,12 @@ export function Profile() {
             <Card>
               <CardContent className="p-6 text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src={profile?.avatar_url} />
                   <AvatarFallback className="text-2xl bg-ecommerce-100 text-ecommerce-600">
-                    {getInitials(profile?.full_name)}
+                    {getInitials(mockUser.name)}
                   </AvatarFallback>
                 </Avatar>
-                <h2 className="text-xl font-semibold mb-2">{profile?.full_name || 'User'}</h2>
-                <p className="text-gray-600 mb-4">{user.email}</p>
+                <h2 className="text-xl font-semibold mb-2">{mockUser.name}</h2>
+                <p className="text-gray-600 mb-4">{mockUser.email}</p>
                 <Badge variant="secondary">Soul & Stone Member</Badge>
               </CardContent>
             </Card>
@@ -147,13 +97,13 @@ export function Profile() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-gray-600">Full Name</label>
-                      <p className="font-medium">{profile?.full_name || 'Not provided'}</p>
+                      <p className="font-medium">{mockUser.name}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Email</label>
                       <div className="flex items-center space-x-2">
                         <Mail className="w-4 h-4 text-gray-400" />
-                        <p className="font-medium">{user.email}</p>
+                        <p className="font-medium">{mockUser.email}</p>
                       </div>
                     </div>
                   </div>
@@ -162,17 +112,12 @@ export function Profile() {
                       <label className="text-sm font-medium text-gray-600">Phone</label>
                       <div className="flex items-center space-x-2">
                         <Phone className="w-4 h-4 text-gray-400" />
-                        <p className="font-medium">{profile?.phone || 'Not provided'}</p>
+                        <p className="font-medium">{mockUser.phone}</p>
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">Member Since</label>
-                      <p className="font-medium">
-                        {new Date(user.created_at).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'long' 
-                        })}
-                      </p>
+                      <p className="font-medium">{mockUser.memberSince}</p>
                     </div>
                   </div>
                 </div>
