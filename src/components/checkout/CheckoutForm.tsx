@@ -49,7 +49,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       // Simulate Stripe payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const order = await createOrder(customerInfo);
+      const order = await createOrder(customerInfo, cart, finalTotal);
       if (order) {
         onOrderCreated(order);
         

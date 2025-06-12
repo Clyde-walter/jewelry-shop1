@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { CartProvider } from './CartContext';
-import { WishlistProvider } from './WishlistContext';
+import { CartProvider, useCart } from './CartContext';
+import { WishlistProvider, useWishlist } from './WishlistContext';
 import { AuthProvider } from './AuthContext';
 import { ProductsProvider, useProducts } from './ProductsContext';
 import { CollectionsProvider, useCollections } from './CollectionsContext';
@@ -12,7 +12,8 @@ import { ChatProvider } from './ChatContext';
 import { LocationProvider } from './LocationContext';
 import { Product, CartItem, WishlistItem, Order } from '@/types/store';
 
-// Re-export the Collection interface from CollectionsContext
+// Re-export types for convenience
+export type { Product, CartItem, WishlistItem, Order } from '@/types/store';
 export type { Collection } from './CollectionsContext';
 
 interface StoreContextType {
@@ -34,15 +35,15 @@ interface StoreContextType {
   updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
   
   // Cart functions from CartContext
-  cartItems: CartItem[];
+  cart: CartItem[];
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  cartTotal: number;
+  getCartTotal: () => number;
   
   // Wishlist functions from WishlistContext  
-  wishlistItems: WishlistItem[];
+  wishlist: WishlistItem[];
   addToWishlist: (item: WishlistItem) => void;
   removeFromWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
@@ -56,6 +57,8 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
   const products = useProducts();
   const collections = useCollections();
   const orders = useOrders();
+  const cart = useCart();
+  const wishlist = useWishlist();
 
   // Listen for collection updates
   useEffect(() => {
@@ -70,7 +73,7 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const value: Omit<StoreContextType, 'cartItems' | 'addToCart' | 'removeFromCart' | 'updateQuantity' | 'clearCart' | 'cartTotal' | 'wishlistItems' | 'addToWishlist' | 'removeFromWishlist' | 'isInWishlist'> = {
+  const value: StoreContextType = {
     // Products
     products: products.products,
     addProduct: products.addProduct,
@@ -88,11 +91,25 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
     createOrder: orders.createOrder,
     updateOrderStatus: orders.updateOrderStatus,
     
+    // Cart
+    cart: cart.cart,
+    addToCart: cart.addToCart,
+    removeFromCart: cart.removeFromCart,
+    updateQuantity: cart.updateQuantity,
+    clearCart: cart.clearCart,
+    getCartTotal: cart.getCartTotal,
+    
+    // Wishlist
+    wishlist: wishlist.wishlist,
+    addToWishlist: wishlist.addToWishlist,
+    removeFromWishlist: wishlist.removeFromWishlist,
+    isInWishlist: wishlist.isInWishlist,
+    
     loading: products.loading || collections.loading || orders.loading
   };
 
   return (
-    <StoreContext.Provider value={value as StoreContextType}>
+    <StoreContext.Provider value={value}>
       {children}
     </StoreContext.Provider>
   );

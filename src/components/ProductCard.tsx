@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Product } from '@/contexts/StoreContext';
+import { Product } from '@/types/store';
 import { useStore } from '@/contexts/StoreContext';
 import { toast } from '@/hooks/use-toast';
 
