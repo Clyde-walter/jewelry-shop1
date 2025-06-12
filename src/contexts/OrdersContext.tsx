@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Order, CartItem } from '@/types/store';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,11 +37,11 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       const formattedOrders: Order[] = data.map((item: any) => ({
         id: item.id,
         orderNumber: item.order_number,
-        items: Array.isArray(item.items) ? item.items as CartItem[] : [],
+        items: Array.isArray(item.items) ? item.items as unknown as CartItem[] : [],
         total: parseFloat(item.total.toString()),
         status: item.status as Order['status'],
         createdAt: item.created_at,
-        customerInfo: typeof item.customer_info === 'object' ? item.customer_info : JSON.parse(item.customer_info)
+        customerInfo: typeof item.customer_info === 'object' ? item.customer_info : JSON.parse(item.customer_info as string)
       }));
 
       setOrders(formattedOrders);
@@ -100,11 +99,11 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       const newOrder: Order = {
         id: data.id,
         orderNumber: data.order_number,
-        items: Array.isArray(data.items) ? data.items as CartItem[] : [],
+        items: Array.isArray(data.items) ? data.items as unknown as CartItem[] : [],
         total: parseFloat(data.total.toString()),
         status: data.status as Order['status'],
         createdAt: data.created_at,
-        customerInfo: typeof data.customer_info === 'object' ? data.customer_info : JSON.parse(data.customer_info)
+        customerInfo: typeof data.customer_info === 'object' ? data.customer_info : JSON.parse(data.customer_info as string)
       };
 
       await fetchOrders();
