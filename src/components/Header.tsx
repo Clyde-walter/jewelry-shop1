@@ -1,20 +1,26 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Search, Bell, MessageCircle } from 'lucide-react';
+import { ShoppingCart, Heart, Search, Menu, X, Bell, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/contexts/StoreContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
-import { CartSidebar } from './CartSidebar';
-import { LanguageSelector } from './LanguageSelector';
-import { MobileNav } from './MobileNav';
+import { useChat } from '@/contexts/ChatContext';
+import { CartSidebar } from '@/components/CartSidebar';
+import { MobileNav } from '@/components/MobileNav';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { AuthButton } from '@/components/AuthButton';
 
 export function Header() {
   const location = useLocation();
   const { cart } = useStore();
   const { unreadCount } = useNotifications();
-  const [isCartOpen, setIsCartOpen] = React.useState(false);
-  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const { language } = useLanguage();
+  const { chat } = useChat();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -22,15 +28,16 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-white shadow-lg sticky top-0 z-40 border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo - Always on the left */}
-            <div className="flex items-center">
-              <Link to="/" className="text-2xl font-bold text-ecommerce-600 hover:text-ecommerce-700 transition-colors">
-                ShopEase
-              </Link>
-            </div>
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-ecommerce-600 to-ecommerce-700 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">S&S</span>
+              </div>
+              <span className="font-bold text-xl text-gray-900">Soul & Stone</span>
+            </Link>
 
             {/* Navigation - Hidden on mobile */}
             <nav className="hidden md:flex items-center space-x-8">
@@ -76,12 +83,9 @@ export function Header() {
               </Link>
             </nav>
 
-            {/* Actions - Mobile menu included here on the right */}
-            <div className="flex items-center space-x-2 md:space-x-4">
-              <div className="hidden md:block">
-                <LanguageSelector />
-              </div>
-              
+            {/* Right Side - Actions */}
+            <div className="flex items-center space-x-4">
+              {/* Search */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -91,6 +95,7 @@ export function Header() {
                 <Search className="w-5 h-5" />
               </Button>
 
+              {/* Notifications */}
               <Link to="/notifications">
                 <Button
                   variant="ghost"
@@ -106,14 +111,14 @@ export function Header() {
                 </Button>
               </Link>
 
-              <div className="hidden md:block">
-                <Link to="/chat">
-                  <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
-                    <MessageCircle className="w-5 h-5" />
-                  </Button>
-                </Link>
-              </div>
+              {/* Chat */}
+              <Link to="/chat">
+                <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
+                  <MessageCircle className="w-5 h-5" />
+                </Button>
+              </Link>
 
+              {/* Cart */}
               <Link to="/cart">
                 <Button
                   variant="ghost"
@@ -129,31 +134,35 @@ export function Header() {
                 </Button>
               </Link>
 
+              {/* Profile */}
               <Link to="/profile">
                 <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
                   <User className="w-5 h-5" />
                 </Button>
               </Link>
 
+              {/* Auth Button */}
+              <AuthButton />
+
               {/* Mobile Menu - Now on the right */}
               <MobileNav />
             </div>
           </div>
-
-          {/* Search Bar */}
-          {isSearchOpen && (
-            <div className="mt-4 animate-fade-in">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ecommerce-500 focus:border-transparent"
-                />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Search Bar */}
+        {isSearchOpen && (
+          <div className="mt-4 animate-fade-in">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ecommerce-500 focus:border-transparent"
+              />
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+        )}
       </header>
 
       <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
