@@ -45,8 +45,11 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         description: item.description || '',
         category: item.category,
         stock: item.stock || 0,
-        image: item.image || item.images?.[0] || '/placeholder.svg',
-        images: item.images || [item.image || '/placeholder.svg']
+        image: item.image || (item.images && Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop'),
+        images: item.images && Array.isArray(item.images) && item.images.length > 0 
+          ? item.images 
+          : [item.image || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop'],
+        collectionId: item.collection_id
       }));
 
       setProducts(formattedProducts);
@@ -82,7 +85,8 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
           category: productData.category,
           stock: productData.stock,
           image: productData.image,
-          images: productData.images || [productData.image]
+          images: productData.images || [productData.image],
+          collection_id: productData.collectionId || null
         }])
         .select()
         .single();
@@ -125,6 +129,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
           stock: productData.stock,
           image: productData.image,
           images: productData.images,
+          collection_id: productData.collectionId || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', id);

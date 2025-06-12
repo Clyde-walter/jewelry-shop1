@@ -86,15 +86,37 @@ export function ProductDetail() {
     image: collectionProduct.images[0],
     description: collectionProduct.description,
     category: collectionProduct.category,
-    stock: collectionProduct.stock
+    stock: collectionProduct.stock,
+    images: collectionProduct.images
   } : null);
+
+  // Ensure we have proper images array for display
+  const getProductImages = () => {
+    if (collectionProduct) {
+      return collectionProduct.images;
+    }
+    
+    if (regularProduct) {
+      // Check if product has images array
+      if (regularProduct.images && Array.isArray(regularProduct.images) && regularProduct.images.length > 0) {
+        return regularProduct.images;
+      }
+      // Fall back to single image if available
+      if (regularProduct.image && regularProduct.image !== '/placeholder.svg') {
+        return [regularProduct.image];
+      }
+    }
+    
+    // Default fallback image
+    return ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop'];
+  };
 
   const productDetail = collectionProduct || {
     name: regularProduct?.name || '',
     price: regularProduct?.price || 0,
     originalPrice: undefined,
     description: regularProduct?.description || '',
-    images: regularProduct?.images || [regularProduct?.image || '/placeholder.svg'],
+    images: getProductImages(),
     inStock: (regularProduct?.stock || 0) > 0,
     stock: regularProduct?.stock || 0,
     rating: 4.5,
@@ -105,7 +127,7 @@ export function ProductDetail() {
       'Price': `$${regularProduct?.price || 0}`
     },
     category: regularProduct?.category || 'General',
-    collectionId: undefined
+    collectionId: regularProduct?.collectionId || undefined
   };
 
   if (!product) {

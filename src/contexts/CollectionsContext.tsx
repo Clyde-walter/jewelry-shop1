@@ -50,13 +50,21 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
         id: item.id,
         name: item.name,
         description: item.description || '',
-        images: item.images || [],
+        images: Array.isArray(item.images) ? item.images : [],
         productCount: item.product_count || 0,
         status: item.status as 'Active' | 'Inactive',
         category: item.category
       }));
 
       setCollections(formattedCollections);
+      
+      // Dispatch event to update StoreContext
+      window.dispatchEvent(new CustomEvent('collectionsUpdated', { 
+        detail: { 
+          timestamp: Date.now(),
+          collections: formattedCollections
+        } 
+      }));
     } catch (error) {
       console.error('Error in fetchCollections:', error);
     } finally {
@@ -70,12 +78,7 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
   const triggerUpdate = () => {
     setLastUpdated(Date.now());
-    window.dispatchEvent(new CustomEvent('collectionsUpdated', { 
-      detail: { 
-        timestamp: Date.now(),
-        collections: collections
-      } 
-    }));
+    fetchCollections(); // Refetch to ensure sync
   };
 
   const addCollection = async (collectionData: Omit<Collection, 'id'>) => {

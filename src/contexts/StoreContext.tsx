@@ -1,104 +1,98 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
+import { CartProvider } from './CartContext';
+import { WishlistProvider } from './WishlistContext';
+import { AuthProvider } from './AuthContext';
 import { ProductsProvider, useProducts } from './ProductsContext';
 import { CollectionsProvider, useCollections } from './CollectionsContext';
-import { CartProvider, useCart } from './CartContext';
-import { WishlistProvider, useWishlist } from './WishlistContext';
 import { OrdersProvider, useOrders } from './OrdersContext';
 import { NotificationsProvider } from './NotificationsContext';
+import { LanguageProvider } from './LanguageContext';
 import { ChatProvider } from './ChatContext';
 import { LocationProvider } from './LocationContext';
-import { LanguageProvider } from './LanguageContext';
 import { Product, CartItem, WishlistItem, Order } from '@/types/store';
-import { Collection } from './CollectionsContext';
+
+// Re-export the Collection interface from CollectionsContext
+export type { Collection } from './CollectionsContext';
 
 interface StoreContextType {
+  // Products
   products: Product[];
-  collections: Collection[];
-  cart: CartItem[];
-  wishlist: WishlistItem[];
-  orders: Order[];
-  addToCart: (product: Product | WishlistItem) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  getCartTotal: () => number;
-  addToWishlist: (item: WishlistItem) => void;
-  removeFromWishlist: (itemId: string) => void;
-  isInWishlist: (itemId: string) => boolean;
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  addCollection: (collection: Omit<Collection, 'id'>) => Promise<void>;
-  updateCollection: (id: string, collection: Partial<Collection>) => Promise<void>;
+  
+  // Collections  
+  collections: any[];
+  addCollection: (collection: any) => Promise<void>;
+  updateCollection: (id: string, collection: any) => Promise<void>;
   deleteCollection: (id: string) => Promise<void>;
-  createOrder: (customerInfo: any) => Promise<Order | null>;
+  
+  // Orders
+  orders: Order[];
+  createOrder: (customerInfo: any, cartItems: CartItem[], total: number) => Promise<Order | null>;
   updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
-  lastUpdated: number;
+  
+  // Cart functions from CartContext
+  cartItems: CartItem[];
+  addToCart: (product: Product) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  cartTotal: number;
+  
+  // Wishlist functions from WishlistContext  
+  wishlistItems: WishlistItem[];
+  addToWishlist: (item: WishlistItem) => void;
+  removeFromWishlist: (productId: string) => void;
+  isInWishlist: (productId: string) => boolean;
+  
   loading: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-function StoreContextProvider({ children }: { children: React.ReactNode }) {
-  const { products, addProduct, updateProduct, deleteProduct, loading: productsLoading } = useProducts();
-  const { collections, addCollection, updateCollection, deleteCollection, loading: collectionsLoading } = useCollections();
-  const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
-  const { wishlist, addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { orders, createOrder: createOrderBase, updateOrderStatus, loading: ordersLoading } = useOrders();
-  const [lastUpdated, setLastUpdated] = useState(Date.now());
-  const loading = productsLoading || collectionsLoading || ordersLoading;
+function StoreContextInner({ children }: { children: React.ReactNode }) {
+  const products = useProducts();
+  const collections = useCollections();
+  const orders = useOrders();
 
-  // Listen for real-time updates
+  // Listen for collection updates
   useEffect(() => {
-    const handleProductsUpdate = () => setLastUpdated(Date.now());
-    const handleCollectionsUpdate = () => setLastUpdated(Date.now());
+    const handleCollectionsUpdate = (event: CustomEvent) => {
+      console.log('Collections updated:', event.detail);
+    };
 
-    window.addEventListener('productsUpdated', handleProductsUpdate);
-    window.addEventListener('collectionsUpdated', handleCollectionsUpdate);
-
+    window.addEventListener('collectionsUpdated', handleCollectionsUpdate as EventListener);
+    
     return () => {
-      window.removeEventListener('productsUpdated', handleProductsUpdate);
-      window.removeEventListener('collectionsUpdated', handleCollectionsUpdate);
+      window.removeEventListener('collectionsUpdated', handleCollectionsUpdate as EventListener);
     };
   }, []);
 
-  const createOrder = async (customerInfo: any): Promise<Order | null> => {
-    const order = await createOrderBase(customerInfo, cart, getCartTotal());
-    if (order) {
-      clearCart();
-    }
-    return order;
+  const value: Omit<StoreContextType, 'cartItems' | 'addToCart' | 'removeFromCart' | 'updateQuantity' | 'clearCart' | 'cartTotal' | 'wishlistItems' | 'addToWishlist' | 'removeFromWishlist' | 'isInWishlist'> = {
+    // Products
+    products: products.products,
+    addProduct: products.addProduct,
+    updateProduct: products.updateProduct,
+    deleteProduct: products.deleteProduct,
+    
+    // Collections
+    collections: collections.collections,
+    addCollection: collections.addCollection,
+    updateCollection: collections.updateCollection,
+    deleteCollection: collections.deleteCollection,
+    
+    // Orders
+    orders: orders.orders,
+    createOrder: orders.createOrder,
+    updateOrderStatus: orders.updateOrderStatus,
+    
+    loading: products.loading || collections.loading || orders.loading
   };
 
   return (
-    <StoreContext.Provider
-      value={{
-        products,
-        collections,
-        cart,
-        wishlist,
-        orders,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        getCartTotal,
-        addToWishlist,
-        removeFromWishlist,
-        isInWishlist,
-        addProduct,
-        updateProduct,
-        deleteProduct,
-        addCollection,
-        updateCollection,
-        deleteCollection,
-        createOrder,
-        updateOrderStatus,
-        lastUpdated,
-        loading
-      }}
-    >
+    <StoreContext.Provider value={value as StoreContextType}>
       {children}
     </StoreContext.Provider>
   );
@@ -106,27 +100,29 @@ function StoreContextProvider({ children }: { children: React.ReactNode }) {
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   return (
-    <ChatProvider>
-      <NotificationsProvider>
-        <LanguageProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <NotificationsProvider>
           <LocationProvider>
-            <ProductsProvider>
-              <CollectionsProvider>
-                <CartProvider>
-                  <WishlistProvider>
-                    <OrdersProvider>
-                      <StoreContextProvider>
-                        {children}
-                      </StoreContextProvider>
-                    </OrdersProvider>
-                  </WishlistProvider>
-                </CartProvider>
-              </CollectionsProvider>
-            </ProductsProvider>
+            <ChatProvider>
+              <ProductsProvider>
+                <CollectionsProvider>
+                  <OrdersProvider>
+                    <CartProvider>
+                      <WishlistProvider>
+                        <StoreContextInner>
+                          {children}
+                        </StoreContextInner>
+                      </WishlistProvider>
+                    </CartProvider>
+                  </OrdersProvider>
+                </CollectionsProvider>
+              </ProductsProvider>
+            </ChatProvider>
           </LocationProvider>
-        </LanguageProvider>
-      </NotificationsProvider>
-    </ChatProvider>
+        </NotificationsProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
@@ -137,6 +133,3 @@ export function useStore() {
   }
   return context;
 }
-
-// Re-export types for convenience
-export type { Product, CartItem, WishlistItem, Order, Collection };
