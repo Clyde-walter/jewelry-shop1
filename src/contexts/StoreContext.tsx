@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect } from 'react';
 import { CartProvider, useCart } from './CartContext';
 import { WishlistProvider, useWishlist } from './WishlistContext';
@@ -160,9 +159,9 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <NotificationsProvider>
+    <AuthProvider>
+      <NotificationsProvider>
+        <LanguageProvider>
           <LocationProvider>
             <ChatProvider>
               <ProductsProvider>
@@ -182,9 +181,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               </ProductsProvider>
             </ChatProvider>
           </LocationProvider>
-        </NotificationsProvider>
-      </AuthProvider>
-    </LanguageProvider>
+        </LanguageProvider>
+      </NotificationsProvider>
+    </AuthProvider>
   );
 }
 
