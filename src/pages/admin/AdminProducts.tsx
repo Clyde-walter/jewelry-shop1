@@ -39,7 +39,9 @@ export function AdminProducts() {
     productsCount: products.length, 
     loading, 
     error,
-    collectionsCount: collections.length
+    collectionsCount: collections.length,
+    isProductDialogOpen,
+    productForm
   });
 
   const filteredProducts = products.filter(product => {
@@ -54,46 +56,107 @@ export function AdminProducts() {
     return { label: t('admin.products.stock.inStock') || 'In Stock', color: 'bg-green-500' };
   };
 
-  const handleProductSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = () => {
+    console.log('Validating form:', productForm);
     
-    if (!productForm.name || !productForm.price || !productForm.description || !productForm.category) {
+    if (!productForm.name.trim()) {
       toast({
-        title: t('admin.products.error.fillFields') || "Please fill in all required fields",
+        title: "Name is required",
+        description: "Please enter a product name",
         variant: "destructive"
       });
+      return false;
+    }
+
+    if (!productForm.price || parseFloat(productForm.price) <= 0) {
+      toast({
+        title: "Valid price is required",
+        description: "Please enter a valid price greater than 0",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (!productForm.description.trim()) {
+      toast({
+        title: "Description is required",
+        description: "Please enter a product description",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (!productForm.category) {
+      toast({
+        title: "Category is required",
+        description: "Please select a category",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted with data:', productForm);
+    
+    if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
     
     try {
+      // Process images - filter out blob URLs and invalid URLs
+      const validImages = productForm.images.filter(img => {
+        const isValid = img && 
+          img !== '/placeholder.svg' && 
+          !img.startsWith('blob:') &&
+          (img.startsWith('http') || img.startsWith('data:') || img.startsWith('/'));
+        console.log('Image validation:', img, 'valid:', isValid);
+        return isValid;
+      });
+
+      // Use default image if no valid images
+      const defaultImage = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
+      const finalImages = validImages.length > 0 ? validImages : [defaultImage];
+
       const productData = {
-        name: productForm.name,
+        name: productForm.name.trim(),
         price: parseFloat(productForm.price),
-        description: productForm.description,
+        description: productForm.description.trim(),
         category: productForm.category,
         stock: parseInt(productForm.stock) || 0,
         collectionId: productForm.collectionId || undefined,
-        image: productForm.images.length > 0 ? productForm.images[0] : 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
-        images: productForm.images.length > 0 ? productForm.images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+        image: finalImages[0],
+        images: finalImages
       };
 
+      console.log('Processed product data:', productData);
+
       if (editingProduct) {
-        console.log('Updating product:', editingProduct.id, productData);
+        console.log('Updating product:', editingProduct.id);
         await updateProduct(editingProduct.id, productData);
       } else {
-        console.log('Adding new product:', productData);
+        console.log('Adding new product');
         await addProduct(productData);
       }
 
+      // Reset form and close dialog
       resetForm();
       setIsProductDialogOpen(false);
+      
+      toast({
+        title: "Success!",
+        description: editingProduct ? "Product updated successfully" : "Product added successfully"
+      });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
-        title: t('admin.products.error.save') || "Error saving product",
-        description: "Please try again",
+        title: "Error saving product",
+        description: "Please try again. Check console for details.",
         variant: "destructive"
       });
     } finally {
@@ -102,6 +165,7 @@ export function AdminProducts() {
   };
 
   const resetForm = () => {
+    console.log('Resetting form');
     setProductForm({
       name: '',
       price: '',
@@ -118,13 +182,13 @@ export function AdminProducts() {
     console.log('Editing product:', product);
     setEditingProduct(product);
     setProductForm({
-      name: product.name,
-      price: product.price.toString(),
-      description: product.description,
-      category: product.category,
-      stock: product.stock.toString(),
+      name: product.name || '',
+      price: product.price?.toString() || '',
+      description: product.description || '',
+      category: product.category || '',
+      stock: product.stock?.toString() || '0',
       collectionId: product.collectionId || '',
-      images: product.images || [product.image]
+      images: product.images || [product.image].filter(Boolean)
     });
     setIsProductDialogOpen(true);
   };
@@ -144,10 +208,12 @@ export function AdminProducts() {
     }
   };
 
-  const handleAddNewProduct = () => {
-    console.log('Opening add product dialog');
-    resetForm();
-    setIsProductDialogOpen(true);
+  const handleDialogOpenChange = (open: boolean) => {
+    console.log('Dialog open state changing to:', open);
+    setIsProductDialogOpen(open);
+    if (!open) {
+      resetForm();
+    }
   };
 
   if (loading) {
@@ -209,9 +275,10 @@ export function AdminProducts() {
             <SelectItem value="Pendants">{t('categories.pendants') || 'Pendants'}</SelectItem>
           </SelectContent>
         </Select>
-        <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
+        
+        <Dialog open={isProductDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddNewProduct}>
+            <Button>
               <Plus className="w-4 h-4 mr-2" />
               {t('admin.products.add') || 'Add Product'}
             </Button>
@@ -290,7 +357,10 @@ export function AdminProducts() {
                 <label className="block text-sm font-medium mb-2">{t('admin.products.form.images') || 'Product Images'}</label>
                 <ImageUpload
                   images={productForm.images}
-                  onImagesChange={(images) => setProductForm({...productForm, images})}
+                  onImagesChange={(images) => {
+                    console.log('Images changed:', images);
+                    setProductForm({...productForm, images});
+                  }}
                   maxImages={5}
                 />
               </div>
@@ -333,7 +403,7 @@ export function AdminProducts() {
               <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
               <p className="text-gray-500 mb-4">Start by adding your first product to the inventory.</p>
-              <Button onClick={handleAddNewProduct}>
+              <Button onClick={() => setIsProductDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Your First Product
               </Button>
