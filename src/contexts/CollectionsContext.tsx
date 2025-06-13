@@ -74,6 +74,18 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     fetchCollections();
+
+    // Listen for external updates
+    const handleCollectionsUpdated = () => {
+      console.log('Collections updated event received, refetching...');
+      fetchCollections();
+    };
+
+    window.addEventListener('collectionsUpdated', handleCollectionsUpdated);
+    
+    return () => {
+      window.removeEventListener('collectionsUpdated', handleCollectionsUpdated);
+    };
   }, []);
 
   const triggerUpdate = () => {

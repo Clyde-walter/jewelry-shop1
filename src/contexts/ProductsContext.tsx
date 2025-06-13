@@ -62,6 +62,18 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchProducts();
+
+    // Listen for external updates
+    const handleProductsUpdated = () => {
+      console.log('Products updated event received, refetching...');
+      fetchProducts();
+    };
+
+    window.addEventListener('productsUpdated', handleProductsUpdated);
+    
+    return () => {
+      window.removeEventListener('productsUpdated', handleProductsUpdated);
+    };
   }, []);
 
   const triggerUpdate = () => {
@@ -76,6 +88,8 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 
   const addProduct = async (productData: Omit<Product, 'id'>) => {
     try {
+      console.log('Adding product with data:', productData);
+      
       const { data, error } = await supabase
         .from('products')
         .insert([{
@@ -92,6 +106,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
+        console.error('Supabase error:', error);
         toast({
           title: "Error adding product",
           description: error.message,
@@ -100,6 +115,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log('Product added successfully:', data);
       await fetchProducts();
       triggerUpdate();
       

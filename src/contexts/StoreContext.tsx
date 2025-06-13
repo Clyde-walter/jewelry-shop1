@@ -10,7 +10,9 @@ import { NotificationsProvider } from './NotificationsContext';
 import { LanguageProvider } from './LanguageContext';
 import { ChatProvider } from './ChatContext';
 import { LocationProvider } from './LocationContext';
+import { CustomersProvider, useCustomers } from './CustomersContext';
 import { Product, CartItem, WishlistItem, Order } from '@/types/store';
+import { supabase } from '@/integrations/supabase/client';
 
 // Re-export types for convenience
 export type { Product, CartItem, WishlistItem, Order } from '@/types/store';
@@ -33,6 +35,12 @@ interface StoreContextType {
   orders: Order[];
   createOrder: (customerInfo: any, cartItems: CartItem[], total: number) => Promise<Order | null>;
   updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
+  
+  // Customers
+  customers: any[];
+  addCustomer: (customer: any) => Promise<void>;
+  updateCustomer: (id: string, customer: any) => Promise<void>;
+  deleteCustomer: (id: string) => Promise<void>;
   
   // Cart functions from CartContext
   cart: CartItem[];
@@ -59,17 +67,46 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
   const orders = useOrders();
   const cart = useCart();
   const wishlist = useWishlist();
+  const customers = useCustomers();
 
-  // Listen for collection updates
+  // Set up real-time subscriptions for all tables
   useEffect(() => {
-    const handleCollectionsUpdate = (event: CustomEvent) => {
-      console.log('Collections updated:', event.detail);
-    };
-
-    window.addEventListener('collectionsUpdated', handleCollectionsUpdate as EventListener);
+    console.log('Setting up real-time subscriptions...');
     
+    const channel = supabase
+      .channel('admin-realtime')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'products' }, 
+        (payload) => {
+          console.log('Products changed:', payload);
+          window.dispatchEvent(new CustomEvent('productsUpdated', { 
+            detail: { timestamp: Date.now(), payload } 
+          }));
+        }
+      )
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'collections' }, 
+        (payload) => {
+          console.log('Collections changed:', payload);
+          window.dispatchEvent(new CustomEvent('collectionsUpdated', { 
+            detail: { timestamp: Date.now(), payload } 
+          }));
+        }
+      )
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'orders' }, 
+        (payload) => {
+          console.log('Orders changed:', payload);
+          window.dispatchEvent(new CustomEvent('ordersUpdated', { 
+            detail: { timestamp: Date.now(), payload } 
+          }));
+        }
+      )
+      .subscribe();
+
     return () => {
-      window.removeEventListener('collectionsUpdated', handleCollectionsUpdate as EventListener);
+      console.log('Cleaning up real-time subscriptions...');
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -91,6 +128,12 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
     createOrder: orders.createOrder,
     updateOrderStatus: orders.updateOrderStatus,
     
+    // Customers
+    customers: customers.customers,
+    addCustomer: customers.addCustomer,
+    updateCustomer: customers.updateCustomer,
+    deleteCustomer: customers.deleteCustomer,
+    
     // Cart
     cart: cart.cart,
     addToCart: cart.addToCart,
@@ -105,7 +148,7 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
     removeFromWishlist: wishlist.removeFromWishlist,
     isInWishlist: wishlist.isInWishlist,
     
-    loading: products.loading || collections.loading || orders.loading
+    loading: products.loading || collections.loading || orders.loading || customers.loading
   };
 
   return (
@@ -125,13 +168,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               <ProductsProvider>
                 <CollectionsProvider>
                   <OrdersProvider>
-                    <CartProvider>
-                      <WishlistProvider>
-                        <StoreContextInner>
-                          {children}
-                        </StoreContextInner>
-                      </WishlistProvider>
-                    </CartProvider>
+                    <CustomersProvider>
+                      <CartProvider>
+                        <WishlistProvider>
+                          <StoreContextInner>
+                            {children}
+                          </StoreContextInner>
+                        </WishlistProvider>
+                      </CartProvider>
+                    </CustomersProvider>
                   </OrdersProvider>
                 </CollectionsProvider>
               </ProductsProvider>

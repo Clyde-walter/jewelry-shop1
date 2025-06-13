@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Plus, Filter, MoreHorizontal, UserCheck, UserX, Mail, Phone } from 'lucide-react';
+import { Search, Plus, MoreHorizontal, UserCheck, Mail, Phone, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,61 +8,25 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: 'active' | 'inactive';
-  totalOrders: number;
-  totalSpent: number;
-  joinDate: string;
-  lastOrder: string;
-}
-
-const mockCustomers: Customer[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1 234 567 8900',
-    status: 'active',
-    totalOrders: 15,
-    totalSpent: 1250.50,
-    joinDate: '2024-01-15',
-    lastOrder: '2024-05-20'
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    phone: '+1 234 567 8901',
-    status: 'active',
-    totalOrders: 8,
-    totalSpent: 650.25,
-    joinDate: '2024-02-10',
-    lastOrder: '2024-05-18'
-  },
-  {
-    id: '3',
-    name: 'Bob Wilson',
-    email: 'bob@example.com',
-    phone: '+1 234 567 8902',
-    status: 'inactive',
-    totalOrders: 3,
-    totalSpent: 180.00,
-    joinDate: '2024-03-05',
-    lastOrder: '2024-04-12'
-  }
-];
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { useStore } from '@/contexts/StoreContext';
+import { toast } from '@/hooks/use-toast';
 
 export function AdminCustomers() {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const { customers, addCustomer, updateCustomer, deleteCustomer, loading } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<any>(null);
+  const [newCustomer, setNewCustomer] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    status: 'active' as 'active' | 'inactive'
+  });
 
-  const filteredCustomers = customers.filter(customer => {
+  const filteredCustomers = customers.filter((customer: any) => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customer.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
@@ -70,9 +34,59 @@ export function AdminCustomers() {
   });
 
   const totalCustomers = customers.length;
-  const activeCustomers = customers.filter(c => c.status === 'active').length;
-  const totalRevenue = customers.reduce((sum, c) => sum + c.totalSpent, 0);
-  const avgOrderValue = totalRevenue / customers.reduce((sum, c) => sum + c.totalOrders, 0) || 0;
+  const activeCustomers = customers.filter((c: any) => c.status === 'active').length;
+  const totalRevenue = customers.reduce((sum: number, c: any) => sum + c.total_spent, 0);
+  const avgOrderValue = totalRevenue / customers.reduce((sum: number, c: any) => sum + c.total_orders, 0) || 0;
+
+  const handleAddCustomer = async () => {
+    if (!newCustomer.name || !newCustomer.email) {
+      toast({
+        title: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    await addCustomer(newCustomer);
+    setNewCustomer({ name: '', email: '', phone: '', status: 'active' });
+    setIsAddDialogOpen(false);
+  };
+
+  const handleEditCustomer = async () => {
+    if (!editingCustomer) return;
+
+    await updateCustomer(editingCustomer.id, {
+      name: editingCustomer.name,
+      email: editingCustomer.email,
+      phone: editingCustomer.phone,
+      status: editingCustomer.status
+    });
+    setEditingCustomer(null);
+  };
+
+  const handleDeleteCustomer = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this customer?')) {
+      await deleteCustomer(id);
+    }
+  };
+
+  const handleStatusToggle = async (customer: any) => {
+    const newStatus = customer.status ===  'active' ? 'inactive' : 'active';
+    await updateCustomer(customer.id, { status: newStatus });
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin text-ecommerce-600" />
+            <p className="text-gray-600">Loading customers...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -157,10 +171,64 @@ export function AdminCustomers() {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Customer
-            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Customer
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Customer</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Name *</Label>
+                    <Input
+                      id="name"
+                      value={newCustomer.name}
+                      onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                      placeholder="Enter customer name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={newCustomer.email}
+                      onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                      placeholder="Enter customer email"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      value={newCustomer.phone}
+                      onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
+                      placeholder="Enter customer phone"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="status">Status</Label>
+                    <Select value={newCustomer.status} onValueChange={(value: 'active' | 'inactive') => setNewCustomer({...newCustomer, status: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleAddCustomer} className="w-full">
+                    Add Customer
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>
@@ -184,18 +252,18 @@ export function AdminCustomers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCustomers.map((customer) => (
+              {filteredCustomers.map((customer: any) => (
                 <TableRow key={customer.id}>
                   <TableCell>
                     <div>
                       <p className="font-medium">{customer.name}</p>
-                      <p className="text-sm text-gray-500">Joined {new Date(customer.joinDate).toLocaleDateString()}</p>
+                      <p className="text-sm text-gray-500">Joined {new Date(customer.join_date).toLocaleDateString()}</p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
                       <p className="text-sm">{customer.email}</p>
-                      <p className="text-sm text-gray-500">{customer.phone}</p>
+                      <p className="text-sm text-gray-500">{customer.phone || 'N/A'}</p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -203,9 +271,9 @@ export function AdminCustomers() {
                       {customer.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{customer.totalOrders}</TableCell>
-                  <TableCell>${customer.totalSpent.toFixed(2)}</TableCell>
-                  <TableCell>{new Date(customer.lastOrder).toLocaleDateString()}</TableCell>
+                  <TableCell>{customer.total_orders}</TableCell>
+                  <TableCell>${customer.total_spent.toFixed(2)}</TableCell>
+                  <TableCell>{customer.last_order ? new Date(customer.last_order).toLocaleDateString() : 'Never'}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -214,10 +282,18 @@ export function AdminCustomers() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Edit Customer</DropdownMenuItem>
-                        <DropdownMenuItem>View Orders</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingCustomer(customer)}>
+                          Edit Customer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStatusToggle(customer)}>
+                          {customer.status === 'active' ? 'Deactivate' : 'Activate'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-red-600"
+                          onClick={() => handleDeleteCustomer(customer.id)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -227,6 +303,62 @@ export function AdminCustomers() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Customer Dialog */}
+      {editingCustomer && (
+        <Dialog open={!!editingCustomer} onOpenChange={() => setEditingCustomer(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Customer</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-name">Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editingCustomer.name}
+                  onChange={(e) => setEditingCustomer({...editingCustomer, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editingCustomer.email}
+                  onChange={(e) => setEditingCustomer({...editingCustomer, email: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-phone">Phone</Label>
+                <Input
+                  id="edit-phone"
+                  value={editingCustomer.phone || ''}
+                  onChange={(e) => setEditingCustomer({...editingCustomer, phone: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-status">Status</Label>
+                <Select 
+                  value={editingCustomer.status} 
+                  onValueChange={(value: 'active' | 'inactive') => setEditingCustomer({...editingCustomer, status: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleEditCustomer} className="w-full">
+                Update Customer
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
