@@ -48,7 +48,7 @@ export function CollectionDetail() {
   };
 
   const handleViewProduct = (productId: string) => {
-    navigate(`/product/${productId}`);
+    navigate(`/product/${productId}/${id}`);
   };
 
   const handleAddToCart = (product: Product) => {
@@ -197,12 +197,7 @@ export function CollectionDetail() {
                       {/* Main image */}
                       <div 
                         className="col-span-3 cursor-pointer group"
-                        onClick={() => {
-                          const allImages = [product.image, ...(product.images || [])].filter(Boolean);
-                          if (allImages.length > 0) {
-                            openImageViewer(allImages, 0);
-                          }
-                        }}
+                        onClick={() => handleViewProduct(product.id)}
                       >
                         <img
                           src={product.image || '/placeholder.svg'}
@@ -264,7 +259,7 @@ export function CollectionDetail() {
                     
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-2xl font-bold text-ecommerce-600">
-                        ${product.price.toFixed(2)}
+                        ${Number(product.price).toFixed(2)}
                       </span>
                       <span className="text-sm text-gray-500">
                         {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}

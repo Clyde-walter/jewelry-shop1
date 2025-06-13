@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Plus, Search, Edit, Trash2, Package } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Edit, Trash2, Package, Eye } from 'lucide-react';
 import { useCollections } from '@/contexts/CollectionsContext';
 import { useProducts } from '@/contexts/ProductsContext';
 import { ProductForm } from '@/components/admin/ProductForm';
@@ -100,6 +100,10 @@ export function AdminCollectionProducts() {
   const handleCreateProduct = () => {
     setEditingProduct(null);
     setIsProductFormOpen(true);
+  };
+
+  const handleViewProduct = (productId) => {
+    navigate(`/product/${productId}/${collectionId}`);
   };
 
   const handleViewImages = (images, startIndex = 0) => {
@@ -255,19 +259,28 @@ export function AdminCollectionProducts() {
                 </div>
               </div>
 
-              <div className="flex space-x-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleViewProduct(product.id)}
+                  className="w-full"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  View
+                </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => handleEditProduct(product)}
-                  className="flex-1"
+                  className="w-full"
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="outline" className="text-orange-600 hover:text-orange-700">
+                    <Button size="sm" variant="outline" className="text-orange-600 hover:text-orange-700 w-full">
                       Remove
                     </Button>
                   </AlertDialogTrigger>
@@ -291,7 +304,7 @@ export function AdminCollectionProducts() {
                 </AlertDialog>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 w-full">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </AlertDialogTrigger>
