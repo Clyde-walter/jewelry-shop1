@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collection } from '@/types/store';
 import { ImageUpload } from '@/components/ImageUpload';
-import { X } from 'lucide-react';
 
 interface CollectionFormProps {
   isOpen: boolean;
@@ -50,17 +49,10 @@ export function CollectionForm({ isOpen, onClose, onSubmit, collection, mode }: 
     }
   };
 
-  const handleImageUpload = (url: string) => {
+  const handleImagesChange = (newImages: string[]) => {
     setFormData(prev => ({
       ...prev,
-      images: [...prev.images, url]
-    }));
-  };
-
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      images: newImages
     }));
   };
 
@@ -137,34 +129,11 @@ export function CollectionForm({ isOpen, onClose, onSubmit, collection, mode }: 
           <div className="space-y-4">
             <Label>Collection Images</Label>
             
-            {/* Current Images */}
-            {formData.images.length > 0 && (
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                {formData.images.map((image, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={image}
-                      alt={`Collection image ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removeImage(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-
             <ImageUpload
-              onUpload={handleImageUpload}
+              images={formData.images}
+              onImagesChange={handleImagesChange}
+              maxImages={5}
               bucketName="product-images"
-              className="w-full"
             />
           </div>
 
