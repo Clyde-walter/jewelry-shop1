@@ -1,35 +1,21 @@
+
 import React, { createContext, useContext, useEffect } from 'react';
 import { CartProvider, useCart } from './CartContext';
 import { WishlistProvider, useWishlist } from './WishlistContext';
 import { AuthProvider } from './AuthContext';
-import { ProductsProvider, useProducts } from './ProductsContext';
-import { CollectionsProvider, useCollections } from './CollectionsContext';
 import { OrdersProvider, useOrders } from './OrdersContext';
 import { NotificationsProvider } from './NotificationsContext';
 import { LanguageProvider } from './LanguageContext';
 import { ChatProvider } from './ChatContext';
-import { LocationProvider } from './LocationContext';
+import { LocationProvider } from './LocationProvider';
 import { CustomersProvider, useCustomers } from './CustomersContext';
 import { Product, CartItem, WishlistItem, Order } from '@/types/store';
 import { supabase } from '@/integrations/supabase/client';
 
 // Re-export types for convenience
 export type { Product, CartItem, WishlistItem, Order } from '@/types/store';
-export type { Collection } from './CollectionsContext';
 
 interface StoreContextType {
-  // Products
-  products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
-  updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
-  deleteProduct: (id: string) => Promise<void>;
-  
-  // Collections  
-  collections: any[];
-  addCollection: (collection: any) => Promise<void>;
-  updateCollection: (id: string, collection: any) => Promise<void>;
-  deleteCollection: (id: string) => Promise<void>;
-  
   // Orders
   orders: Order[];
   createOrder: (customerInfo: any, cartItems: CartItem[], total: number) => Promise<Order | null>;
@@ -55,43 +41,27 @@ interface StoreContextType {
   removeFromWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
   
+  // Static data for now since contexts are removed
+  products: Product[];
+  collections: any[];
+  
   loading: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 function StoreContextInner({ children }: { children: React.ReactNode }) {
-  const products = useProducts();
-  const collections = useCollections();
   const orders = useOrders();
   const cart = useCart();
   const wishlist = useWishlist();
   const customers = useCustomers();
 
-  // Set up real-time subscriptions for all tables
+  // Set up real-time subscriptions for remaining tables
   useEffect(() => {
     console.log('Setting up real-time subscriptions...');
     
     const channel = supabase
       .channel('admin-realtime')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'products' }, 
-        (payload) => {
-          console.log('Products changed:', payload);
-          window.dispatchEvent(new CustomEvent('productsUpdated', { 
-            detail: { timestamp: Date.now(), payload } 
-          }));
-        }
-      )
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'collections' }, 
-        (payload) => {
-          console.log('Collections changed:', payload);
-          window.dispatchEvent(new CustomEvent('collectionsUpdated', { 
-            detail: { timestamp: Date.now(), payload } 
-          }));
-        }
-      )
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'orders' }, 
         (payload) => {
@@ -110,18 +80,6 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value: StoreContextType = {
-    // Products
-    products: products.products,
-    addProduct: products.addProduct,
-    updateProduct: products.updateProduct,
-    deleteProduct: products.deleteProduct,
-    
-    // Collections
-    collections: collections.collections,
-    addCollection: collections.addCollection,
-    updateCollection: collections.updateCollection,
-    deleteCollection: collections.deleteCollection,
-    
     // Orders
     orders: orders.orders,
     createOrder: orders.createOrder,
@@ -147,7 +105,11 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
     removeFromWishlist: wishlist.removeFromWishlist,
     isInWishlist: wishlist.isInWishlist,
     
-    loading: products.loading || collections.loading || orders.loading || customers.loading
+    // Empty arrays for now since contexts are removed
+    products: [],
+    collections: [],
+    
+    loading: orders.loading || customers.loading
   };
 
   return (
@@ -164,21 +126,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         <LanguageProvider>
           <LocationProvider>
             <ChatProvider>
-              <ProductsProvider>
-                <CollectionsProvider>
-                  <OrdersProvider>
-                    <CustomersProvider>
-                      <CartProvider>
-                        <WishlistProvider>
-                          <StoreContextInner>
-                            {children}
-                          </StoreContextInner>
-                        </WishlistProvider>
-                      </CartProvider>
-                    </CustomersProvider>
-                  </OrdersProvider>
-                </CollectionsProvider>
-              </ProductsProvider>
+              <OrdersProvider>
+                <CustomersProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <StoreContextInner>
+                        {children}
+                      </StoreContextInner>
+                    </WishlistProvider>
+                  </CartProvider>
+                </CustomersProvider>
+              </OrdersProvider>
             </ChatProvider>
           </LocationProvider>
         </LanguageProvider>

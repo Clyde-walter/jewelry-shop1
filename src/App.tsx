@@ -18,9 +18,7 @@ import { CustomDesign } from "@/pages/CustomDesign";
 import { Checkout } from "@/pages/Checkout";
 import { Orders } from "@/pages/Orders";
 import { Admin } from "@/pages/Admin";
-import { AdminProducts } from "@/pages/admin/AdminProducts";
 import { AdminOrders } from "@/pages/admin/AdminOrders";
-import { AdminCollections } from "@/pages/admin/AdminCollections";
 import { AdminCustomers } from "@/pages/admin/AdminCustomers";
 import { AdminSupport } from "@/pages/admin/AdminSupport";
 import { AdminShipping } from "@/pages/admin/AdminShipping";
@@ -65,9 +63,7 @@ const App = () => (
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Admin />} />
-                <Route path="products" element={<AdminProducts />} />
                 <Route path="orders" element={<AdminOrders />} />
-                <Route path="collections" element={<AdminCollections />} />
                 <Route path="customers" element={<AdminCustomers />} />
                 <Route path="support" element={<AdminSupport />} />
                 <Route path="shipping" element={<AdminShipping />} />
