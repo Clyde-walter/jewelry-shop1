@@ -7,7 +7,7 @@ import { OrdersProvider, useOrders } from './OrdersContext';
 import { NotificationsProvider } from './NotificationsContext';
 import { LanguageProvider } from './LanguageContext';
 import { ChatProvider } from './ChatContext';
-import { LocationProvider } from './LocationProvider';
+import { LocationProvider } from './LocationContext';
 import { CustomersProvider, useCustomers } from './CustomersContext';
 import { Product, CartItem, WishlistItem, Order } from '@/types/store';
 import { supabase } from '@/integrations/supabase/client';
