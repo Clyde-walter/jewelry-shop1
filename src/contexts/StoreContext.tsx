@@ -11,8 +11,9 @@ import { LocationProvider } from './LocationContext';
 import { CustomersProvider, useCustomers } from './CustomersContext';
 import { ProductsProvider, useProducts } from './ProductsContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Product, CartItem, WishlistItem, Order } from '@/types/store';
 
-// Import types
+// Re-export types for convenience
 export type { Product, CartItem, WishlistItem, Order } from '@/types/store';
 
 interface StoreContextType {
