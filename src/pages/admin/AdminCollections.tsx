@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Eye, Package } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Package, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCollections } from '@/contexts/CollectionsContext';
 import { CollectionForm } from '@/components/admin/CollectionForm';
 import { Collection } from '@/types/store';
@@ -21,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export function AdminCollections() {
+  const navigate = useNavigate();
   const { collections, loading, addCollection, updateCollection, deleteCollection } = useCollections();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -42,6 +44,10 @@ export function AdminCollections() {
     setEditingCollection(collection);
     setFormMode('edit');
     setIsFormOpen(true);
+  };
+
+  const handleManageProducts = (collectionId: string) => {
+    navigate(`/admin/collections/${collectionId}/products`);
   };
 
   const handleFormSubmit = async (collectionData: Omit<Collection, 'id' | 'productCount'>) => {
@@ -141,12 +147,21 @@ export function AdminCollections() {
                 </span>
               </div>
 
-              <div className="flex space-x-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleManageProducts(collection.id)}
+                  className="w-full"
+                >
+                  <Settings className="w-4 h-4 mr-1" />
+                  Manage
+                </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => window.open(`/collection/${collection.id}`, '_blank')}
-                  className="flex-1"
+                  className="w-full"
                 >
                   <Eye className="w-4 h-4 mr-1" />
                   View
@@ -155,15 +170,16 @@ export function AdminCollections() {
                   size="sm"
                   variant="outline"
                   onClick={() => handleEditCollection(collection)}
-                  className="flex-1"
+                  className="w-full"
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
+                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 w-full">
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
