@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { ShoppingCart, Heart, ArrowLeft, Filter, SortAsc } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/contexts/StoreContext';
 import { toast } from '@/hooks/use-toast';
-import { ProductImageCarousel } from '@/components/ProductImageCarousel';
+import { ProductImage } from '@/components/ProductImage';
 
 export function CollectionDetail() {
   const { id } = useParams();
@@ -157,7 +156,7 @@ export function CollectionDetail() {
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
                 <div className="relative">
                   <div className="h-64">
-                    <ProductImageCarousel 
+                    <ProductImage 
                       images={validImages.length > 0 ? validImages : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']}
                       productName={product.name}
                     />

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Package, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useStore } from '@/contexts/StoreContext';
-import { ProductImageCarousel } from '@/components/ProductImageCarousel';
+import { ProductImage } from '@/components/ProductImage';
 
 export function Collections() {
   const navigate = useNavigate();
@@ -105,7 +105,7 @@ export function Collections() {
               <Card key={collection.id} className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border-0 shadow-lg bg-white">
                 <div className="relative overflow-hidden">
                   <div className="h-64 bg-gray-100">
-                    <ProductImageCarousel 
+                    <ProductImage 
                       images={displayImages}
                       productName={collection.name}
                     />
