@@ -63,10 +63,6 @@ export function CollectionDetail() {
     }
   };
 
-  const handleProductClick = (productId: string) => {
-    navigate(`/product/${productId}`);
-  };
-
   // Sort products
   const sortedProducts = [...collectionProducts].sort((a, b) => {
     switch (sortBy) {
@@ -186,10 +182,7 @@ export function CollectionDetail() {
                 </div>
                 
                 <CardContent className="p-4">
-                  <h3 
-                    className="text-lg font-semibold mb-2 cursor-pointer hover:text-ecommerce-600 transition-colors" 
-                    onClick={() => handleProductClick(product.id)}
-                  >
+                  <h3 className="text-lg font-semibold mb-2">
                     {product.name}
                   </h3>
                   <p className="text-2xl font-bold text-ecommerce-600 mb-4">
