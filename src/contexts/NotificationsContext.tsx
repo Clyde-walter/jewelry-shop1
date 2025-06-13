@@ -52,16 +52,20 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   // Listen for product updates and create notifications
   useEffect(() => {
     const handleProductsUpdated = () => {
-      addNotification({
+      // Use setNotifications directly to avoid circular dependency
+      setNotifications(current => [{
+        id: Date.now().toString(),
         title: 'Products Updated',
         message: 'Product catalog has been updated by admin',
-        type: 'info'
-      });
+        type: 'info' as const,
+        timestamp: new Date().toISOString(),
+        read: false
+      }, ...current]);
     };
 
     window.addEventListener('productsUpdated', handleProductsUpdated);
     return () => window.removeEventListener('productsUpdated', handleProductsUpdated);
-  }, []);
+  }, []); // Empty dependency array to avoid re-creating listeners
 
   return (
     <NotificationsContext.Provider
