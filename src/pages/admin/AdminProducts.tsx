@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Search, Filter, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, Package, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,12 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useStore } from '@/contexts/StoreContext';
+import { useProducts } from '@/contexts/ProductsContext';
+import { useCollections } from '@/contexts/CollectionsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
 import { ImageUpload } from '@/components/ImageUpload';
 
 export function AdminProducts() {
-  const { products, collections, addProduct, updateProduct, deleteProduct } = useStore();
+  const { products, addProduct, updateProduct, deleteProduct, loading } = useProducts();
+  const { collections } = useCollections();
+  const { t } = useLanguage();
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,47 +40,50 @@ export function AdminProducts() {
   });
 
   const getStockStatus = (stock: number) => {
-    if (stock === 0) return { label: 'Out of Stock', color: 'bg-red-500' };
-    if (stock <= 5) return { label: 'Limited Stock', color: 'bg-yellow-500' };
-    return { label: 'In Stock', color: 'bg-green-500' };
+    if (stock === 0) return { label: t('admin.products.stock.outOfStock') || 'Out of Stock', color: 'bg-red-500' };
+    if (stock <= 5) return { label: t('admin.products.stock.limited') || 'Limited Stock', color: 'bg-yellow-500' };
+    return { label: t('admin.products.stock.inStock') || 'In Stock', color: 'bg-green-500' };
   };
 
-  const handleProductSubmit = (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!productForm.name || !productForm.price || !productForm.description || !productForm.category) {
       toast({
-        title: "Please fill in all required fields",
+        title: t('admin.products.error.fillFields') || "Please fill in all required fields",
         variant: "destructive"
       });
       return;
     }
 
-    const productData = {
-      name: productForm.name,
-      price: parseFloat(productForm.price),
-      description: productForm.description,
-      category: productForm.category,
-      stock: parseInt(productForm.stock) || 0,
-      collectionId: productForm.collectionId || undefined,
-      image: productForm.images.length > 0 ? productForm.images[0] : 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
-      images: productForm.images.length > 0 ? productForm.images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
-    };
+    try {
+      const productData = {
+        name: productForm.name,
+        price: parseFloat(productForm.price),
+        description: productForm.description,
+        category: productForm.category,
+        stock: parseInt(productForm.stock) || 0,
+        collectionId: productForm.collectionId || undefined,
+        image: productForm.images.length > 0 ? productForm.images[0] : 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
+        images: productForm.images.length > 0 ? productForm.images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+      };
 
-    if (editingProduct) {
-      updateProduct(editingProduct.id, productData);
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, productData);
+      } else {
+        await addProduct(productData);
+      }
+
+      resetForm();
+      setIsProductDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
       toast({
-        title: "Product updated successfully!"
-      });
-    } else {
-      addProduct(productData);
-      toast({
-        title: "Product added successfully!"
+        title: t('admin.products.error.save') || "Error saving product",
+        description: "Please try again",
+        variant: "destructive"
       });
     }
-
-    resetForm();
-    setIsProductDialogOpen(false);
   };
 
   const resetForm = () => {
@@ -106,20 +113,38 @@ export function AdminProducts() {
     setIsProductDialogOpen(true);
   };
 
-  const handleDelete = (productId: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(productId);
-      toast({
-        title: "Product deleted successfully!"
-      });
+  const handleDelete = async (productId: string) => {
+    if (window.confirm(t('admin.products.confirm.delete') || 'Are you sure you want to delete this product?')) {
+      try {
+        await deleteProduct(productId);
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        toast({
+          title: t('admin.products.error.delete') || "Error deleting product",
+          variant: "destructive"
+        });
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin text-ecommerce-600" />
+            <p className="text-gray-600">{t('admin.products.loading') || 'Loading products...'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Products Management</h1>
-        <p className="text-gray-600">Manage your product inventory, pricing, and stock levels</p>
+        <h1 className="text-3xl font-bold mb-2">{t('admin.products.title') || 'Products Management'}</h1>
+        <p className="text-gray-600">{t('admin.products.description') || 'Manage your product inventory, pricing, and stock levels'}</p>
       </div>
 
       {/* Actions Bar */}
@@ -127,7 +152,7 @@ export function AdminProducts() {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
-            placeholder="Search products..."
+            placeholder={t('admin.products.search.placeholder') || "Search products..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -136,43 +161,43 @@ export function AdminProducts() {
         <Select value={filterCategory} onValueChange={setFilterCategory}>
           <SelectTrigger className="w-48">
             <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Filter by category" />
+            <SelectValue placeholder={t('admin.products.filter.placeholder') || "Filter by category"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="Rings">Rings</SelectItem>
-            <SelectItem value="Necklaces">Necklaces</SelectItem>
-            <SelectItem value="Earrings">Earrings</SelectItem>
-            <SelectItem value="Bracelets">Bracelets</SelectItem>
-            <SelectItem value="Watches">Watches</SelectItem>
-            <SelectItem value="Pendants">Pendants</SelectItem>
+            <SelectItem value="all">{t('admin.products.filter.all') || 'All Categories'}</SelectItem>
+            <SelectItem value="Rings">{t('categories.rings') || 'Rings'}</SelectItem>
+            <SelectItem value="Necklaces">{t('categories.necklaces') || 'Necklaces'}</SelectItem>
+            <SelectItem value="Earrings">{t('categories.earrings') || 'Earrings'}</SelectItem>
+            <SelectItem value="Bracelets">{t('categories.bracelets') || 'Bracelets'}</SelectItem>
+            <SelectItem value="Watches">{t('categories.watches') || 'Watches'}</SelectItem>
+            <SelectItem value="Pendants">{t('categories.pendants') || 'Pendants'}</SelectItem>
           </SelectContent>
         </Select>
         <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={resetForm}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Product
+              {t('admin.products.add') || 'Add Product'}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
+                {editingProduct ? (t('admin.products.edit') || 'Edit Product') : (t('admin.products.add') || 'Add New Product')}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleProductSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Product Name *</label>
+                <label className="block text-sm font-medium mb-2">{t('admin.products.form.name') || 'Product Name'} *</label>
                 <Input
                   value={productForm.name}
                   onChange={(e) => setProductForm({...productForm, name: e.target.value})}
-                  placeholder="Enter product name"
+                  placeholder={t('admin.products.form.name.placeholder') || "Enter product name"}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Price *</label>
+                  <label className="block text-sm font-medium mb-2">{t('admin.products.form.price') || 'Price'} *</label>
                   <Input
                     type="number"
                     step="0.01"
@@ -182,7 +207,7 @@ export function AdminProducts() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Stock Quantity</label>
+                  <label className="block text-sm font-medium mb-2">{t('admin.products.form.stock') || 'Stock Quantity'}</label>
                   <Input
                     type="number"
                     value={productForm.stock}
@@ -192,29 +217,29 @@ export function AdminProducts() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Category *</label>
+                <label className="block text-sm font-medium mb-2">{t('admin.products.form.category') || 'Category'} *</label>
                 <Select value={productForm.category} onValueChange={(value) => setProductForm({...productForm, category: value})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t('admin.products.form.category.placeholder') || "Select category"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Rings">Rings</SelectItem>
-                    <SelectItem value="Necklaces">Necklaces</SelectItem>
-                    <SelectItem value="Earrings">Earrings</SelectItem>
-                    <SelectItem value="Bracelets">Bracelets</SelectItem>
-                    <SelectItem value="Watches">Watches</SelectItem>
-                    <SelectItem value="Pendants">Pendants</SelectItem>
+                    <SelectItem value="Rings">{t('categories.rings') || 'Rings'}</SelectItem>
+                    <SelectItem value="Necklaces">{t('categories.necklaces') || 'Necklaces'}</SelectItem>
+                    <SelectItem value="Earrings">{t('categories.earrings') || 'Earrings'}</SelectItem>
+                    <SelectItem value="Bracelets">{t('categories.bracelets') || 'Bracelets'}</SelectItem>
+                    <SelectItem value="Watches">{t('categories.watches') || 'Watches'}</SelectItem>
+                    <SelectItem value="Pendants">{t('categories.pendants') || 'Pendants'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Collection (Optional)</label>
+                <label className="block text-sm font-medium mb-2">{t('admin.products.form.collection') || 'Collection'} ({t('admin.products.form.optional') || 'Optional'})</label>
                 <Select value={productForm.collectionId} onValueChange={(value) => setProductForm({...productForm, collectionId: value})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select collection" />
+                    <SelectValue placeholder={t('admin.products.form.collection.placeholder') || "Select collection"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Collection</SelectItem>
+                    <SelectItem value="">{t('admin.products.form.collection.none') || 'No Collection'}</SelectItem>
                     {collections.map((collection) => (
                       <SelectItem key={collection.id} value={collection.id}>
                         {collection.name}
@@ -224,7 +249,7 @@ export function AdminProducts() {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Product Images</label>
+                <label className="block text-sm font-medium mb-2">{t('admin.products.form.images') || 'Product Images'}</label>
                 <ImageUpload
                   images={productForm.images}
                   onImagesChange={(images) => setProductForm({...productForm, images})}
@@ -232,16 +257,16 @@ export function AdminProducts() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Description *</label>
+                <label className="block text-sm font-medium mb-2">{t('admin.products.form.description') || 'Description'} *</label>
                 <Textarea
                   value={productForm.description}
                   onChange={(e) => setProductForm({...productForm, description: e.target.value})}
-                  placeholder="Enter product description"
+                  placeholder={t('admin.products.form.description.placeholder') || "Enter product description"}
                   rows={3}
                 />
               </div>
               <Button type="submit" className="w-full">
-                {editingProduct ? 'Update Product' : 'Add Product'}
+                {editingProduct ? (t('admin.products.update') || 'Update Product') : (t('admin.products.add') || 'Add Product')}
               </Button>
             </form>
           </DialogContent>
@@ -253,20 +278,20 @@ export function AdminProducts() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="w-5 h-5" />
-            Products ({filteredProducts.length})
+            {t('admin.products.products') || 'Products'} ({filteredProducts.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Collection</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('admin.products.table.product') || 'Product'}</TableHead>
+                <TableHead>{t('admin.products.table.category') || 'Category'}</TableHead>
+                <TableHead>{t('admin.products.table.collection') || 'Collection'}</TableHead>
+                <TableHead>{t('admin.products.table.price') || 'Price'}</TableHead>
+                <TableHead>{t('admin.products.table.stock') || 'Stock'}</TableHead>
+                <TableHead>{t('admin.products.table.status') || 'Status'}</TableHead>
+                <TableHead>{t('admin.products.table.actions') || 'Actions'}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -309,13 +334,13 @@ export function AdminProducts() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{product.category}</Badge>
+                      <Badge variant="secondary">{t(`categories.${product.category.toLowerCase()}`) || product.category}</Badge>
                     </TableCell>
                     <TableCell>
                       {collection ? (
                         <Badge variant="outline">{collection.name}</Badge>
                       ) : (
-                        <span className="text-gray-400">No Collection</span>
+                        <span className="text-gray-400">{t('admin.products.table.noCollection') || 'No Collection'}</span>
                       )}
                     </TableCell>
                     <TableCell className="font-medium">${product.price}</TableCell>

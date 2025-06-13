@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Order, CartItem } from '@/types/store';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +15,16 @@ interface OrdersContextType {
 }
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
+
+// Generate a consistent order number format
+const generateOrderNumber = (): string => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `ORD-${year}${month}${day}-${random}`;
+};
 
 export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -36,7 +47,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
       const formattedOrders: Order[] = data.map((item: any) => ({
         id: item.id,
-        orderNumber: item.order_number,
+        orderNumber: item.order_number || generateOrderNumber(),
         items: Array.isArray(item.items) ? item.items as unknown as CartItem[] : [],
         total: parseFloat(item.total.toString()),
         status: item.status as Order['status'],
@@ -59,19 +70,17 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const createOrder = async (customerInfo: any, cartItems: CartItem[], cartTotal: number): Promise<Order | null> => {
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "Please log in to create an order.",
+        title: t('order.error.auth.title') || "Authentication required",
+        description: t('order.error.auth.description') || "Please log in to create an order.",
         variant: "destructive"
       });
       return null;
     }
 
     try {
-      // Generate order number
-      const { data: orderNumberData, error: orderNumberError } = await supabase
-        .rpc('generate_order_number');
-
-      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+      // Generate consistent order number
+      const orderNumber = generateOrderNumber();
+      console.log('Creating order with number:', orderNumber);
 
       const { data, error } = await supabase
         .from('orders')
@@ -89,7 +98,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error('Error creating order:', error);
         toast({
-          title: "Error creating order",
+          title: t('order.error.create.title') || "Error creating order",
           description: error.message,
           variant: "destructive"
         });
@@ -109,22 +118,22 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       await fetchOrders();
       
       addNotification({
-        title: t('notification.new.order'),
-        message: `${t('notification.order.created')} ${orderNumber}`,
+        title: t('notification.new.order') || 'New Order',
+        message: `${t('notification.order.created') || 'Order created'} ${orderNumber}`,
         type: 'success'
       });
 
       toast({
-        title: "Order created successfully!",
-        description: `Your order ${orderNumber} has been placed.`
+        title: t('order.success.create.title') || "Order created successfully!",
+        description: `${t('order.success.create.description') || 'Your order'} ${orderNumber} ${t('order.success.create.placed') || 'has been placed'}.`
       });
       
       return newOrder;
     } catch (error) {
       console.error('Error creating order:', error);
       toast({
-        title: "Error creating order",
-        description: "Something went wrong. Please try again.",
+        title: t('order.error.create.title') || "Error creating order",
+        description: t('order.error.create.generic') || "Something went wrong. Please try again.",
         variant: "destructive"
       });
       return null;
@@ -143,7 +152,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         toast({
-          title: "Error updating order",
+          title: t('order.error.update.title') || "Error updating order",
           description: error.message,
           variant: "destructive"
         });
@@ -154,20 +163,20 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       
       const order = orders.find(o => o.id === orderId);
       addNotification({
-        title: t('notification.order.status.changed'),
-        message: `${t('order.status')}: ${order?.orderNumber || orderId} - ${t(`status.${status}`)}`,
+        title: t('notification.order.status.changed') || 'Order Status Changed',
+        message: `${t('order.status') || 'Status'}: ${order?.orderNumber || orderId} - ${t(`status.${status}`) || status}`,
         type: 'info'
       });
 
       toast({
-        title: "Order status updated",
-        description: `Order status changed to ${status}`
+        title: t('order.success.update.title') || "Order status updated",
+        description: `${t('order.success.update.description') || 'Order status changed to'} ${t(`status.${status}`) || status}`
       });
     } catch (error) {
       console.error('Error updating order status:', error);
       toast({
-        title: "Error updating order",
-        description: "Something went wrong. Please try again.",
+        title: t('order.error.update.title') || "Error updating order",
+        description: t('order.error.update.generic') || "Something went wrong. Please try again.",
         variant: "destructive"
       });
     }

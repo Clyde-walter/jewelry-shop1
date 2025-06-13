@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProductQuantitySelectorProps {
   quantity: number;
@@ -9,6 +10,8 @@ interface ProductQuantitySelectorProps {
 }
 
 export function ProductQuantitySelector({ quantity, onQuantityChange, maxQuantity = 99 }: ProductQuantitySelectorProps) {
+  const { t } = useLanguage();
+
   const handleDecrease = () => {
     onQuantityChange(Math.max(1, quantity - 1));
   };
@@ -19,7 +22,7 @@ export function ProductQuantitySelector({ quantity, onQuantityChange, maxQuantit
 
   return (
     <div className="flex items-center space-x-4">
-      <label className="font-medium">Quantity:</label>
+      <label className="font-medium">{t('product.quantity') || 'Quantity'}:</label>
       <div className="flex items-center border rounded-md">
         <button 
           onClick={handleDecrease}

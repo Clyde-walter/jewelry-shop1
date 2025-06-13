@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { ProductQuantitySelector } from './ProductQuantitySelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProductDetailInfoProps {
   product: {
@@ -36,6 +37,8 @@ export function ProductDetailInfo({
   onBuyNow,
   isInWishlist
 }: ProductDetailInfoProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <div>
@@ -51,7 +54,7 @@ export function ProductDetailInfo({
               />
             ))}
           </div>
-          <span className="text-sm text-gray-600">({productDetail.reviews} reviews)</span>
+          <span className="text-sm text-gray-600">({productDetail.reviews} {t('product.reviews') || 'reviews'})</span>
         </div>
         <div className="flex items-center space-x-4 mb-4">
           <span className="text-3xl font-bold text-ecommerce-600">${product.price.toLocaleString()}</span>
@@ -59,9 +62,9 @@ export function ProductDetailInfo({
             <span className="text-xl text-gray-500 line-through">${productDetail.originalPrice.toLocaleString()}</span>
           )}
           {productDetail.inStock ? (
-            <Badge className="bg-green-100 text-green-800">In Stock</Badge>
+            <Badge className="bg-green-100 text-green-800">{t('product.inStock') || 'In Stock'}</Badge>
           ) : (
-            <Badge className="bg-red-100 text-red-800">Out of Stock</Badge>
+            <Badge className="bg-red-100 text-red-800">{t('product.outOfStock') || 'Out of Stock'}</Badge>
           )}
         </div>
       </div>
@@ -81,7 +84,7 @@ export function ProductDetailInfo({
             disabled={!productDetail.inStock}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
-            Add to Cart
+            {t('product.addToCart') || 'Add to Cart'}
           </Button>
           <Button 
             variant="outline" 
@@ -102,7 +105,7 @@ export function ProductDetailInfo({
           onClick={onBuyNow}
           disabled={!productDetail.inStock}
         >
-          Buy Now
+          {t('product.buyNow') || 'Buy Now'}
         </Button>
       </div>
     </div>

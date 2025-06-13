@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNotifications } from './NotificationsContext';
 
@@ -60,6 +59,141 @@ const translations: Translations = {
     zh: '实时跟踪',
     ja: 'ライブトラッキング'
   },
+  
+  // Admin Products translations
+  'admin.products.title': {
+    en: 'Products Management',
+    es: 'Gestión de Productos',
+    fr: 'Gestion des Produits',
+    de: 'Produktverwaltung',
+    it: 'Gestione Prodotti',
+    pt: 'Gestão de Produtos',
+    zh: '产品管理',
+    ja: '製品管理'
+  },
+  'admin.products.description': {
+    en: 'Manage your product inventory, pricing, and stock levels',
+    es: 'Gestiona tu inventario de productos, precios y niveles de stock',
+    fr: 'Gérez votre inventaire de produits, prix et niveaux de stock',
+    de: 'Verwalten Sie Ihr Produktinventar, Preise und Lagerbestände',
+    it: 'Gestisci il tuo inventario prodotti, prezzi e livelli di stock',
+    pt: 'Gerencie seu inventário de produtos, preços e níveis de estoque',
+    zh: '管理您的产品库存、定价和库存水平',
+    ja: '製品在庫、価格、在庫レベルを管理する'
+  },
+  'admin.products.loading': {
+    en: 'Loading products...',
+    es: 'Cargando productos...',
+    fr: 'Chargement des produits...',
+    de: 'Produkte werden geladen...',
+    it: 'Caricamento prodotti...',
+    pt: 'Carregando produtos...',
+    zh: '正在加载产品...',
+    ja: '製品を読み込み中...'
+  },
+  'admin.products.add': {
+    en: 'Add Product',
+    es: 'Añadir Producto',
+    fr: 'Ajouter Produit',
+    de: 'Produkt hinzufügen',
+    it: 'Aggiungi Prodotto',
+    pt: 'Adicionar Produto',
+    zh: '添加产品',
+    ja: '製品を追加'
+  },
+  'admin.products.edit': {
+    en: 'Edit Product',
+    es: 'Editar Producto',
+    fr: 'Modifier Produit',
+    de: 'Produkt bearbeiten',
+    it: 'Modifica Prodotto',
+    pt: 'Editar Produto',
+    zh: '编辑产品',
+    ja: '製品を編集'
+  },
+  'admin.products.update': {
+    en: 'Update Product',
+    es: 'Actualizar Producto',
+    fr: 'Mettre à jour Produit',
+    de: 'Produkt aktualisieren',
+    it: 'Aggiorna Prodotto',
+    pt: 'Atualizar Produto',
+    zh: '更新产品',
+    ja: '製品を更新'
+  },
+  'admin.products.products': {
+    en: 'Products',
+    es: 'Productos',
+    fr: 'Produits',
+    de: '产品',
+    it: 'Prodotti',
+    pt: 'Produtos',
+    zh: '产品',
+    ja: '製品'
+  },
+  
+  // Categories
+  'categories.rings': {
+    en: 'Rings',
+    es: 'Anillos',
+    fr: 'Bagues',
+    de: 'Ringe',
+    it: 'Anelli',
+    pt: 'Anéis',
+    zh: '戒指',
+    ja: 'リング'
+  },
+  'categories.necklaces': {
+    en: 'Necklaces',
+    es: 'Collares',
+    fr: 'Colliers',
+    de: 'Halsketten',
+    it: 'Collane',
+    pt: 'Colares',
+    zh: '项链',
+    ja: 'ネックレス'
+  },
+  'categories.earrings': {
+    en: 'Earrings',
+    es: 'Pendientes',
+    fr: 'Boucles d\'oreilles',
+    de: 'Ohrringe',
+    it: 'Orecchini',
+    pt: 'Brincos',
+    zh: '耳环',
+    ja: 'イヤリング'
+  },
+  'categories.bracelets': {
+    en: 'Bracelets',
+    es: 'Pulseras',
+    fr: 'Bracelets',
+    de: 'Armbänder',
+    it: 'Braccialetti',
+    pt: 'Pulseiras',
+    zh: '手镯',
+    ja: 'ブレスレット'
+  },
+  'categories.watches': {
+    en: 'Watches',
+    es: 'Relojes',
+    fr: 'Montres',
+    de: 'Uhren',
+    it: 'Orologi',
+    pt: 'Relógios',
+    zh: '手表',
+    ja: '時計'
+  },
+  'categories.pendants': {
+    en: 'Pendants',
+    es: 'Colgantes',
+    fr: 'Pendentifs',
+    de: 'Anhänger',
+    it: 'Ciondoli',
+    pt: 'Pingentes',
+    zh: '吊坠',
+    ja: 'ペンダント'
+  },
+
   // Live Map Page
   'livemap.title': {
     en: 'Live Order Tracking',
@@ -121,6 +255,7 @@ const translations: Translations = {
     zh: '您最近的订单：',
     ja: '最近の注文：'
   },
+  
   // Order Details
   'order.details': {
     en: 'Order Details',
@@ -192,6 +327,7 @@ const translations: Translations = {
     zh: '总计',
     ja: '合計'
   },
+  
   // Order Status Values
   'status.pending': {
     en: 'Pending',
@@ -233,6 +369,7 @@ const translations: Translations = {
     zh: '已送达',
     ja: '配達済み'
   },
+  
   // Notifications
   'notification.order.location.updated': {
     en: 'Order location updated',
@@ -253,6 +390,26 @@ const translations: Translations = {
     pt: 'Status do pedido alterado',
     zh: '订单状态已更改',
     ja: '注文ステータスが変更されました'
+  },
+  'notification.new.order': {
+    en: 'New Order',
+    es: 'Nuevo Pedido',
+    fr: 'Nouvelle Commande',
+    de: 'Neue Bestellung',
+    it: 'Nuovo Ordine',
+    pt: 'Novo Pedido',
+    zh: '新订单',
+    ja: '新しい注文'
+  },
+  'notification.order.created': {    
+    en: 'Order created',
+    es: 'Pedido creado',
+    fr: 'Commande créée',
+    de: 'Bestellung erstellt',
+    it: 'Ordine creato',
+    pt: 'Pedido criado',
+    zh: '订单已创建',
+    ja: '注文が作成されました'
   }
 };
 
