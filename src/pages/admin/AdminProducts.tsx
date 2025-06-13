@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Search, Filter, Upload, Package, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,9 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStore } from '@/contexts/StoreContext';
 import { toast } from '@/hooks/use-toast';
+import { ImageUpload } from '@/components/ImageUpload';
 
 export function AdminProducts() {
-  const { products, addProduct, updateProduct, deleteProduct } = useStore();
+  const { products, collections, addProduct, updateProduct, deleteProduct } = useStore();
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +25,7 @@ export function AdminProducts() {
     description: '',
     category: '',
     stock: '',
+    collectionId: '',
     images: [] as string[]
   });
 
@@ -36,23 +39,6 @@ export function AdminProducts() {
     if (stock === 0) return { label: 'Out of Stock', color: 'bg-red-500' };
     if (stock <= 5) return { label: 'Limited Stock', color: 'bg-yellow-500' };
     return { label: 'In Stock', color: 'bg-green-500' };
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const newImages = Array.from(files).slice(0, 5).map(file => {
-        return URL.createObjectURL(file);
-      });
-      
-      const updatedImages = [...productForm.images, ...newImages].slice(0, 5);
-      setProductForm({...productForm, images: updatedImages});
-    }
-  };
-
-  const removeImage = (index: number) => {
-    const updatedImages = productForm.images.filter((_, i) => i !== index);
-    setProductForm({...productForm, images: updatedImages});
   };
 
   const handleProductSubmit = (e: React.FormEvent) => {
@@ -72,6 +58,7 @@ export function AdminProducts() {
       description: productForm.description,
       category: productForm.category,
       stock: parseInt(productForm.stock) || 0,
+      collectionId: productForm.collectionId || undefined,
       image: productForm.images.length > 0 ? productForm.images[0] : 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
       images: productForm.images.length > 0 ? productForm.images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
     };
@@ -99,6 +86,7 @@ export function AdminProducts() {
       description: '',
       category: '',
       stock: '',
+      collectionId: '',
       images: []
     });
     setEditingProduct(null);
@@ -112,6 +100,7 @@ export function AdminProducts() {
       description: product.description,
       category: product.category,
       stock: product.stock.toString(),
+      collectionId: product.collectionId || '',
       images: product.images || [product.image]
     });
     setIsProductDialogOpen(true);
@@ -219,47 +208,28 @@ export function AdminProducts() {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Product Images (Up to 5)</label>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Button type="button" variant="outline" asChild>
-                        <span>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload Images
-                        </span>
-                      </Button>
-                    </label>
-                  </div>
-                  {productForm.images.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2">
-                      {productForm.images.map((image, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={image}
-                            alt={`Product ${index + 1}`}
-                            className="w-full h-20 object-cover rounded border"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <label className="block text-sm font-medium mb-2">Collection (Optional)</label>
+                <Select value={productForm.collectionId} onValueChange={(value) => setProductForm({...productForm, collectionId: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select collection" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Collection</SelectItem>
+                    {collections.map((collection) => (
+                      <SelectItem key={collection.id} value={collection.id}>
+                        {collection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Product Images</label>
+                <ImageUpload
+                  images={productForm.images}
+                  onImagesChange={(images) => setProductForm({...productForm, images})}
+                  maxImages={5}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Description *</label>
@@ -292,6 +262,7 @@ export function AdminProducts() {
               <TableRow>
                 <TableHead>Product</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Collection</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead>Status</TableHead>
@@ -307,6 +278,8 @@ export function AdminProducts() {
                   img !== '/placeholder.svg' && 
                   (img.startsWith('http') || img.startsWith('data:') || img.startsWith('/'))
                 );
+                const collection = collections.find(c => c.id === product.collectionId);
+                
                 return (
                   <TableRow key={product.id}>
                     <TableCell>
@@ -318,6 +291,9 @@ export function AdminProducts() {
                               src={image}
                               alt={product.name}
                               className="w-8 h-8 object-cover rounded-full border-2 border-white"
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
+                              }}
                             />
                           ))}
                           {validImages.length > 3 && (
@@ -334,6 +310,13 @@ export function AdminProducts() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary">{product.category}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {collection ? (
+                        <Badge variant="outline">{collection.name}</Badge>
+                      ) : (
+                        <span className="text-gray-400">No Collection</span>
+                      )}
                     </TableCell>
                     <TableCell className="font-medium">${product.price}</TableCell>
                     <TableCell>{product.stock}</TableCell>
