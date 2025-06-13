@@ -229,20 +229,24 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
     fetchCollections();
   }, []);
 
-  // Set up real-time subscription
+  // Set up real-time subscription with proper cleanup
   useEffect(() => {
+    const channelName = `collections-changes-${Date.now()}`;
+    console.log('Setting up collections channel:', channelName);
+    
     const channel = supabase
-      .channel('collections-changes')
+      .channel(channelName)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'collections' }, 
-        () => {
-          console.log('Collections changed, refetching...');
+        (payload) => {
+          console.log('Collections changed, refetching...', payload);
           fetchCollections();
         }
       )
       .subscribe();
 
     return () => {
+      console.log('Cleaning up collections channel:', channelName);
       supabase.removeChannel(channel);
     };
   }, []);
