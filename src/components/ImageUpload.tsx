@@ -16,7 +16,7 @@ export function ImageUpload({
   images, 
   onImagesChange, 
   maxImages = 5,
-  bucketName = 'products-images'
+  bucketName = 'product-images'
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
 
@@ -39,7 +39,6 @@ export function ImageUpload({
         return null;
       }
 
-      // Get public URL - this is the key fix
       const { data: { publicUrl } } = supabase.storage
         .from(bucketName)
         .getPublicUrl(fileName);
@@ -70,7 +69,7 @@ export function ImageUpload({
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast({
           title: "File too large",
           description: `${file.name} is too large. Maximum 10MB per file.`,
@@ -94,7 +93,7 @@ export function ImageUpload({
     }
 
     setUploading(false);
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   };
 
   const removeImage = async (index: number) => {
@@ -102,7 +101,6 @@ export function ImageUpload({
     const updatedImages = images.filter((_, i) => i !== index);
     onImagesChange(updatedImages);
 
-    // Try to delete from storage if it's a Supabase URL
     if (imageUrl.includes('supabase')) {
       try {
         const fileName = imageUrl.split('/').pop();
@@ -158,7 +156,6 @@ export function ImageUpload({
                 alt={`Upload ${index + 1}`}
                 className="w-full h-20 object-cover rounded border"
                 onError={(e) => {
-                  // Fallback for broken images
                   e.currentTarget.src = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
                 }}
               />

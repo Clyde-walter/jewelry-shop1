@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import { Footer } from "@/components/Footer";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Home } from "@/pages/Home";
 import { Products } from "@/pages/Products";
+import { ProductDetail } from "@/pages/ProductDetail";
 import { Collections } from "@/pages/Collections";
 import { CollectionDetail } from "@/pages/CollectionDetail";
 import { CustomDesign } from "@/pages/CustomDesign";
@@ -65,6 +65,7 @@ const App = () => (
                 <Route index element={<Admin />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="customers" element={<AdminCustomers />} />
+                <Route path="products" element={<AdminProducts />} />
                 <Route path="support" element={<AdminSupport />} />
                 <Route path="shipping" element={<AdminShipping />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
@@ -80,6 +81,7 @@ const App = () => (
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/products" element={<Products />} />
+                      <Route path="/product/:id" element={<ProductDetail />} />
                       <Route path="/collections" element={<Collections />} />
                       <Route path="/collection/:id" element={<CollectionDetail />} />
                       <Route path="/custom-design" element={<CustomDesign />} />
