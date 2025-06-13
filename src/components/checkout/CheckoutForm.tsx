@@ -6,6 +6,7 @@ import { CustomerInfoForm } from './CustomerInfoForm';
 import { ShippingAddressForm } from './ShippingAddressForm';
 import { PaymentInfoForm } from './PaymentInfoForm';
 import { OrderSummary } from './OrderSummary';
+import { PaystackPayment } from './PaystackPayment';
 
 interface CheckoutFormProps {
   onOrderCreated: (order: any) => void;
@@ -14,6 +15,7 @@ interface CheckoutFormProps {
 export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   const { cart, getCartTotal, createOrder } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('paystack');
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -32,7 +34,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     setCustomerInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleStripeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!customerInfo.name || !customerInfo.email || !customerInfo.address) {
@@ -69,6 +71,14 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     }
   };
 
+  const handlePaystackSuccess = (order: any) => {
+    onOrderCreated(order);
+    toast({
+      title: "Payment successful!",
+      description: `Your order has been confirmed.`
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
@@ -85,7 +95,10 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               customerInfo={customerInfo}
               onInputChange={handleInputChange}
             />
-            <PaymentInfoForm />
+            <PaymentInfoForm 
+              paymentMethod={paymentMethod}
+              onPaymentMethodChange={setPaymentMethod}
+            />
           </div>
 
           {/* Order Summary */}
@@ -97,7 +110,19 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               tax={tax}
               finalTotal={finalTotal}
               isProcessing={isProcessing}
-              onSubmit={handleSubmit}
+              onSubmit={paymentMethod === 'stripe' ? handleStripeSubmit : undefined}
+              paymentMethod={paymentMethod}
+              renderPaymentButton={() => 
+                paymentMethod === 'paystack' ? (
+                  <PaystackPayment
+                    amount={finalTotal}
+                    email={customerInfo.email}
+                    customerInfo={customerInfo}
+                    cartItems={cart}
+                    onSuccess={handlePaystackSuccess}
+                  />
+                ) : null
+              }
             />
           </div>
         </div>

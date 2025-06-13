@@ -12,7 +12,9 @@ interface OrderSummaryProps {
   tax: number;
   finalTotal: number;
   isProcessing: boolean;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit?: (e: React.FormEvent) => void;
+  paymentMethod?: string;
+  renderPaymentButton?: () => React.ReactNode;
 }
 
 export function OrderSummary({ 
@@ -22,7 +24,9 @@ export function OrderSummary({
   tax, 
   finalTotal, 
   isProcessing, 
-  onSubmit 
+  onSubmit,
+  paymentMethod = 'stripe',
+  renderPaymentButton
 }: OrderSummaryProps) {
   return (
     <Card className="sticky top-4">
@@ -71,22 +75,29 @@ export function OrderSummary({
           </div>
         </div>
 
-        <form onSubmit={onSubmit}>
-          <Button
-            type="submit"
-            className="w-full bg-ecommerce-600 hover:bg-ecommerce-700"
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              `Pay $${finalTotal.toFixed(2)}`
-            )}
-          </Button>
-        </form>
+        {/* Payment Button */}
+        {paymentMethod === 'paystack' && renderPaymentButton ? (
+          renderPaymentButton()
+        ) : (
+          onSubmit && (
+            <form onSubmit={onSubmit}>
+              <Button
+                type="submit"
+                className="w-full bg-ecommerce-600 hover:bg-ecommerce-700"
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  `Pay $${finalTotal.toFixed(2)}`
+                )}
+              </Button>
+            </form>
+          )
+        )}
         
         <p className="text-xs text-gray-500 text-center">
           By placing your order, you agree to our terms and conditions.
