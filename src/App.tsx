@@ -22,6 +22,7 @@ import { Admin } from "@/pages/Admin";
 import { AdminOrders } from "@/pages/admin/AdminOrders";
 import { AdminCustomers } from "@/pages/admin/AdminCustomers";
 import { AdminProducts } from "@/pages/admin/AdminProducts";
+import { AdminCollections } from "@/pages/admin/AdminCollections";
 import { AdminSupport } from "@/pages/admin/AdminSupport";
 import { AdminShipping } from "@/pages/admin/AdminShipping";
 import { AdminAnalytics } from "@/pages/admin/AdminAnalytics";
@@ -68,6 +69,7 @@ const App = () => (
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="customers" element={<AdminCustomers />} />
                 <Route path="products" element={<AdminProducts />} />
+                <Route path="collections" element={<AdminCollections />} />
                 <Route path="support" element={<AdminSupport />} />
                 <Route path="shipping" element={<AdminShipping />} />
                 <Route path="analytics" element={<AdminAnalytics />} />

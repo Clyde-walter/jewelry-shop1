@@ -9,15 +9,56 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      collection_products: {
+        Row: {
+          collection_id: string
+          created_at: string
+          id: string
+          product_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           category: string
           created_at: string
           description: string | null
+          featured: boolean | null
           id: string
           images: string[] | null
           name: string
           product_count: number | null
+          sort_order: number | null
           status: string | null
           updated_at: string
         }
@@ -25,10 +66,12 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          featured?: boolean | null
           id?: string
           images?: string[] | null
           name: string
           product_count?: number | null
+          sort_order?: number | null
           status?: string | null
           updated_at?: string
         }
@@ -36,10 +79,12 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          featured?: boolean | null
           id?: string
           images?: string[] | null
           name?: string
           product_count?: number | null
+          sort_order?: number | null
           status?: string | null
           updated_at?: string
         }

@@ -10,11 +10,12 @@ import { ChatProvider } from './ChatContext';
 import { LocationProvider } from './LocationContext';
 import { CustomersProvider, useCustomers } from './CustomersContext';
 import { ProductsProvider, useProducts } from './ProductsContext';
+import { CollectionsProvider, useCollections } from './CollectionsContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Product, CartItem, WishlistItem, Order } from '@/types/store';
+import { Product, CartItem, WishlistItem, Order, Collection } from '@/types/store';
 
 // Re-export types for convenience
-export type { Product, CartItem, WishlistItem, Order } from '@/types/store';
+export type { Product, CartItem, WishlistItem, Order, Collection } from '@/types/store';
 
 interface StoreContextType {
   // Orders
@@ -44,7 +45,9 @@ interface StoreContextType {
   
   // Products from context
   products: Product[];
-  collections: any[];
+  
+  // Collections from context
+  collections: Collection[];
   
   loading: boolean;
 }
@@ -57,6 +60,7 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
   const wishlist = useWishlist();
   const customers = useCustomers();
   const products = useProducts();
+  const collections = useCollections();
 
   // Set up real-time subscriptions for remaining tables
   useEffect(() => {
@@ -109,9 +113,11 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
     
     // Products from context
     products: products.products,
-    collections: [],
     
-    loading: orders.loading || customers.loading || products.loading
+    // Collections from context
+    collections: collections.collections,
+    
+    loading: orders.loading || customers.loading || products.loading || collections.loading
   };
 
   return (
@@ -131,13 +137,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               <OrdersProvider>
                 <CustomersProvider>
                   <ProductsProvider>
-                    <CartProvider>
-                      <WishlistProvider>
-                        <StoreContextInner>
-                          {children}
-                        </StoreContextInner>
-                      </WishlistProvider>
-                    </CartProvider>
+                    <CollectionsProvider>
+                      <CartProvider>
+                        <WishlistProvider>
+                          <StoreContextInner>
+                            {children}
+                          </StoreContextInner>
+                        </WishlistProvider>
+                      </CartProvider>
+                    </CollectionsProvider>
                   </ProductsProvider>
                 </CustomersProvider>
               </OrdersProvider>
