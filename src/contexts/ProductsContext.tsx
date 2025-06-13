@@ -11,6 +11,7 @@ interface ProductsContextType {
   deleteProduct: (id: string) => Promise<void>;
   lastUpdated: number;
   loading: boolean;
+  error: string | null;
 }
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
@@ -19,10 +20,12 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch products from Supabase
   const fetchProducts = async () => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -30,6 +33,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error fetching products:', error);
+        setError(error.message);
         toast({
           title: "Error loading products",
           description: error.message,
@@ -53,8 +57,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       }));
 
       setProducts(formattedProducts);
+      // DO NOT dispatch event here - this was causing potential loops
     } catch (error) {
       console.error('Error in fetchProducts:', error);
+      setError('Failed to fetch products');
     } finally {
       setLoading(false);
     }
@@ -63,8 +69,8 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetchProducts();
 
-    // Listen for external updates
-    const handleProductsUpdated = () => {
+    // Listen for external updates from StoreContext real-time subscriptions
+    const handleProductsUpdated = (event: any) => {
       console.log('Products updated event received, refetching...');
       fetchProducts();
     };
@@ -78,6 +84,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 
   const triggerUpdate = () => {
     setLastUpdated(Date.now());
+    // Only dispatch event from CRUD operations
     window.dispatchEvent(new CustomEvent('productsUpdated', { 
       detail: { 
         timestamp: Date.now(),
@@ -88,6 +95,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 
   const addProduct = async (productData: Omit<Product, 'id'>) => {
     try {
+      setError(null);
       console.log('Adding product with data:', productData);
       
       const { data, error } = await supabase
@@ -135,6 +143,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 
   const updateProduct = async (id: string, productData: Partial<Product>) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('products')
         .update({
@@ -178,6 +187,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 
   const deleteProduct = async (id: string) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('products')
         .delete()
@@ -217,7 +227,8 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         updateProduct,
         deleteProduct,
         lastUpdated,
-        loading
+        loading,
+        error
       }}
     >
       {children}

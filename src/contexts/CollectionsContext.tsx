@@ -20,6 +20,7 @@ interface CollectionsContextType {
   deleteCollection: (id: string) => Promise<void>;
   lastUpdated: number;
   loading: boolean;
+  error: string | null;
 }
 
 const CollectionsContext = createContext<CollectionsContextType | undefined>(undefined);
@@ -28,9 +29,11 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
   const [collections, setCollections] = useState<Collection[]>([]);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchCollections = async () => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('collections')
         .select('*')
@@ -38,6 +41,7 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
       if (error) {
         console.error('Error fetching collections:', error);
+        setError(error.message);
         toast({
           title: "Error loading collections",
           description: error.message,
@@ -57,16 +61,10 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
       }));
 
       setCollections(formattedCollections);
-      
-      // Dispatch event to update StoreContext
-      window.dispatchEvent(new CustomEvent('collectionsUpdated', { 
-        detail: { 
-          timestamp: Date.now(),
-          collections: formattedCollections
-        } 
-      }));
+      // DO NOT dispatch event here - this was causing the infinite loop
     } catch (error) {
       console.error('Error in fetchCollections:', error);
+      setError('Failed to fetch collections');
     } finally {
       setLoading(false);
     }
@@ -75,8 +73,8 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     fetchCollections();
 
-    // Listen for external updates
-    const handleCollectionsUpdated = () => {
+    // Listen for external updates from StoreContext real-time subscriptions
+    const handleCollectionsUpdated = (event: any) => {
       console.log('Collections updated event received, refetching...');
       fetchCollections();
     };
@@ -90,11 +88,18 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
   const triggerUpdate = () => {
     setLastUpdated(Date.now());
-    fetchCollections(); // Refetch to ensure sync
+    // Only dispatch event from CRUD operations, not from fetch
+    window.dispatchEvent(new CustomEvent('collectionsUpdated', { 
+      detail: { 
+        timestamp: Date.now(),
+        collections: collections
+      } 
+    }));
   };
 
   const addCollection = async (collectionData: Omit<Collection, 'id'>) => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('collections')
         .insert([{
@@ -136,6 +141,7 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
   const updateCollection = async (id: string, collectionData: Partial<Collection>) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('collections')
         .update({
@@ -176,6 +182,7 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
   const deleteCollection = async (id: string) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('collections')
         .delete()
@@ -215,7 +222,8 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
         updateCollection,
         deleteCollection,
         lastUpdated,
-        loading
+        loading,
+        error
       }}
     >
       {children}
