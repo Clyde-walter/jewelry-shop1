@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { toast } from '@/hooks/use-toast';
-import { ProductImageCarousel } from '@/components/ProductImageCarousel';
+import { ProductImageGallery } from '@/components/ProductImageGallery';
 
 // Collection products data structure
 const collectionProductsData = {
@@ -196,9 +196,9 @@ export function ProductDetail() {
       </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Product Images with Carousel */}
+        {/* Enhanced Product Images Gallery */}
         <div className="space-y-4">
-          <ProductImageCarousel 
+          <ProductImageGallery 
             images={productDetail.images} 
             productName={product.name} 
           />

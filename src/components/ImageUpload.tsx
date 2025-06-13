@@ -39,11 +39,12 @@ export function ImageUpload({
         return null;
       }
 
-      // Get public URL
+      // Get public URL - this is the key fix
       const { data: { publicUrl } } = supabase.storage
         .from(bucketName)
         .getPublicUrl(fileName);
 
+      console.log('Generated public URL:', publicUrl);
       return publicUrl;
     } catch (error) {
       console.error('Upload error:', error);

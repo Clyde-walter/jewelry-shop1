@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,7 +47,7 @@ export function ProductImageCarousel({ images, productName }: ProductImageCarous
 
   return (
     <div className="relative">
-      <div className="aspect-square overflow-hidden rounded-lg">
+      <div className="aspect-square overflow-hidden rounded-lg bg-gray-50">
         <img
           src={validImages[currentIndex]}
           alt={`${productName} ${currentIndex + 1}`}
