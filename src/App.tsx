@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +21,7 @@ import { Orders } from "@/pages/Orders";
 import { Admin } from "@/pages/Admin";
 import { AdminOrders } from "@/pages/admin/AdminOrders";
 import { AdminCustomers } from "@/pages/admin/AdminCustomers";
+import { AdminProducts } from "@/pages/admin/AdminProducts";
 import { AdminSupport } from "@/pages/admin/AdminSupport";
 import { AdminShipping } from "@/pages/admin/AdminShipping";
 import { AdminAnalytics } from "@/pages/admin/AdminAnalytics";

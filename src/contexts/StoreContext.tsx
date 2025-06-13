@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect } from 'react';
 import { CartProvider, useCart } from './CartContext';
 import { WishlistProvider, useWishlist } from './WishlistContext';
@@ -11,7 +12,7 @@ import { CustomersProvider, useCustomers } from './CustomersContext';
 import { ProductsProvider, useProducts } from './ProductsContext';
 import { supabase } from '@/integrations/supabase/client';
 
-// Re-export types for convenience
+// Import types
 export type { Product, CartItem, WishlistItem, Order } from '@/types/store';
 
 interface StoreContextType {
