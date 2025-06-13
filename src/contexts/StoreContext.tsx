@@ -160,9 +160,9 @@ function StoreContextInner({ children }: { children: React.ReactNode }) {
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <NotificationsProvider>
-        <LanguageProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <NotificationsProvider>
           <LocationProvider>
             <ChatProvider>
               <ProductsProvider>
@@ -182,9 +182,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               </ProductsProvider>
             </ChatProvider>
           </LocationProvider>
-        </LanguageProvider>
-      </NotificationsProvider>
-    </AuthProvider>
+        </NotificationsProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
