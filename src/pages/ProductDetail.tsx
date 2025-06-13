@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { toast } from '@/hooks/use-toast';
 import { ProductImageGallery } from '@/components/ProductImageGallery';
+import { ProductDetailInfo } from '@/components/ProductDetailInfo';
+import { ProductSpecifications } from '@/components/ProductSpecifications';
+import { ProductServiceFeatures } from '@/components/ProductServiceFeatures';
 
 // Collection products data structure
 const collectionProductsData = {
@@ -46,7 +47,6 @@ const collectionProductsData = {
     category: 'Diamond Elegance',
     collectionId: '1'
   },
-  // Add more collection products here...
   '201': {
     name: 'Gold Chain Necklace',
     price: 1200,
@@ -206,119 +206,20 @@ export function ProductDetail() {
 
         {/* Product Info */}
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(productDetail.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm text-gray-600">({productDetail.reviews} reviews)</span>
-            </div>
-            <div className="flex items-center space-x-4 mb-4">
-              <span className="text-3xl font-bold text-ecommerce-600">${product.price.toLocaleString()}</span>
-              {productDetail.originalPrice && (
-                <span className="text-xl text-gray-500 line-through">${productDetail.originalPrice.toLocaleString()}</span>
-              )}
-              {productDetail.inStock ? (
-                <Badge className="bg-green-100 text-green-800">In Stock</Badge>
-              ) : (
-                <Badge className="bg-red-100 text-red-800">Out of Stock</Badge>
-              )}
-            </div>
-          </div>
+          <ProductDetailInfo
+            product={product}
+            productDetail={productDetail}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            onAddToCart={handleAddToCart}
+            onWishlistToggle={handleWishlistToggle}
+            onBuyNow={handleBuyNow}
+            isInWishlist={isInWishlist(product.id)}
+          />
 
-          <p className="text-gray-600 leading-relaxed">{product.description}</p>
+          <ProductSpecifications specs={productDetail.specs} />
 
-          {/* Quantity and Add to Cart */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <label className="font-medium">Quantity:</label>
-              <div className="flex items-center border rounded-md">
-                <button 
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-2 hover:bg-gray-100"
-                >
-                  -
-                </button>
-                <span className="px-4 py-2 border-x">{quantity}</span>
-                <button 
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-2 hover:bg-gray-100"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="flex space-x-4">
-              <Button 
-                className="flex-1 bg-ecommerce-600 hover:bg-ecommerce-700"
-                onClick={handleAddToCart}
-                disabled={!productDetail.inStock}
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
-              </Button>
-              <Button 
-                variant="outline" 
-                size="icon"
-                className={`${
-                  isInWishlist(product.id) 
-                    ? 'text-red-500 border-red-500' 
-                    : 'text-gray-500 hover:text-red-500'
-                }`}
-                onClick={handleWishlistToggle}
-              >
-                <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
-              </Button>
-            </div>
-
-            <Button 
-              className="w-full bg-green-600 hover:bg-green-700"
-              onClick={handleBuyNow}
-              disabled={!productDetail.inStock}
-            >
-              Buy Now
-            </Button>
-          </div>
-
-          {/* Product Specifications */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Specifications</h3>
-              <div className="space-y-2">
-                {Object.entries(productDetail.specs).map(([key, value]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="text-gray-600">{key}:</span>
-                    <span className="font-medium">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Service Features */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2 text-sm">
-              <Truck className="w-5 h-5 text-ecommerce-600" />
-              <span>Free Shipping</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <Shield className="w-5 h-5 text-ecommerce-600" />
-              <span>Lifetime Warranty</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <RotateCcw className="w-5 h-5 text-ecommerce-600" />
-              <span>30-Day Returns</span>
-            </div>
-          </div>
+          <ProductServiceFeatures />
         </div>
       </div>
     </div>
