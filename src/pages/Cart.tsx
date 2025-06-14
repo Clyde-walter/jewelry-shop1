@@ -1,10 +1,13 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStore } from '@/contexts/StoreContext';
+
+// Define fallback image for broken product images
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
 
 export function Cart() {
   const { cart, updateQuantity, removeFromCart, getCartTotal } = useStore();
@@ -27,6 +30,7 @@ export function Cart() {
       </div>
     );
   }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
@@ -38,15 +42,18 @@ export function Cart() {
               <div className="space-y-6">
                 {cart.map((item) => (
                   <Link
-                    to={`/products/${item.product.id}`}
+                    to={`/product/${item.product.id}`}
                     key={item.product.id}
-                    className="block"
+                    className="block group"
                   >
                     <div className="flex items-center space-x-4 p-4 border rounded-lg group hover:shadow-lg transition-all duration-300 cursor-pointer bg-white hover:bg-gray-50">
                       <div className="flex-shrink-0 w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 relative rounded overflow-hidden bg-gray-100">
                         <img
                           src={item.product.image}
                           alt={item.product.name}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = FALLBACK_IMAGE;
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
