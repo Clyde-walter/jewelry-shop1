@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User, ShoppingBag, Heart, Settings, CreditCard, MapPin, Phone, Mail, Edit } from 'lucide-react';
@@ -45,6 +44,12 @@ export function Profile() {
     return user?.email || 'User';
   };
 
+  // Pick the profile image if available
+  const profileImage =
+    profile?.profile_image_url && profile.profile_image_url !== ''
+      ? profile.profile_image_url
+      : '/placeholder.svg';
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
@@ -56,7 +61,8 @@ export function Profile() {
             <Card>
               <CardContent className="p-6 text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src="/placeholder.svg" />
+                  {/* Use profile image if set, fallback if error */}
+                  <AvatarImage src={profileImage} />
                   <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
                 </Avatar>
                 <h2 className="text-xl font-semibold mb-2">{getFullName()}</h2>
