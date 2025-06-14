@@ -8,10 +8,26 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    firstName?: string,
+    lastName?: string
+  ) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  updateProfile: (data: { first_name?: string; last_name?: string; phone?: string }) => Promise<{ error: any }>;
+  updateProfile: (
+    data: {
+      first_name?: string;
+      last_name?: string;
+      phone?: string;
+      date_of_birth?: string;
+      profile_image_url?: string;
+      newsletter?: boolean;
+      sms_notifications?: boolean;
+      email_notifications?: boolean;
+    }
+  ) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -110,7 +126,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateProfile = async (data: { first_name?: string; last_name?: string; phone?: string }) => {
+  /**
+   * Extended updateProfile with all fields supported by the profiles table.
+   */
+  const updateProfile = async (data: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    date_of_birth?: string;
+    profile_image_url?: string;
+    newsletter?: boolean;
+    sms_notifications?: boolean;
+    email_notifications?: boolean;
+  }) => {
     if (!user) return { error: new Error('No user logged in') };
 
     const { error } = await supabase
