@@ -59,7 +59,8 @@ export function EmailProvider({ children }: { children: React.ReactNode }) {
 
   const fetchTemplates = async () => {
     try {
-      const { data, error } = await supabase
+      // Use type assertion to bypass TypeScript strict typing for new tables
+      const { data, error } = await (supabase as any)
         .from('email_templates')
         .select('*')
         .order('created_at', { ascending: false });
@@ -78,7 +79,7 @@ export function EmailProvider({ children }: { children: React.ReactNode }) {
 
   const fetchEmailHistory = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('email_history')
         .select('*')
         .order('created_at', { ascending: false })
@@ -98,7 +99,7 @@ export function EmailProvider({ children }: { children: React.ReactNode }) {
 
   const createTemplate = async (template: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('email_templates')
         .insert(template);
 
@@ -122,7 +123,7 @@ export function EmailProvider({ children }: { children: React.ReactNode }) {
 
   const updateTemplate = async (id: string, updates: Partial<EmailTemplate>) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('email_templates')
         .update(updates)
         .eq('id', id);
@@ -147,7 +148,7 @@ export function EmailProvider({ children }: { children: React.ReactNode }) {
 
   const deleteTemplate = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('email_templates')
         .delete()
         .eq('id', id);
