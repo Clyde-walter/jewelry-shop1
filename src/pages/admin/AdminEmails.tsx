@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Mail } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,6 +21,7 @@ export function AdminEmails() {
   
   const [previewMode, setPreviewMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [tab, setTab] = useState("compose"); // new for tab switching
 
   const handleTemplateSelect = (templateId: string) => {
     const template = templates.find(t => t.id === templateId);
@@ -32,6 +32,7 @@ export function AdminEmails() {
         content: template.content,
         template: templateId
       });
+      setTab("compose"); // Switch to compose tab when using a template
     }
   };
 
@@ -105,7 +106,7 @@ export function AdminEmails() {
         <p className="text-gray-600">Manage email templates and send messages to your users</p>
       </div>
 
-      <Tabs defaultValue="compose" className="space-y-6">
+      <Tabs value={tab} onValueChange={setTab} defaultValue="compose" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="compose">Compose Email</TabsTrigger>
           <TabsTrigger value="templates">Email Templates ({templates.length})</TabsTrigger>
@@ -136,7 +137,7 @@ export function AdminEmails() {
             onCreateTemplate={handleCreateTemplate}
             onUpdateTemplate={handleUpdateTemplate}
             onDeleteTemplate={deleteTemplate}
-            onUseTemplate={handleTemplateSelect}
+            onUseTemplate={handleTemplateSelect} // passes handler down
           />
         </TabsContent>
 

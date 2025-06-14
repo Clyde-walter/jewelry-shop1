@@ -27,11 +27,9 @@ export function Cart() {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2">
@@ -39,46 +37,64 @@ export function Cart() {
             <CardContent className="p-6">
               <div className="space-y-6">
                 {cart.map((item) => (
-                  <div key={item.product.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                    <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{item.product.name}</h3>
-                      <p className="text-sm text-gray-600">{item.product.category}</p>
-                      <p className="font-bold text-ecommerce-600">${item.product.price.toFixed(2)}</p>
+                  <Link
+                    to={`/products/${item.product.id}`}
+                    key={item.product.id}
+                    className="block"
+                  >
+                    <div className="flex items-center space-x-4 p-4 border rounded-lg group hover:shadow-lg transition-all duration-300 cursor-pointer bg-white hover:bg-gray-50">
+                      <div className="flex-shrink-0 w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 relative rounded overflow-hidden bg-gray-100">
+                        <img
+                          src={item.product.image}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold line-clamp-1">{item.product.name}</h3>
+                        <p className="text-sm text-gray-600">{item.product.category}</p>
+                        <p className="font-bold text-ecommerce-600">${item.product.price.toFixed(2)}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={e => {
+                            e.preventDefault();
+                            updateQuantity(item.product.id, item.quantity - 1);
+                          }}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-8 text-center">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={e => {
+                            e.preventDefault();
+                            updateQuantity(item.product.id, item.quantity + 1);
+                          }}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${(item.product.price * item.quantity).toFixed(2)}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={e => {
+                            e.preventDefault();
+                            removeFromCart(item.product.id);
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                      >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">${(item.product.price * item.quantity).toFixed(2)}</p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFromCart(item.product.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </CardContent>

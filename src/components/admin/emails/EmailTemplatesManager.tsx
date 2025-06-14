@@ -93,6 +93,7 @@ export function EmailTemplatesManager({
                     size="sm" 
                     variant="outline"
                     onClick={() => onUseTemplate(template.id)}
+                    className="font-semibold text-primary hover:bg-primary/10"
                   >
                     Use Template
                   </Button>
