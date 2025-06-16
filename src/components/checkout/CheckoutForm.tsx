@@ -34,14 +34,52 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     setCustomerInfo(prev => ({ ...prev, [field]: value }));
   };
 
+  const validateRequiredFields = () => {
+    if (!customerInfo.name.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please enter your full name",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    if (!customerInfo.email.trim()) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    if (!customerInfo.address.trim()) {
+      toast({
+        title: "Address required",
+        description: "Please enter your shipping address",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customerInfo.email)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleStripeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!customerInfo.name || !customerInfo.email || !customerInfo.address) {
-      toast({
-        title: "Please fill in all required fields",
-        variant: "destructive"
-      });
+    if (!validateRequiredFields()) {
       return;
     }
 
@@ -77,6 +115,11 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       title: "Payment successful!",
       description: `Your order has been confirmed.`
     });
+  };
+
+  const handlePaystackPayment = () => {
+    // Validate before attempting Paystack payment
+    return validateRequiredFields();
   };
 
   return (
@@ -120,6 +163,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
                     customerInfo={customerInfo}
                     cartItems={cart}
                     onSuccess={handlePaystackSuccess}
+                    onValidate={handlePaystackPayment}
                   />
                 ) : null
               }
