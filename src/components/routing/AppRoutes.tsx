@@ -2,7 +2,18 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Auth } from "@/pages/Auth";
-import { AdminRoutes } from "./AdminRoutes";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { Admin } from "@/pages/Admin";
+import { AdminOrders } from "@/pages/admin/AdminOrders";
+import { AdminCustomers } from "@/pages/admin/AdminCustomers";
+import { AdminProducts } from "@/pages/admin/AdminProducts";
+import { AdminCollections } from "@/pages/admin/AdminCollections";
+import { AdminCollectionProducts } from "@/pages/admin/AdminCollectionProducts";
+import { AdminSupport } from "@/pages/admin/AdminSupport";
+import { AdminShipping } from "@/pages/admin/AdminShipping";
+import { AdminAnalytics } from "@/pages/admin/AdminAnalytics";
+import { AdminSettings } from "@/pages/admin/AdminSettings";
+import { AdminEmails } from "@/pages/admin/AdminEmails";
 import { PublicRoutes } from "./PublicRoutes";
 
 export function AppRoutes() {
@@ -13,7 +24,19 @@ export function AppRoutes() {
         <Route path="/auth" element={<Auth />} />
 
         {/* Admin Routes */}
-        <AdminRoutes />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Admin />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="collections" element={<AdminCollections />} />
+          <Route path="collections/:collectionId/products" element={<AdminCollectionProducts />} />
+          <Route path="support" element={<AdminSupport />} />
+          <Route path="shipping" element={<AdminShipping />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="emails" element={<AdminEmails />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
 
         {/* Public Routes with Header/Footer */}
         <Route path="/*" element={<PublicRoutes />} />
