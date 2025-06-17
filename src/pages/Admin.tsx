@@ -1,11 +1,14 @@
-
 import React from 'react';
 import { Package, DollarSign, ShoppingCart, Users, TrendingUp, Clock, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStore } from '@/contexts/StoreContext';
+import { useProducts } from '@/contexts/ProductsContext';
 
 export function Admin() {
-  const { products, orders, loading } = useStore();
+  const { orders, loading: ordersLoading } = useStore();
+  const { products, loading: productsLoading } = useProducts();
+
+  const loading = ordersLoading || productsLoading;
 
   if (loading) {
     return (
@@ -24,7 +27,7 @@ export function Admin() {
   const totalProducts = products.length;
   const totalOrders = orders.length;
   const pendingOrders = orders.filter(order => order.status === 'pending').length;
-  const lowStockProducts =  products.filter(product => product.stock <= 5).length;
+  const lowStockProducts = products.filter(product => product.stock <= 5).length;
   const recentOrders = orders.slice(0, 5);
 
   return (

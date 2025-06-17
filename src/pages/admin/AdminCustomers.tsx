@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Plus, MoreHorizontal, UserCheck, Mail, Phone, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,11 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { useStore } from '@/contexts/StoreContext';
+import { useCustomers } from '@/contexts/CustomersContext';
 import { toast } from '@/hooks/use-toast';
 
 export function AdminCustomers() {
-  const { customers, addCustomer, updateCustomer, deleteCustomer, loading } = useStore();
+  const { customers, addCustomer, updateCustomer, deleteCustomer, loading } = useCustomers();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -71,7 +70,7 @@ export function AdminCustomers() {
   };
 
   const handleStatusToggle = async (customer: any) => {
-    const newStatus = customer.status ===  'active' ? 'inactive' : 'active';
+    const newStatus = customer.status === 'active' ? 'inactive' : 'active';
     await updateCustomer(customer.id, { status: newStatus });
   };
 
