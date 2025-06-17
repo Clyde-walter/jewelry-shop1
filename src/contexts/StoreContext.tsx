@@ -1,159 +1,86 @@
 
-import React, { createContext, useContext, useEffect } from 'react';
-import { CartProvider, useCart } from './CartContext';
-import { WishlistProvider, useWishlist } from './WishlistContext';
-import { AuthProvider } from './AuthContext';
-import { OrdersProvider, useOrders } from './OrdersContext';
-import { NotificationsProvider } from './NotificationsContext';
-import { LanguageProvider } from './LanguageContext';
-import { ChatProvider } from './ChatContext';
-import { LocationProvider } from './LocationContext';
-import { CustomersProvider, useCustomers } from './CustomersContext';
-import { ProductsProvider, useProducts } from './ProductsContext';
-import { CollectionsProvider, useCollections } from './CollectionsContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Product, CartItem, WishlistItem, Order, Collection } from '@/types/store';
-
-// Re-export types for convenience
-export type { Product, CartItem, WishlistItem, Order, Collection } from '@/types/store';
+import React, { createContext, useContext } from 'react';
+import { useAuth } from './AuthContext';
+import { useCart } from './CartContext';
+import { useWishlist } from './WishlistContext';
+import { useOrders } from './OrdersContext';
 
 interface StoreContextType {
-  // Orders
-  orders: Order[];
-  createOrder: (customerInfo: any, cartItems: CartItem[], total: number) => Promise<Order | null>;
-  updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>;
-  
-  // Customers
-  customers: any[];
-  addCustomer: (customer: any) => Promise<void>;
-  updateCustomer: (id: string, customer: any) => Promise<void>;
-  deleteCustomer: (id: string) => Promise<void>;
-  
-  // Cart functions from CartContext
-  cart: CartItem[];
-  addToCart: (product: Product) => void;
+  // Cart functions
+  cart: any[];
+  addToCart: (product: any) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   
-  // Wishlist functions from WishlistContext  
-  wishlist: WishlistItem[];
-  addToWishlist: (item: WishlistItem) => void;
+  // Wishlist functions
+  wishlist: any[];
+  addToWishlist: (product: any) => void;
   removeFromWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
   
-  // Products from context
-  products: Product[];
-  
-  // Collections from context
-  collections: Collection[];
-  
+  // Orders functions
+  orders: any[];
+  createOrder: (customerInfo: any, cartItems: any[], cartTotal: number) => Promise<any>;
+  updateOrderStatus: (orderId: string, status: any) => Promise<void>;
   loading: boolean;
+  
+  // Auth functions
+  user: any;
+  session: any;
+  authLoading: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-function StoreContextInner({ children }: { children: React.ReactNode }) {
-  const orders = useOrders();
-  const cart = useCart();
-  const wishlist = useWishlist();
-  const customers = useCustomers();
-  const products = useProducts();
-  const collections = useCollections();
+export function StoreProvider({ children }: { children: React.ReactNode }) {
+  const { user, session, loading: authLoading } = useAuth();
+  const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
+  const { wishlist, addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { orders, createOrder: originalCreateOrder, updateOrderStatus, loading } = useOrders();
 
-  // Set up real-time subscriptions for remaining tables
-  useEffect(() => {
-    console.log('Setting up real-time subscriptions...');
-    
-    const channel = supabase
-      .channel('admin-realtime')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'orders' }, 
-        (payload) => {
-          console.log('Orders changed:', payload);
-          window.dispatchEvent(new CustomEvent('ordersUpdated', { 
-            detail: { timestamp: Date.now(), payload } 
-          }));
-        }
-      )
-      .subscribe();
-
-    return () => {
-      console.log('Cleaning up real-time subscriptions...');
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const value: StoreContextType = {
-    // Orders
-    orders: orders.orders,
-    createOrder: orders.createOrder,
-    updateOrderStatus: orders.updateOrderStatus,
-    
-    // Customers
-    customers: customers.customers,
-    addCustomer: customers.addCustomer,
-    updateCustomer: customers.updateCustomer,
-    deleteCustomer: customers.deleteCustomer,
-    
-    // Cart
-    cart: cart.cart,
-    addToCart: cart.addToCart,
-    removeFromCart: cart.removeFromCart,
-    updateQuantity: cart.updateQuantity,
-    clearCart: cart.clearCart,
-    getCartTotal: cart.getCartTotal,
-    
-    // Wishlist
-    wishlist: wishlist.wishlist,
-    addToWishlist: wishlist.addToWishlist,
-    removeFromWishlist: wishlist.removeFromWishlist,
-    isInWishlist: wishlist.isInWishlist,
-    
-    // Products from context
-    products: products.products,
-    
-    // Collections from context
-    collections: collections.collections,
-    
-    loading: orders.loading || customers.loading || products.loading || collections.loading
+  // Wrap createOrder to clear cart after successful order creation
+  const createOrder = async (customerInfo: any, cartItems: any[], cartTotal: number) => {
+    const order = await originalCreateOrder(customerInfo, cartItems, cartTotal);
+    if (order) {
+      // Clear the cart after successful order creation
+      clearCart();
+    }
+    return order;
   };
 
   return (
-    <StoreContext.Provider value={value}>
+    <StoreContext.Provider
+      value={{
+        // Cart
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        getCartTotal,
+        
+        // Wishlist
+        wishlist,
+        addToWishlist,
+        removeFromWishlist,
+        isInWishlist,
+        
+        // Orders
+        orders,
+        createOrder,
+        updateOrderStatus,
+        loading,
+        
+        // Auth
+        user,
+        session,
+        authLoading,
+      }}
+    >
       {children}
     </StoreContext.Provider>
-  );
-}
-
-export function StoreProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <AuthProvider>
-      <NotificationsProvider>
-        <LanguageProvider>
-          <LocationProvider>
-            <ChatProvider>
-              <OrdersProvider>
-                <CustomersProvider>
-                  <ProductsProvider>
-                    <CollectionsProvider>
-                      <CartProvider>
-                        <WishlistProvider>
-                          <StoreContextInner>
-                            {children}
-                          </StoreContextInner>
-                        </WishlistProvider>
-                      </CartProvider>
-                    </CollectionsProvider>
-                  </ProductsProvider>
-                </CustomersProvider>
-              </OrdersProvider>
-            </ChatProvider>
-          </LocationProvider>
-        </LanguageProvider>
-      </NotificationsProvider>
-    </AuthProvider>
   );
 }
 
