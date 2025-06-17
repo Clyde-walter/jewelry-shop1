@@ -68,8 +68,8 @@ function App() {
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <LanguageProvider>
-            <NotificationsProvider>
+          <NotificationsProvider>
+            <LanguageProvider>
               <CartProvider>
                 <WishlistProvider>
                   <ProductsProvider>
@@ -189,8 +189,8 @@ function App() {
                   </ProductsProvider>
                 </WishlistProvider>
               </CartProvider>
-            </NotificationsProvider>
-          </LanguageProvider>
+            </LanguageProvider>
+          </NotificationsProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
