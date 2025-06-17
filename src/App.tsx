@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import { StoreProvider } from "@/contexts/StoreContext";
 import { ProductsProvider } from "@/contexts/ProductsContext";
 import { CollectionsProvider } from "@/contexts/CollectionsContext";
@@ -65,119 +66,121 @@ function App() {
         <Sonner />
         <AuthProvider>
           <CartProvider>
-            <ProductsProvider>
-              <CollectionsProvider>
-                <EmailProvider>
-                  <StoreProvider>
-                    <BrowserRouter>
-                      <Routes>
-                        {/* Auth Route */}
-                        <Route path="/auth" element={<Auth />} />
+            <WishlistProvider>
+              <ProductsProvider>
+                <CollectionsProvider>
+                  <EmailProvider>
+                    <StoreProvider>
+                      <BrowserRouter>
+                        <Routes>
+                          {/* Auth Route */}
+                          <Route path="/auth" element={<Auth />} />
 
-                        {/* Admin Routes */}
-                        <Route path="/admin" element={<AdminLayout />}>
-                          <Route index element={<Admin />} />
-                          <Route path="orders" element={<AdminOrders />} />
-                          <Route path="customers" element={<AdminCustomers />} />
-                          <Route path="products" element={<AdminProducts />} />
-                          <Route path="collections" element={<AdminCollections />} />
-                          <Route path="collections/:collectionId/products" element={<AdminCollectionProducts />} />
-                          <Route path="support" element={<AdminSupport />} />
-                          <Route path="shipping" element={<AdminShipping />} />
-                          <Route path="analytics" element={<AdminAnalytics />} />
-                          <Route path="emails" element={<AdminEmails />} />
-                          <Route path="settings" element={<AdminSettings />} />
-                        </Route>
+                          {/* Admin Routes */}
+                          <Route path="/admin" element={<AdminLayout />}>
+                            <Route index element={<Admin />} />
+                            <Route path="orders" element={<AdminOrders />} />
+                            <Route path="customers" element={<AdminCustomers />} />
+                            <Route path="products" element={<AdminProducts />} />
+                            <Route path="collections" element={<AdminCollections />} />
+                            <Route path="collections/:collectionId/products" element={<AdminCollectionProducts />} />
+                            <Route path="support" element={<AdminSupport />} />
+                            <Route path="shipping" element={<AdminShipping />} />
+                            <Route path="analytics" element={<AdminAnalytics />} />
+                            <Route path="emails" element={<AdminEmails />} />
+                            <Route path="settings" element={<AdminSettings />} />
+                          </Route>
 
-                        {/* Public Routes with Header/Footer */}
-                        <Route path="/*" element={
-                          <div className="min-h-screen bg-gray-50 flex flex-col">
-                            <Header />
-                            <main className="flex-1">
-                              <Routes>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/products" element={<Products />} />
-                                <Route path="/product/:id" element={<ProductDetail />} />
-                                <Route path="/product/:id/:collectionId" element={<ProductDetail />} />
-                                <Route path="/collections" element={<Collections />} />
-                                <Route path="/collection/:id" element={<CollectionDetail />} />
-                                <Route path="/custom-design" element={<CustomDesign />} />
-                                <Route path="/cart" element={<Cart />} />
-                                <Route path="/contact" element={<Contact />} />
-                                <Route path="/support" element={<Support />} />
-                                <Route path="/returns" element={<Returns />} />
-                                <Route path="/warranty" element={<Warranty />} />
-                                <Route path="/privacy" element={<Privacy />} />
-                                <Route path="/terms" element={<Terms />} />
-                                <Route path="/cookies" element={<Cookies />} />
-                                <Route path="/notifications" element={<Notifications />} />
-                                <Route path="/chat" element={<Chat />} />
+                          {/* Public Routes with Header/Footer */}
+                          <Route path="/*" element={
+                            <div className="min-h-screen bg-gray-50 flex flex-col">
+                              <Header />
+                              <main className="flex-1">
+                                <Routes>
+                                  <Route path="/" element={<Home />} />
+                                  <Route path="/products" element={<Products />} />
+                                  <Route path="/product/:id" element={<ProductDetail />} />
+                                  <Route path="/product/:id/:collectionId" element={<ProductDetail />} />
+                                  <Route path="/collections" element={<Collections />} />
+                                  <Route path="/collection/:id" element={<CollectionDetail />} />
+                                  <Route path="/custom-design" element={<CustomDesign />} />
+                                  <Route path="/cart" element={<Cart />} />
+                                  <Route path="/contact" element={<Contact />} />
+                                  <Route path="/support" element={<Support />} />
+                                  <Route path="/returns" element={<Returns />} />
+                                  <Route path="/warranty" element={<Warranty />} />
+                                  <Route path="/privacy" element={<Privacy />} />
+                                  <Route path="/terms" element={<Terms />} />
+                                  <Route path="/cookies" element={<Cookies />} />
+                                  <Route path="/notifications" element={<Notifications />} />
+                                  <Route path="/chat" element={<Chat />} />
 
-                                {/* Protected Routes */}
-                                <Route path="/checkout" element={
-                                  <ProtectedRoute>
-                                    <Checkout />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/orders" element={
-                                  <ProtectedRoute>
-                                    <Orders />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/orders/:orderId" element={
-                                  <ProtectedRoute>
-                                    <Orders />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/profile" element={
-                                  <ProtectedRoute>
-                                    <Profile />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/profile/settings" element={
-                                  <ProtectedRoute>
-                                    <ProfileSettings />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/wishlist" element={
-                                  <ProtectedRoute>
-                                    <Wishlist />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/live-map" element={
-                                  <ProtectedRoute>
-                                    <LiveMap />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/manage-addresses" element={
-                                  <ProtectedRoute>
-                                    <ManageAddresses />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/payment-methods" element={
-                                  <ProtectedRoute>
-                                    <PaymentMethods />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/edit-information" element={
-                                  <ProtectedRoute>
-                                    <EditInformation />
-                                  </ProtectedRoute>
-                                } />
+                                  {/* Protected Routes */}
+                                  <Route path="/checkout" element={
+                                    <ProtectedRoute>
+                                      <Checkout />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/orders" element={
+                                    <ProtectedRoute>
+                                      <Orders />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/orders/:orderId" element={
+                                    <ProtectedRoute>
+                                      <Orders />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/profile" element={
+                                    <ProtectedRoute>
+                                      <Profile />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/profile/settings" element={
+                                    <ProtectedRoute>
+                                      <ProfileSettings />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/wishlist" element={
+                                    <ProtectedRoute>
+                                      <Wishlist />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/live-map" element={
+                                    <ProtectedRoute>
+                                      <LiveMap />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/manage-addresses" element={
+                                    <ProtectedRoute>
+                                      <ManageAddresses />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/payment-methods" element={
+                                    <ProtectedRoute>
+                                      <PaymentMethods />
+                                    </ProtectedRoute>
+                                  } />
+                                  <Route path="/edit-information" element={
+                                    <ProtectedRoute>
+                                      <EditInformation />
+                                    </ProtectedRoute>
+                                  } />
 
-                                <Route path="*" element={<NotFound />} />
-                              </Routes>
-                            </main>
-                            <Footer />
-                            <CustomerCareButton />
-                          </div>
-                        } />
-                      </Routes>
-                    </BrowserRouter>
-                  </StoreProvider>
-                </EmailProvider>
-              </CollectionsProvider>
-            </ProductsProvider>
+                                  <Route path="*" element={<NotFound />} />
+                                </Routes>
+                              </main>
+                              <Footer />
+                              <CustomerCareButton />
+                            </div>
+                          } />
+                        </Routes>
+                      </BrowserRouter>
+                    </StoreProvider>
+                  </EmailProvider>
+                </CollectionsProvider>
+              </ProductsProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </TooltipProvider>
