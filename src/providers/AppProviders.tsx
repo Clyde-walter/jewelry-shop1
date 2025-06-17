@@ -13,6 +13,7 @@ import { EmailProvider } from "@/contexts/EmailContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CustomersProvider } from "@/contexts/CustomersContext";
+import { ChatProvider } from "@/contexts/ChatContext";
 
 const queryClient = new QueryClient();
 
@@ -27,23 +28,25 @@ export function AppProviders({ children }: AppProvidersProps) {
         <AuthProvider>
           <NotificationsProvider>
             <LanguageProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <ProductsProvider>
-                    <CollectionsProvider>
-                      <EmailProvider>
-                        <CustomersProvider>
-                          <OrdersProvider>
-                            <StoreProvider>
-                              {children}
-                            </StoreProvider>
-                          </OrdersProvider>
-                        </CustomersProvider>
-                      </EmailProvider>
-                    </CollectionsProvider>
-                  </ProductsProvider>
-                </WishlistProvider>
-              </CartProvider>
+              <ChatProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <ProductsProvider>
+                      <CollectionsProvider>
+                        <EmailProvider>
+                          <CustomersProvider>
+                            <OrdersProvider>
+                              <StoreProvider>
+                                {children}
+                              </StoreProvider>
+                            </OrdersProvider>
+                          </CustomersProvider>
+                        </EmailProvider>
+                      </CollectionsProvider>
+                    </ProductsProvider>
+                  </WishlistProvider>
+                </CartProvider>
+              </ChatProvider>
             </LanguageProvider>
           </NotificationsProvider>
         </AuthProvider>
