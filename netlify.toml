@@ -1,0 +1,16 @@
+
+# Netlify configuration for proper SPA routing
+
+[[redirects]]
+# Handle admin routes - redirect all admin paths to the main admin entry point
+from = "/admin/*"
+to = "/admin/index.html"
+status = 200
+force = false
+
+# Handle all other SPA routes - redirect to index.html for client-side routing
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+force = false
