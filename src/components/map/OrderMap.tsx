@@ -1,7 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
 import { MapPin } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OrderMapProps {
   coordinates?: { lat: number; lng: number };
@@ -11,7 +10,6 @@ interface OrderMapProps {
 
 export function OrderMap({ coordinates, location, orderId }: OrderMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const { t } = useLanguage();
 
   useEffect(() => {
     if (!coordinates || !mapRef.current) return;
@@ -70,7 +68,7 @@ export function OrderMap({ coordinates, location, orderId }: OrderMapProps) {
           <div class="w-3 h-3 bg-white rounded-full"></div>
         </div>
         <div class="absolute top-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-xl">
-          <div class="font-semibold">${location || t('order.location.current')}</div>
+          <div class="font-semibold">${location || 'Current Location'}</div>
           <div class="text-xs text-gray-300">${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}</div>
           <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black bg-opacity-80 rotate-45"></div>
         </div>
@@ -96,16 +94,16 @@ export function OrderMap({ coordinates, location, orderId }: OrderMapProps) {
     satelliteLabel.textContent = 'Satellite View';
     mapDiv.appendChild(satelliteLabel);
     
-  }, [coordinates, location, t]);
+  }, [coordinates, location]);
 
   if (!coordinates) {
     return (
       <div className="bg-slate-800 rounded-lg h-96 flex items-center justify-center">
         <div className="text-center">
           <MapPin className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold mb-2 text-white">{t('map.no.location')}</h3>
+          <h3 className="text-lg font-semibold mb-2 text-white">No Location Data</h3>
           <p className="text-gray-400">
-            {t('map.location.pending')}
+            Location tracking will be available once your order is shipped and tracking updates are provided.
           </p>
         </div>
       </div>

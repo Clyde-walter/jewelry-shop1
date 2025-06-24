@@ -61,7 +61,7 @@ export function LiveMap() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ecommerce-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading orders...</p>
           </div>
         </div>
@@ -72,7 +72,7 @@ export function LiveMap() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">{t('livemap.title')}</h1>
+        <h1 className="text-3xl font-bold mb-4">Live Order Tracking</h1>
         <p className="text-gray-600">Track your orders in real-time and see their current location on the map.</p>
       </div>
       
@@ -102,7 +102,7 @@ export function LiveMap() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <MapPin className="w-5 h-5 mr-2" />
-                  {t('livemap.location.tracking')}
+                  Order Location Tracking
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -114,7 +114,7 @@ export function LiveMap() {
                 {(orderLocation || trackingInfo) && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm text-green-800">
-                      <strong>{t('order.last.updated')}:</strong> {
+                      <strong>Last Updated:</strong> {
                         orderLocation ? 
                         new Date(orderLocation.lastUpdated).toLocaleString() :
                         'Demo data - Updated 2 hours ago'

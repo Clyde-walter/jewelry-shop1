@@ -14,6 +14,7 @@ import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CustomersProvider } from "@/contexts/CustomersContext";
 import { ChatProvider } from "@/contexts/ChatContext";
+import { LocationProvider } from "@/contexts/LocationContext";
 
 const queryClient = new QueryClient();
 
@@ -29,23 +30,25 @@ export function AppProviders({ children }: AppProvidersProps) {
           <NotificationsProvider>
             <LanguageProvider>
               <ChatProvider>
-                <CartProvider>
-                  <WishlistProvider>
-                    <ProductsProvider>
-                      <CollectionsProvider>
-                        <EmailProvider>
-                          <CustomersProvider>
-                            <OrdersProvider>
-                              <StoreProvider>
-                                {children}
-                              </StoreProvider>
-                            </OrdersProvider>
-                          </CustomersProvider>
-                        </EmailProvider>
-                      </CollectionsProvider>
-                    </ProductsProvider>
-                  </WishlistProvider>
-                </CartProvider>
+                <LocationProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <ProductsProvider>
+                        <CollectionsProvider>
+                          <EmailProvider>
+                            <CustomersProvider>
+                              <OrdersProvider>
+                                <StoreProvider>
+                                  {children}
+                                </StoreProvider>
+                              </OrdersProvider>
+                            </CustomersProvider>
+                          </EmailProvider>
+                        </CollectionsProvider>
+                      </ProductsProvider>
+                    </WishlistProvider>
+                  </CartProvider>
+                </LocationProvider>
               </ChatProvider>
             </LanguageProvider>
           </NotificationsProvider>
