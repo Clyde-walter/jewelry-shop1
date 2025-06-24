@@ -10,7 +10,7 @@ interface CartSidebarProps {
   onClose: () => void;
 }
 
-export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
+export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart();
 
   const total = getCartTotal();
@@ -115,4 +115,4 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       </div>
     </>
   );
-}
+};
