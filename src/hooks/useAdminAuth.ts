@@ -17,21 +17,24 @@ export function useAdminAuth() {
       }
 
       try {
-        const { data, error } = await supabase
+        console.log('Checking admin role for user:', user.id, user.email);
+        
+        // First check if user has admin role
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
+          .eq('role', 'admin');
 
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error checking admin role:', error);
+        if (roleError) {
+          console.error('Error checking admin role:', roleError);
           setIsAdmin(false);
         } else {
-          setIsAdmin(!!data);
+          console.log('Role data:', roleData);
+          setIsAdmin(roleData && roleData.length > 0);
         }
       } catch (error) {
-        console.error('Error checking admin role:', error);
+        console.error('Error in checkAdminRole:', error);
         setIsAdmin(false);
       } finally {
         setLoading(false);

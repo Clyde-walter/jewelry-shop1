@@ -30,10 +30,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!user) {
+    console.log('No user found, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
   if (!isAdmin) {
+    console.log('User is not admin:', user.email);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
@@ -44,6 +46,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
             <CardTitle className="text-2xl font-bold text-red-600">Access Denied</CardTitle>
             <p className="text-gray-600 mt-2">
               You don't have administrator privileges to access this area.
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Current user: {user.email}
             </p>
           </CardHeader>
           <CardContent className="text-center">
@@ -58,5 +63,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
+  console.log('User has admin access:', user.email);
   return <>{children}</>;
 }
