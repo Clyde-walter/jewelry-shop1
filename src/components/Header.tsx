@@ -9,7 +9,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { CartSidebar } from './CartSidebar';
+import { CartSidebar } from '@/components/CartSidebar';
 import { MobileNav } from './MobileNav';
 import { LanguageSelector } from './LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
