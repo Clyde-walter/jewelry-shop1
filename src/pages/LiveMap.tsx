@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStore } from '@/contexts/StoreContext';
+import { useOrders } from '@/contexts/OrdersContext';
 import { useLocation } from '@/contexts/LocationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { OrderMap } from '@/components/map/OrderMap';
@@ -11,7 +11,7 @@ import { OrderDetailsCard } from '@/components/livemap/OrderDetailsCard';
 import { OrderTimeline } from '@/components/livemap/OrderTimeline';
 
 export function LiveMap() {
-  const { orders } = useStore();
+  const { orders, loading } = useOrders();
   const { getOrderLocation } = useLocation();
   const { t } = useLanguage();
   const [selectedOrder, setSelectedOrder] = useState('');
@@ -55,6 +55,19 @@ export function LiveMap() {
   // Use mock coordinates if no real location data exists
   const displayCoordinates = orderLocation?.coordinates || trackingInfo?.coordinates;
   const displayLocation = orderLocation?.currentLocation || trackingInfo?.currentLocation;
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ecommerce-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading orders...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
