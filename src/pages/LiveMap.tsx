@@ -17,19 +17,26 @@ export function LiveMap() {
   const [selectedOrder, setSelectedOrder] = useState('');
   const [orderFound, setOrderFound] = useState(false);
 
-  // Mock tracking data for demo orders
-  const mockTrackingData: Record<string, any> = {
-    'ORD-001': {
-      currentLocation: 'Distribution Center - New York',
-      coordinates: { lat: 40.7128, lng: -74.0060 },
-      trackingNumber: 'TRK-001-2024',
-    },
-    'ORD-002': {
-      currentLocation: 'Warehouse - California',
-      coordinates: { lat: 34.0522, lng: -118.2437 },
-      trackingNumber: 'TRK-002-2024',
-    }
-  };
+  // Enhanced mock tracking data for demo - includes all current orders
+  const mockTrackingData: Record<string, any> = {};
+  
+  // Generate mock tracking data for all orders
+  orders.forEach((order, index) => {
+    const locations = [
+      { name: 'Distribution Center - New York', lat: 40.7128, lng: -74.0060 },
+      { name: 'Warehouse - California', lat: 34.0522, lng: -118.2437 },
+      { name: 'Processing Center - Texas', lat: 32.7767, lng: -96.7970 },
+      { name: 'Distribution Hub - Florida', lat: 25.7617, lng: -80.1918 },
+      { name: 'Shipping Center - Chicago', lat: 41.8781, lng: -87.6298 }
+    ];
+    
+    const location = locations[index % locations.length];
+    mockTrackingData[order.id] = {
+      currentLocation: location.name,
+      coordinates: { lat: location.lat, lng: location.lng },
+      trackingNumber: `TRK-${order.id.slice(-6)}-2024`,
+    };
+  });
 
   const handleOrderFound = (orderId: string) => {
     setSelectedOrder(orderId);
@@ -45,15 +52,34 @@ export function LiveMap() {
   const orderLocation = selectedOrder ? getOrderLocation(selectedOrder) : undefined;
   const trackingInfo = selectedOrder ? mockTrackingData[selectedOrder] : undefined;
 
+  // Use mock coordinates if no real location data exists
+  const displayCoordinates = orderLocation?.coordinates || trackingInfo?.coordinates;
+  const displayLocation = orderLocation?.currentLocation || trackingInfo?.currentLocation;
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">{t('livemap.title')}</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-4">{t('livemap.title')}</h1>
+        <p className="text-gray-600">Track your orders in real-time and see their current location on the map.</p>
+      </div>
       
       <OrderSearchForm 
         orders={orders}
         onOrderFound={handleOrderFound}
         onOrderNotFound={handleOrderNotFound}
       />
+
+      {orders.length === 0 && (
+        <Card className="mb-8">
+          <CardContent className="p-8 text-center">
+            <MapPin className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Orders Found</h3>
+            <p className="text-gray-600">
+              You don't have any orders to track yet. Place an order to see live tracking information.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {selectedOrder && orderFound && currentOrder && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -68,15 +94,24 @@ export function LiveMap() {
               </CardHeader>
               <CardContent>
                 <OrderMap
-                  coordinates={orderLocation?.coordinates}
-                  location={orderLocation?.currentLocation}
+                  coordinates={displayCoordinates}
+                  location={displayLocation}
                   orderId={selectedOrder}
                 />
-                {orderLocation && (
+                {(orderLocation || trackingInfo) && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm text-green-800">
-                      <strong>{t('order.last.updated')}:</strong> {new Date(orderLocation.lastUpdated).toLocaleString()}
+                      <strong>{t('order.last.updated')}:</strong> {
+                        orderLocation ? 
+                        new Date(orderLocation.lastUpdated).toLocaleString() :
+                        'Demo data - Updated 2 hours ago'
+                      }
                     </p>
+                    {!orderLocation && (
+                      <p className="text-xs text-green-600 mt-1">
+                        * This is demo tracking data for demonstration purposes
+                      </p>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -98,6 +133,44 @@ export function LiveMap() {
             />
           </div>
         </div>
+      )}
+
+      {!selectedOrder && orders.length > 0 && (
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Recent Orders Available for Tracking</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {orders.slice(0, 6).map((order) => (
+                <div
+                  key={order.id}
+                  className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => handleOrderFound(order.id)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-mono text-sm text-blue-600">{order.id}</span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                      order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                      order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {order.customerInfo?.name || 'Customer'}
+                  </p>
+                  <p className="text-sm font-medium">${order.total.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

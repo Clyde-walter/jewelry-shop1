@@ -16,6 +16,7 @@ interface OrderDetailsCardProps {
   };
   trackingInfo?: {
     trackingNumber: string;
+    currentLocation?: string;
   };
 }
 
@@ -43,53 +44,62 @@ export function OrderDetailsCard({ order, selectedOrder, orderLocation, tracking
       <CardHeader>
         <CardTitle className="flex items-center">
           <Package className="w-5 h-5 mr-2" />
-          {t('order.details')}
+          Order Details
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex justify-between items-center">
-          <span className="font-medium">{t('order.id')}:</span>
+          <span className="font-medium">Order ID:</span>
           <span className="font-mono text-sm">{selectedOrder}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-medium">{t('order.customer')}:</span>
+          <span className="font-medium">Customer:</span>
           <span>{order.customerInfo?.name || 'Customer'}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-medium">{t('order.status')}:</span>
+          <span className="font-medium">Status:</span>
           <Badge className={getStatusColor(order.status)}>
-            {t(`status.${order.status}`)}
+            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
           </Badge>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-medium">{t('order.tracking')}:</span>
+          <span className="font-medium">Tracking #:</span>
           <span className="font-mono text-sm">{trackingInfo?.trackingNumber || `TRK-${selectedOrder.slice(-6)}`}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-medium">{t('order.date')}:</span>
+          <span className="font-medium">Order Date:</span>
           <span className="flex items-center">
             <Clock className="w-4 h-4 mr-1" />
             {new Date(order.createdAt).toLocaleDateString()}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-medium">{t('order.carrier')}:</span>
+          <span className="font-medium">Carrier:</span>
           <span className="flex items-center">
             <Truck className="w-4 h-4 mr-1" />
             Express Delivery
           </span>
         </div>
+        {(orderLocation?.currentLocation || trackingInfo?.currentLocation) && (
+          <div className="flex justify-between items-center">
+            <span className="font-medium">Current Location:</span>
+            <span className="flex items-center text-sm">
+              <MapPin className="w-4 h-4 mr-1 text-blue-600" />
+              {orderLocation?.currentLocation || trackingInfo?.currentLocation}
+            </span>
+          </div>
+        )}
         <div>
-          <span className="font-medium">{t('order.items')}:</span>
+          <span className="font-medium">Items:</span>
           <ul className="text-sm text-gray-600 mt-1">
             {order.items.map((item, index) => (
               <li key={index} className="ml-2">• {item.product.name} (x{item.quantity})</li>
             ))}
           </ul>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="font-medium">{t('order.total')}:</span>
-          <span className="font-semibold">${order.total.toFixed(2)}</span>
+        <div className="flex justify-between items-center pt-2 border-t">
+          <span className="font-medium text-lg">Total:</span>
+          <span className="font-semibold text-lg">${order.total.toFixed(2)}</span>
         </div>
       </CardContent>
     </Card>
