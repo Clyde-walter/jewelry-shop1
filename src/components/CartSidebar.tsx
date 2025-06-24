@@ -2,7 +2,7 @@
 import React from 'react';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useStore } from '@/contexts/StoreContext';
+import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
 
 interface CartSidebarProps {
@@ -11,7 +11,7 @@ interface CartSidebarProps {
 }
 
 export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
-  const { cart, updateQuantity, removeFromCart, getCartTotal } = useStore();
+  const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart();
 
   const total = getCartTotal();
 
