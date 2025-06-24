@@ -1,93 +1,57 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lock, User } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Lock, AlertTriangle } from 'lucide-react';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const { isAdmin, loading, user } = useAdminAuth();
 
-  // Temporary admin credentials (replace with Supabase authentication)
-  const ADMIN_USERNAME = 'admin';
-  const ADMIN_PASSWORD = 'admin123';
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (credentials.username === ADMIN_USERNAME && credentials.password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      toast({
-        title: "Access granted!",
-        description: "Welcome to the admin panel.",
-      });
-    } else {
-      toast({
-        title: "Access denied",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  if (!isAuthenticated) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-ecommerce-100 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-12 h-12 bg-ecommerce-100 rounded-full flex items-center justify-center mb-4 animate-pulse">
               <Lock className="w-6 h-6 text-ecommerce-600" />
             </div>
-            <CardTitle className="text-2xl font-bold">Admin Access Required</CardTitle>
+            <CardTitle className="text-2xl font-bold">Checking Access...</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-red-600">Access Denied</CardTitle>
             <p className="text-gray-600 mt-2">
-              Please enter your admin credentials to access the admin panel.
+              You don't have administrator privileges to access this area.
             </p>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Username</label>
-                <div className="relative">
-                  <Input
-                    type="text"
-                    value={credentials.username}
-                    onChange={(e) => setCredentials({...credentials, username: e.target.value})}
-                    placeholder="Enter admin username"
-                    className="pl-10"
-                  />
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Password</label>
-                <div className="relative">
-                  <Input
-                    type="password"
-                    value={credentials.password}
-                    onChange={(e) => setCredentials({...credentials, password: e.target.value})}
-                    placeholder="Enter admin password"
-                    className="pl-10"
-                  />
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                </div>
-              </div>
-              <Button type="submit" className="w-full bg-ecommerce-600 hover:bg-ecommerce-700">
-                Access Admin Panel
+          <CardContent className="text-center">
+            <Link to="/">
+              <Button variant="outline" className="w-full">
+                Return to Store
               </Button>
-            </form>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-xs text-blue-700">
-                <strong>Demo credentials:</strong><br />
-                Username: admin<br />
-                Password: admin123
-              </p>
-            </div>
+            </Link>
           </CardContent>
         </Card>
       </div>

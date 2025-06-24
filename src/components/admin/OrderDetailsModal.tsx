@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye } from 'lucide-react';
 import { Order } from '@/types/store';
-import { LocationInput } from './LocationInput';
-import { useLocation } from '@/contexts/LocationContext';
 
 interface OrderDetailsModalProps {
   order: Order;
@@ -14,9 +12,6 @@ interface OrderDetailsModalProps {
 }
 
 export function OrderDetailsModal({ order, onStatusChange }: OrderDetailsModalProps) {
-  const { getOrderLocation } = useLocation();
-  const orderLocation = getOrderLocation(order.id);
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -79,11 +74,17 @@ export function OrderDetailsModal({ order, onStatusChange }: OrderDetailsModalPr
             </div>
             
             <div>
-              <LocationInput 
-                orderId={order.id}
-                currentLocation={orderLocation?.currentLocation}
-                currentCoordinates={orderLocation?.coordinates}
-              />
+              <h4 className="font-medium mb-2">Order Timeline</h4>
+              <div className="space-y-2">
+                <div className="p-3 bg-gray-50 rounded">
+                  <p className="text-sm font-medium">Order Created</p>
+                  <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded">
+                  <p className="text-sm font-medium">Current Status: {order.status}</p>
+                  <p className="text-xs text-gray-500">Last updated: {new Date(order.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
