@@ -1,12 +1,16 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, Package, Layers, ShoppingBag, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
-export function MobileNav() {
-  const [isOpen, setIsOpen] = useState(false);
+interface MobileNavProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const location = useLocation();
 
   const navigationItems = [
@@ -21,12 +25,7 @@ export function MobileNav() {
 
   return (
     <div className="md:hidden">
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="hover:bg-ecommerce-50">
-            <Menu className="w-5 h-5" />
-          </Button>
-        </SheetTrigger>
+      <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent side="left" className="w-64">
           <SheetHeader>
             <SheetTitle className="text-left text-ecommerce-600 font-bold text-xl">
@@ -41,7 +40,7 @@ export function MobileNav() {
                   <Link
                     key={item.path}
                     to={item.path}
-                    onClick={() => setIsOpen(false)}
+                    onClick={onClose}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive(item.path)
                         ? 'bg-ecommerce-100 text-ecommerce-700 font-medium'
