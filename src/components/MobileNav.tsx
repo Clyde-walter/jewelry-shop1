@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Package, Layers, ShoppingBag, MapPin } from 'lucide-react';
+import { Menu, X, Home, Package, Layers, ShoppingBag, MapPin, Diamond } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
@@ -28,8 +28,9 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent side="left" className="w-64">
           <SheetHeader>
-            <SheetTitle className="text-left text-ecommerce-600 font-bold text-xl">
-              ShopEase
+            <SheetTitle className="text-left flex items-center space-x-2">
+              <Diamond className="w-6 h-6 text-ecommerce-600" />
+              <span className="text-ecommerce-600 font-bold text-xl">Jewelryport</span>
             </SheetTitle>
           </SheetHeader>
           <nav className="mt-8">

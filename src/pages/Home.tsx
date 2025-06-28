@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Heart, ShoppingCart, Gem, Crown, Diamond, Sparkles } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Diamond, Crown, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Home() {
@@ -69,10 +69,13 @@ export function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-6">
-              <Gem className="w-16 h-16 text-ecommerce-600" />
+              <div className="relative">
+                <Diamond className="w-16 h-16 text-ecommerce-600 animate-bounce-subtle" />
+                <div className="absolute inset-0 bg-ecommerce-600/20 rounded-full blur-xl animate-pulse"></div>
+              </div>
             </div>
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Welcome to <span className="text-ecommerce-600 font-serif">Ston&Soul</span>
+              Welcome to <span className="text-ecommerce-600 font-serif bg-gradient-to-r from-ecommerce-600 to-ecommerce-700 bg-clip-text text-transparent">Jewelryport</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Discover exquisite jewelry that captures your soul. From timeless classics to modern masterpieces, 
@@ -80,13 +83,13 @@ export function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/products">
-                <Button size="lg" className="bg-ecommerce-600 hover:bg-ecommerce-700 text-white px-8 py-3 text-lg">
+                <Button size="lg" className="bg-ecommerce-600 hover:bg-ecommerce-700 text-white px-8 py-3 text-lg hover:shadow-lg hover:scale-105 transition-all duration-300">
                   Explore Collection
                 </Button>
               </Link>
               {!user && (
                 <Link to="/auth">
-                  <Button variant="outline" size="lg" className="border-ecommerce-600 text-ecommerce-600 hover:bg-ecommerce-50 px-8 py-3 text-lg">
+                  <Button variant="outline" size="lg" className="border-ecommerce-600 text-ecommerce-600 hover:bg-ecommerce-50 px-8 py-3 text-lg hover:shadow-lg hover:scale-105 transition-all duration-300">
                     Join Our Community
                   </Button>
                 </Link>
@@ -112,9 +115,9 @@ export function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {collections.map((collection, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Card key={index} className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
                 <CardContent className="p-8 text-center">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${collection.color}`}>
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${collection.color} hover:scale-110 transition-transform duration-300`}>
                     <collection.icon className="w-8 h-8" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{collection.name}</h3>
@@ -135,7 +138,7 @@ export function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-xl transition-all duration-300">
+              <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden">
                     <img 
@@ -144,12 +147,12 @@ export function Home() {
                       className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute top-4 right-4">
-                      <Button size="icon" variant="ghost" className="bg-white/80 hover:bg-white">
+                      <Button size="icon" variant="ghost" className="bg-white/80 hover:bg-white hover:scale-110 transition-all duration-300">
                         <Heart className="w-4 h-4" />
                       </Button>
                     </div>
                     {product.originalPrice && (
-                      <Badge className="absolute top-4 left-4 bg-red-500">
+                      <Badge className="absolute top-4 left-4 bg-red-500 animate-pulse">
                         Sale
                       </Badge>
                     )}
@@ -179,7 +182,7 @@ export function Home() {
                           </span>
                         )}
                       </div>
-                      <Button size="sm" className="bg-ecommerce-600 hover:bg-ecommerce-700">
+                      <Button size="sm" className="bg-ecommerce-600 hover:bg-ecommerce-700 hover:scale-105 transition-all duration-300">
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Add to Cart
                       </Button>
@@ -191,7 +194,7 @@ export function Home() {
           </div>
           <div className="text-center mt-12">
             <Link to="/products">
-              <Button size="lg" variant="outline" className="border-ecommerce-600 text-ecommerce-600 hover:bg-ecommerce-50">
+              <Button size="lg" variant="outline" className="border-ecommerce-600 text-ecommerce-600 hover:bg-ecommerce-50 hover:scale-105 transition-all duration-300">
                 View All Products
               </Button>
             </Link>
@@ -208,7 +211,7 @@ export function Home() {
             From engagement rings to custom pendants, bring your vision to life.
           </p>
           <Link to="/custom-design">
-            <Button size="lg" variant="secondary" className="bg-white text-ecommerce-600 hover:bg-gray-100">
+            <Button size="lg" variant="secondary" className="bg-white text-ecommerce-600 hover:bg-gray-100 hover:scale-105 transition-all duration-300">
               Start Custom Design
             </Button>
           </Link>
