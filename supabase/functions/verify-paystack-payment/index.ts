@@ -58,10 +58,13 @@ serve(async (req) => {
       }
     }
 
+    // Get original USD amount from metadata or convert back from NGN
+    const originalAmountUSD = transaction.metadata?.original_amount_usd || (transaction.amount / 100 / 800);
+
     return new Response(
       JSON.stringify({
         status: transaction.status,
-        amount: transaction.amount / 100, // Convert from kobo back to naira
+        amount: originalAmountUSD, // Return USD amount for display
         reference: transaction.reference,
         paid_at: transaction.paid_at,
       }),
