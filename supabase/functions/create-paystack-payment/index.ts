@@ -43,9 +43,9 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        amount: Math.round(amount * 100), // Convert to kobo (Paystack uses smallest currency unit)
+        amount: Math.round(amount * 100), // Convert to cents for USD (Paystack uses smallest currency unit)
         email: email,
-        currency: "NGN", // Nigerian Naira - change as needed
+        currency: "USD", // Set currency to USD instead of NGN
         callback_url: `${req.headers.get("origin")}/payment-success`,
         metadata: {
           user_id: user.id,
