@@ -58,8 +58,8 @@ serve(async (req) => {
       }
     }
 
-    // Get original USD amount from metadata or convert back from NGN
-    const originalAmountUSD = transaction.metadata?.original_amount_usd || (transaction.amount / 100 / 800);
+    // Get original USD amount from metadata or convert back from NGN using updated rate
+    const originalAmountUSD = transaction.metadata?.original_amount_usd || (transaction.amount / 100 / 1600);
 
     return new Response(
       JSON.stringify({

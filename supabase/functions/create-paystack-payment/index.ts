@@ -35,9 +35,9 @@ serve(async (req) => {
       throw new Error("Paystack secret key not configured");
     }
 
-    // Convert USD to NGN for Paystack (approximate rate: 1 USD = 800 NGN)
-    // You should use a real-time exchange rate API for production
-    const exchangeRate = 800;
+    // Use current USD to NGN exchange rate (as of 2024: approximately 1 USD = 1,600 NGN)
+    // This is a more accurate rate for Nigerian banking system
+    const exchangeRate = 1600;
     const amountInNGN = amount * exchangeRate;
 
     console.log('Payment details:', {
