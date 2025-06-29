@@ -96,7 +96,7 @@ export function Home() {
     {
       name: "Diamond Classics",
       description: "Timeless elegance with brilliant diamonds",
-      icon: Diamond,
+      icon: Sparkles,
       color: "bg-blue-100 text-blue-600"
     },
     {
