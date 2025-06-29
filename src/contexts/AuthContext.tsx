@@ -130,11 +130,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-password-reset`, {
+      const response = await fetch(`https://kirxlakwwzpkrmipdelj.supabase.co/functions/v1/send-password-reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpcnhsYWt3d3pwa3JtaXBkZWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MzYyMDUsImV4cCI6MjA2NTMxMjIwNX0.0K47ffl2fgM3PteazMqgT87YNqj7GTzVHyxnfdo--R0`
         },
         body: JSON.stringify({
           email,
