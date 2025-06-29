@@ -178,6 +178,17 @@ export function Auth() {
               </Button>
             </form>
 
+            {isLogin && (
+              <div className="text-center mt-4">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-ecommerce-600 hover:text-ecommerce-700"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+            )}
+
             <Separator className="my-6" />
 
             <div className="text-center">
