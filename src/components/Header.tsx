@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, User, Menu, X, Settings, Diamond } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Menu, X, Settings } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,7 +53,11 @@ export function Header() {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
               <div className="relative">
-                <Diamond className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-ecommerce-600 group-hover:text-ecommerce-700 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" />
+                <img 
+                  src="/lovable-uploads/06008771-3946-4cde-95f5-eed2a260f2ae.png" 
+                  alt="Jewelryport Logo" 
+                  className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 group-hover:scale-110 transition-all duration-300"
+                />
                 <div className="absolute inset-0 bg-ecommerce-600/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-ecommerce-600 to-ecommerce-700 bg-clip-text text-transparent group-hover:from-ecommerce-700 group-hover:to-ecommerce-800 transition-all duration-300">
