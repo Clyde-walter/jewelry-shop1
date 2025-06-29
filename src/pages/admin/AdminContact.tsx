@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Mail, Eye, Check, Clock, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,8 @@ export function AdminContact() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      // Type assertion to ensure proper typing from Supabase
+      setRequests((data || []) as ContactRequest[]);
     } catch (error) {
       console.error('Error fetching contact requests:', error);
       toast({

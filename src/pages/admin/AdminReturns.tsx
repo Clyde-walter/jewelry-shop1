@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, Eye, Check, Clock, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,7 +48,8 @@ export function AdminReturns() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      // Type assertion to ensure proper typing from Supabase
+      setRequests((data || []) as ReturnRequest[]);
     } catch (error) {
       console.error('Error fetching return requests:', error);
       toast({

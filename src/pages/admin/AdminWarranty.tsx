@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Shield, Eye, Check, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,7 +49,8 @@ export function AdminWarranty() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setClaims(data || []);
+      // Type assertion to ensure proper typing from Supabase
+      setClaims((data || []) as WarrantyClaim[]);
     } catch (error) {
       console.error('Error fetching warranty claims:', error);
       toast({

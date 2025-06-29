@@ -18,13 +18,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 // Import existing admin pages
-import AdminProducts from './admin/AdminProducts';
-import AdminOrders from './admin/AdminOrders';
-import AdminCustomers from './admin/AdminCustomers';
-import AdminSettings from './admin/AdminSettings';
-import AdminCollections from './admin/AdminCollections';
-import AdminShipping from './admin/AdminShipping';
-import AdminEmails from './admin/AdminEmails';
+import { AdminProducts } from './admin/AdminProducts';
+import { AdminOrders } from './admin/AdminOrders';
+import { AdminCustomers } from './admin/AdminCustomers';
+import { AdminSettings } from './admin/AdminSettings';
+import { AdminCollections } from './admin/AdminCollections';
+import { AdminShipping } from './admin/AdminShipping';
+import { AdminEmails } from './admin/AdminEmails';
 
 // Import new admin pages
 import { AdminSupport } from './admin/AdminSupport';
@@ -116,21 +116,19 @@ function AdminDashboard() {
 
 export default function Admin() {
   return (
-    <AdminLayout>
-      <Routes>
-        <Route index element={<AdminDashboard />} />
-        <Route path="products/*" element={<AdminProducts />} />
-        <Route path="orders/*" element={<AdminOrders />} />
-        <Route path="customers/*" element={<AdminCustomers />} />
-        <Route path="collections/*" element={<AdminCollections />} />
-        <Route path="shipping/*" element={<AdminShipping />} />
-        <Route path="emails/*" element={<AdminEmails />} />
-        <Route path="support" element={<AdminSupport />} />
-        <Route path="warranty" element={<AdminWarranty />} />
-        <Route path="contact" element={<AdminContact />} />
-        <Route path="returns" element={<AdminReturns />} />
-        <Route path="settings/*" element={<AdminSettings />} />
-      </Routes>
-    </AdminLayout>
+    <Routes>
+      <Route index element={<AdminDashboard />} />
+      <Route path="products/*" element={<AdminProducts />} />
+      <Route path="orders/*" element={<AdminOrders />} />
+      <Route path="customers/*" element={<AdminCustomers />} />
+      <Route path="collections/*" element={<AdminCollections />} />
+      <Route path="shipping/*" element={<AdminShipping />} />
+      <Route path="emails/*" element={<AdminEmails />} />
+      <Route path="support" element={<AdminSupport />} />
+      <Route path="warranty" element={<AdminWarranty />} />
+      <Route path="contact" element={<AdminContact />} />
+      <Route path="returns" element={<AdminReturns />} />
+      <Route path="settings/*" element={<AdminSettings />} />
+    </Routes>
   );
 }

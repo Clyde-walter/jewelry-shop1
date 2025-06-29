@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Send, Bot, User, Search, Filter, Eye, Check, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,8 @@ export function AdminSupport() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setMessages(data || []);
+      // Type assertion to ensure proper typing from Supabase
+      setMessages((data || []) as SupportRequest[]);
     } catch (error) {
       console.error('Error fetching support requests:', error);
       toast({
