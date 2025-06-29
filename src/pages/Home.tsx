@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Heart, ShoppingCart, Diamond, Crown, Sparkles } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Diamond, Crown, Sparkles, Shield, Truck, Users, Award } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Home() {
@@ -16,7 +16,7 @@ export function Home() {
       name: "Diamond Eternity Ring",
       price: 2500,
       originalPrice: 3000,
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop",
       rating: 4.9,
       reviews: 127,
       category: "Rings"
@@ -25,7 +25,7 @@ export function Home() {
       id: 2,
       name: "Pearl Pendant Necklace",
       price: 850,
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop",
       rating: 4.8,
       reviews: 89,
       category: "Necklaces"
@@ -34,10 +34,19 @@ export function Home() {
       id: 3,
       name: "Sapphire Stud Earrings",
       price: 1200,
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400&h=400&fit=crop",
       rating: 5.0,
       reviews: 45,
       category: "Earrings"
+    },
+    {
+      id: 4,
+      name: "Gold Tennis Bracelet",
+      price: 1800,
+      image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=400&fit=crop",
+      rating: 4.7,
+      reviews: 63,
+      category: "Bracelets"
     }
   ];
 
@@ -62,11 +71,62 @@ export function Home() {
     }
   ];
 
+  const features = [
+    {
+      icon: Shield,
+      title: "Lifetime Warranty",
+      description: "All our jewelry comes with lifetime warranty and free maintenance"
+    },
+    {
+      icon: Truck,
+      title: "Free Shipping",
+      description: "Complimentary shipping on all orders above $500"
+    },
+    {
+      icon: Users,
+      title: "Expert Consultation",
+      description: "Get personalized advice from our certified gemologists"
+    },
+    {
+      icon: Award,
+      title: "Certified Quality",
+      description: "Every piece is certified and comes with authenticity guarantee"
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Johnson",
+      rating: 5,
+      comment: "Absolutely stunning engagement ring! The quality exceeded my expectations and the service was exceptional.",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=60&h=60&fit=crop&crop=face"
+    },
+    {
+      name: "Michael Chen",
+      rating: 5,
+      comment: "Beautiful custom necklace for my wife's anniversary. The craftsmanship is incredible!",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face"
+    },
+    {
+      name: "Emily Rodriguez",
+      rating: 5,
+      comment: "Love my diamond earrings! They're perfect for both everyday wear and special occasions.",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face"
+    }
+  ];
+
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-ecommerce-50 to-ecommerce-100 py-12 sm:py-16 lg:py-20 xl:py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Hero Section with Jewelry Background */}
+      <section className="relative bg-gradient-to-r from-ecommerce-50 to-ecommerce-100 py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-10"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1920&h=1080&fit=crop')"
+          }}
+        />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-4 sm:mb-6">
               <div className="relative">
@@ -75,7 +135,7 @@ export function Home() {
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Welcome to <span className="text-ecommerce-600 font-serif bg-gradient-to-r from-ecommerce-600 to-ecommerce-700 bg-clip-text text-transparent">Jewelryport</span>
+              Welcome to <span className="text-ecommerce-600 font-serif bg-gradient-to-r from-ecommerce-600 to-ecommerce-700 bg-clip-text text-transparent">Jewelry Port</span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
               Discover exquisite jewelry that captures your soul. From timeless classics to modern masterpieces, 
@@ -104,8 +164,25 @@ export function Home() {
         </div>
       </section>
 
+      {/* Features Section */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center">
+                <div className="w-12 h-12 mx-auto mb-4 bg-ecommerce-100 rounded-full flex items-center justify-center">
+                  <feature.icon className="w-6 h-6 text-ecommerce-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Collections Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Our Collections</h2>
@@ -130,13 +207,13 @@ export function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Featured Products</h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">Handpicked pieces that embody elegance and sophistication</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {featuredProducts.map((product) => (
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <CardContent className="p-0">
@@ -203,16 +280,70 @@ export function Home() {
         </div>
       </section>
 
+      {/* Customer Testimonials */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">What Our Customers Say</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">Read testimonials from our satisfied customers</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-4">
+                    <img 
+                      src={testimonial.image} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                      <h4 className="font-semibold">{testimonial.name}</h4>
+                      <div className="flex">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-gray-600 text-sm italic">"{testimonial.comment}"</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Signup */}
+      <section className="py-12 sm:py-16 bg-ecommerce-600 text-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Stay in the Loop</h2>
+          <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90 max-w-2xl mx-auto px-4">
+            Subscribe to our newsletter and be the first to know about new collections, exclusive offers, and jewelry care tips.
+          </p>
+          <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+            <Button variant="secondary" size="lg" className="bg-white text-ecommerce-600 hover:bg-gray-100 px-6">
+              Subscribe
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-ecommerce-600 text-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Create Something Unique</h2>
-          <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90 max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 text-gray-600 max-w-2xl mx-auto px-4">
             Work with our master craftsmen to design a piece that's truly yours. 
             From engagement rings to custom pendants, bring your vision to life.
           </p>
           <Link to="/custom-design">
-            <Button size="lg" variant="secondary" className="bg-white text-ecommerce-600 hover:bg-gray-100 hover:scale-105 transition-all duration-300 px-6 sm:px-8">
+            <Button size="lg" className="bg-ecommerce-600 hover:bg-ecommerce-700 text-white hover:scale-105 transition-all duration-300 px-6 sm:px-8">
               Start Custom Design
             </Button>
           </Link>

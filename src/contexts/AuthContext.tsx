@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,24 +129,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
-    });
-
-    if (error) {
-      toast({
-        title: "Password reset failed",
-        description: error.message,
-        variant: "destructive"
+    try {
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-password-reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        },
+        body: JSON.stringify({
+          email,
+          redirectUrl: `${window.location.origin}/reset-password`
+        })
       });
-    } else {
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send password reset email');
+      }
+
       toast({
         title: "Password reset email sent",
         description: "Please check your email for password reset instructions.",
       });
-    }
 
-    return { error };
+      return { error: null };
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      toast({
+        title: "Password reset failed",
+        description: error.message || "Failed to send password reset email. Please try again.",
+        variant: "destructive"
+      });
+      return { error };
+    }
   };
 
   const signOut = async () => {
