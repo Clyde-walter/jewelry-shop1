@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Heart, ShoppingCart, Diamond, Crown, Sparkles, Shield, Truck, Users, Award } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Crown, Sparkles, Shield, Truck, Users, Award } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/contexts/ProductsContext';
 import { useStore } from '@/contexts/StoreContext';
@@ -165,7 +166,11 @@ export function Home() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-4 sm:mb-6">
               <div className="relative">
-                <Diamond className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 text-ecommerce-600 animate-bounce-subtle" />
+                <img 
+                  src="/lovable-uploads/6736e3a1-5470-4a95-9299-f8f8057c0cbc.png" 
+                  alt="Jewelry Port Logo"
+                  className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 animate-bounce-subtle"
+                />
                 <div className="absolute inset-0 bg-ecommerce-600/20 rounded-full blur-xl animate-pulse"></div>
               </div>
             </div>
