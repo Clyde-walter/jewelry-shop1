@@ -13,7 +13,7 @@ interface AuthContextType {
     password: string,
     firstName?: string,
     lastName?: string
-  ) => Promise<{ error: any }>;
+  ) => Promise<{ error: any; needsVerification?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -59,13 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
         data: {
           first_name: firstName,
           last_name: lastName,
@@ -79,14 +76,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: error.message,
         variant: "destructive"
       });
+      return { error };
     } else {
       toast({
-        title: "Welcome to Ston&Soul!",
-        description: "Please check your email to verify your account.",
+        title: "Welcome to Jewelry Port!",
+        description: "Please check your email for the verification code.",
       });
+      return { error: null, needsVerification: true };
     }
-
-    return { error };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -103,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } else {
       toast({
-        title: "Welcome back!",
+        title: "Welcome back to Jewelry Port!",
         description: "You have successfully signed in.",
       });
     }
@@ -140,15 +137,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } else {
       toast({
-        title: "Signed out",
+        title: "Signed out from Jewelry Port",
         description: "You have been successfully signed out.",
       });
     }
   };
 
-  /**
-   * Extended updateProfile with all fields supported by the profiles table.
-   */
   const updateProfile = async (data: {
     first_name?: string;
     last_name?: string;
@@ -175,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       toast({
         title: "Profile updated",
-        description: "Your profile has been successfully updated.",
+        description: "Your Jewelry Port profile has been successfully updated.",
       });
     }
 

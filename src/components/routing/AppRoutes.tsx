@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Auth } from "@/pages/Auth";
+import { OTPVerification } from "@/pages/OTPVerification";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Admin } from "@/pages/Admin";
 import { AdminOrders } from "@/pages/admin/AdminOrders";
@@ -22,6 +23,7 @@ export function AppRoutes() {
       <Routes>
         {/* Auth Route */}
         <Route path="/auth" element={<Auth />} />
+        <Route path="/otp-verification" element={<OTPVerification />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>

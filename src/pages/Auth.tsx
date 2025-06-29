@@ -38,9 +38,9 @@ export function Auth() {
           navigate('/');
         }
       } else {
-        const { error } = await signUp(email, password, firstName, lastName);
-        if (!error) {
-          // Stay on auth page to show email verification message
+        const { error, needsVerification } = await signUp(email, password, firstName, lastName);
+        if (!error && needsVerification) {
+          navigate(`/otp-verification?email=${encodeURIComponent(email)}`);
         }
       }
     } finally {
@@ -64,7 +64,7 @@ export function Auth() {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
             <Gem className="w-8 h-8 text-ecommerce-600" />
-            <span className="text-3xl font-serif font-bold text-ecommerce-600">Ston&Soul</span>
+            <span className="text-3xl font-serif font-bold text-ecommerce-600">Jewelry Port</span>
           </Link>
           <p className="text-gray-600 mt-2">
             {isLogin ? 'Welcome back to your jewelry collection' : 'Join our jewelry community'}
