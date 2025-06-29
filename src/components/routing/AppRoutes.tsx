@@ -20,6 +20,7 @@ import { AdminEmails } from "@/pages/admin/AdminEmails";
 import { AdminWarranty } from "@/pages/admin/AdminWarranty";
 import { AdminContact } from "@/pages/admin/AdminContact";
 import { AdminReturns } from "@/pages/admin/AdminReturns";
+import { AdminFeatured } from "@/pages/admin/AdminFeatured";
 import { PublicRoutes } from "./PublicRoutes";
 
 export function AppRoutes() {
@@ -42,6 +43,7 @@ export function AppRoutes() {
               <Route path="products" element={<AdminProducts />} />
               <Route path="collections" element={<AdminCollections />} />
               <Route path="collections/:collectionId/products" element={<AdminCollectionProducts />} />
+              <Route path="featured" element={<AdminFeatured />} />
               <Route path="support" element={<AdminSupport />} />
               <Route path="warranty" element={<AdminWarranty />} />
               <Route path="contact" element={<AdminContact />} />

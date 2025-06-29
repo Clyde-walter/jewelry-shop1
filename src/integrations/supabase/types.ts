@@ -316,9 +316,13 @@ export type Database = {
           collection_id: string | null
           created_at: string
           description: string | null
+          featured_order: number | null
           id: string
           image: string | null
           images: string[] | null
+          is_featured: boolean | null
+          is_most_picked: boolean | null
+          most_picked_order: number | null
           name: string
           price: number
           stock: number | null
@@ -329,9 +333,13 @@ export type Database = {
           collection_id?: string | null
           created_at?: string
           description?: string | null
+          featured_order?: number | null
           id?: string
           image?: string | null
           images?: string[] | null
+          is_featured?: boolean | null
+          is_most_picked?: boolean | null
+          most_picked_order?: number | null
           name: string
           price: number
           stock?: number | null
@@ -342,9 +350,13 @@ export type Database = {
           collection_id?: string | null
           created_at?: string
           description?: string | null
+          featured_order?: number | null
           id?: string
           image?: string | null
           images?: string[] | null
+          is_featured?: boolean | null
+          is_most_picked?: boolean | null
+          most_picked_order?: number | null
           name?: string
           price?: number
           stock?: number | null

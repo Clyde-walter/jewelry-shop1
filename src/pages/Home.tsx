@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,49 +5,85 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Heart, ShoppingCart, Diamond, Crown, Sparkles, Shield, Truck, Users, Award } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProducts } from '@/contexts/ProductsContext';
+import { useStore } from '@/contexts/StoreContext';
 
 export function Home() {
   const { user } = useAuth();
+  const { featuredProducts, mostPickedProducts, loading } = useProducts();
+  const { addToCart, addToWishlist, isInWishlist } = useStore();
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Diamond Eternity Ring",
-      price: 2500,
-      originalPrice: 3000,
-      image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop",
-      rating: 4.9,
-      reviews: 127,
-      category: "Rings"
-    },
-    {
-      id: 2,
-      name: "Pearl Pendant Necklace",
-      price: 850,
-      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop",
-      rating: 4.8,
-      reviews: 89,
-      category: "Necklaces"
-    },
-    {
-      id: 3,
-      name: "Sapphire Stud Earrings",
-      price: 1200,
-      image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400&h=400&fit=crop",
-      rating: 5.0,
-      reviews: 45,
-      category: "Earrings"
-    },
-    {
-      id: 4,
-      name: "Gold Tennis Bracelet",
-      price: 1800,
-      image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=400&fit=crop",
-      rating: 4.7,
-      reviews: 63,
-      category: "Bracelets"
-    }
-  ];
+  const handleAddToCart = (e: React.MouseEvent, product: any) => {
+    e.stopPropagation();
+    addToCart(product);
+  };
+
+  const handleAddToWishlist = (e: React.MouseEvent, product: any) => {
+    e.stopPropagation();
+    addToWishlist({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      description: product.description
+    });
+  };
+
+  const ProductCard = ({ product }: { product: any }) => (
+    <Card className="group hover:shadow-xl transition-all duration-300 hover:scale-105">
+      <CardContent className="p-0">
+        <div className="relative overflow-hidden">
+          <img 
+            src={product.image || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'} 
+            alt={product.name}
+            className="w-full h-48 sm:h-56 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
+            }}
+          />
+          <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="bg-white/80 hover:bg-white hover:scale-110 transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10"
+              onClick={(e) => handleAddToWishlist(e, product)}
+            >
+              <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isInWishlist(product.id) ? 'fill-current text-red-500' : ''}`} />
+            </Button>
+          </div>
+          {product.stock === 0 && (
+            <Badge className="absolute top-3 sm:top-4 left-3 sm:left-4 bg-red-500">
+              Out of Stock
+            </Badge>
+          )}
+        </div>
+        <div className="p-4 sm:p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="secondary" className="text-xs">
+              {product.category}
+            </Badge>
+          </div>
+          <h3 className="text-base sm:text-lg font-semibold mb-2 line-clamp-2">{product.name}</h3>
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-lg sm:text-xl font-bold text-ecommerce-600">
+              ${product.price.toLocaleString()}
+            </span>
+            <Button 
+              size="sm" 
+              className="bg-ecommerce-600 hover:bg-ecommerce-700 hover:scale-105 transition-all duration-300 flex-shrink-0"
+              onClick={(e) => handleAddToCart(e, product)}
+              disabled={product.stock === 0}
+            >
+              <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Add to Cart</span>
+              <span className="sm:hidden">Add</span>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   const collections = [
     {
@@ -213,63 +248,75 @@ export function Home() {
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Featured Products</h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">Handpicked pieces that embody elegance and sophistication</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <CardContent className="p-0">
-                  <div className="relative overflow-hidden">
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-48 sm:h-56 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
-                      <Button size="icon" variant="ghost" className="bg-white/80 hover:bg-white hover:scale-110 transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10">
-                        <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
-                    </div>
-                    {product.originalPrice && (
-                      <Badge className="absolute top-3 sm:top-4 left-3 sm:left-4 bg-red-500 animate-pulse text-xs">
-                        Sale
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="p-4 sm:p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                    <h3 className="text-base sm:text-lg font-semibold mb-2 line-clamp-2">{product.name}</h3>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="flex items-center">
-                        <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs sm:text-sm font-medium ml-1">{product.rating}</span>
-                      </div>
-                      <span className="text-xs sm:text-sm text-gray-500">({product.reviews} reviews)</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-lg sm:text-xl font-bold text-ecommerce-600">
-                          ${product.price.toLocaleString()}
-                        </span>
-                        {product.originalPrice && (
-                          <span className="text-xs sm:text-sm text-gray-500 line-through">
-                            ${product.originalPrice.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                      <Button size="sm" className="bg-ecommerce-600 hover:bg-ecommerce-700 hover:scale-105 transition-all duration-300 flex-shrink-0">
-                        <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="hidden sm:inline">Add to Cart</span>
-                        <span className="sm:hidden">Add</span>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-48 sm:h-56 lg:h-64 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              {featuredProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600 mb-4">No featured products available at the moment.</p>
+              <Link to="/products">
+                <Button className="bg-ecommerce-600 hover:bg-ecommerce-700">
+                  Browse All Products
+                </Button>
+              </Link>
+            </div>
+          )}
+          <div className="text-center mt-8 sm:mt-12">
+            <Link to="/products">
+              <Button size="lg" variant="outline" className="border-ecommerce-600 text-ecommerce-600 hover:bg-ecommerce-50 hover:scale-105 transition-all duration-300 px-6 sm:px-8">
+                View All Products
+              </Button>
+            </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Most Picked Products */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Most Picked</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">Customer favorites that are flying off our shelves</p>
+          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-48 sm:h-56 lg:h-64 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : mostPickedProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              {mostPickedProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600 mb-4">No most picked products available at the moment.</p>
+              <Link to="/products">
+                <Button className="bg-ecommerce-600 hover:bg-ecommerce-700">
+                  Browse All Products
+                </Button>
+              </Link>
+            </div>
+          )}
           <div className="text-center mt-8 sm:mt-12">
             <Link to="/products">
               <Button size="lg" variant="outline" className="border-ecommerce-600 text-ecommerce-600 hover:bg-ecommerce-50 hover:scale-105 transition-all duration-300 px-6 sm:px-8">
@@ -281,7 +328,7 @@ export function Home() {
       </section>
 
       {/* Customer Testimonials */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">What Our Customers Say</h2>
