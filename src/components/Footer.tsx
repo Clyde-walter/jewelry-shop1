@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
@@ -12,8 +13,8 @@ export function Footer() {
             <Link to="/" className="flex items-center">
               <img 
                 src="/lovable-uploads/06008771-3946-4cde-95f5-eed2a260f2ae.png" 
-                alt="Jewelryport Logo" 
-                className="w-8 h-8"
+                alt="Logo" 
+                className="h-12 w-auto"
               />
             </Link>
             <p className="text-gray-400">

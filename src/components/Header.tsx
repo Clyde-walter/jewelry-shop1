@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, User, Menu, X, Settings } from 'lucide-react';
@@ -51,11 +52,11 @@ export function Header() {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center group flex-shrink-0">
-              <div className="relative">
+              <div className="relative flex items-center justify-center">
                 <img 
                   src="/lovable-uploads/06008771-3946-4cde-95f5-eed2a260f2ae.png" 
-                  alt="Jewelryport Logo" 
-                  className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 group-hover:scale-110 transition-all duration-300"
+                  alt="Logo" 
+                  className="h-10 w-auto lg:h-12 group-hover:scale-110 transition-all duration-300"
                 />
                 <div className="absolute inset-0 bg-ecommerce-600/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
