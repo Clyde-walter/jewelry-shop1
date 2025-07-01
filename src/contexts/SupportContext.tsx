@@ -1,22 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { toast } from '@/hooks/use-toast';
-
-interface SupportRequest {
-  id: string;
-  customer_name: string;
-  customer_email: string;
-  subject: string;
-  message: string;
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  admin_response?: string;
-  user_id?: string;
-  created_at: string;
-  updated_at: string;
-}
+import { SupportRequest } from '@/types/support';
 
 interface SupportContextType {
   supportRequests: SupportRequest[];
