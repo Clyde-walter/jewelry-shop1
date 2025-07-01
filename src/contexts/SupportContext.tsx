@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
@@ -27,14 +28,21 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log('Fetching support requests for user:', user.id);
+
       // Check if user is admin
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
         .eq('role', 'admin');
 
+      if (roleError) {
+        console.error('Error checking admin role:', roleError);
+      }
+
       const isAdmin = roleData && roleData.length > 0;
+      console.log('User is admin:', isAdmin);
 
       let query = supabase
         .from('support_requests')
@@ -57,6 +65,8 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         });
         return;
       }
+
+      console.log('Fetched support requests:', data);
 
       // Type cast the data to match our interface
       const typedData = (data || []).map(item => ({
@@ -81,8 +91,8 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
       .channel('support-requests-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'support_requests' }, 
-        () => {
-          console.log('Support requests table changed, refetching...');
+        (payload) => {
+          console.log('Support requests table changed:', payload);
           fetchSupportRequests();
         }
       )
@@ -95,6 +105,8 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
 
   const createSupportRequest = async (requestData: Omit<SupportRequest, 'id' | 'status' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Creating support request:', requestData);
+      
       const { data, error } = await supabase
         .from('support_requests')
         .insert([{
@@ -106,6 +118,7 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
+        console.error('Error creating support request:', error);
         toast({
           title: "Error creating support request",
           description: error.message,
@@ -114,6 +127,7 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log('Support request created:', data);
       toast({
         title: "Support request created!",
         description: "We'll get back to you soon."
@@ -130,6 +144,8 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
 
   const updateSupportRequest = async (id: string, updates: Partial<SupportRequest>) => {
     try {
+      console.log('Updating support request:', id, updates);
+      
       const { error } = await supabase
         .from('support_requests')
         .update({
@@ -139,6 +155,7 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         .eq('id', id);
 
       if (error) {
+        console.error('Error updating support request:', error);
         toast({
           title: "Error updating support request",
           description: error.message,
@@ -147,6 +164,7 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log('Support request updated successfully');
       toast({
         title: "Support request updated!",
         description: "Changes have been saved."
@@ -163,12 +181,15 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
 
   const deleteSupportRequest = async (id: string) => {
     try {
+      console.log('Deleting support request:', id);
+      
       const { error } = await supabase
         .from('support_requests')
         .delete()
         .eq('id', id);
 
       if (error) {
+        console.error('Error deleting support request:', error);
         toast({
           title: "Error deleting support request",
           description: error.message,
@@ -177,6 +198,7 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log('Support request deleted successfully');
       toast({
         title: "Support request deleted!",
         description: "The request has been removed."
