@@ -31,7 +31,6 @@ import { ManageAddresses } from "@/pages/ManageAddresses";
 import { PaymentMethods } from "@/pages/PaymentMethods";
 import { EditInformation } from "@/pages/EditInformation";
 import NotFound from "@/pages/NotFound";
-import Index from "@/pages/Index";
 
 export function PublicRoutes() {
   return (
@@ -39,11 +38,12 @@ export function PublicRoutes() {
       <Header />
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
+          {/* More specific routes first to avoid conflicts */}
           <Route path="/product/:id/:collectionId" element={<ProductDetail />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/collections" element={<Collections />} />
           <Route path="/collection/:id" element={<CollectionDetail />} />
           <Route path="/custom-design" element={<CustomDesign />} />
@@ -58,57 +58,19 @@ export function PublicRoutes() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/chat" element={<Chat />} />
           
-          {/* Protected Routes - Inlined */}
-          <Route path="/checkout" element={
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
-          } />
-          <Route path="/orders" element={
-            <ProtectedRoute>
-              <Orders />
-            </ProtectedRoute>
-          } />
-          <Route path="/orders/:orderId" element={
-            <ProtectedRoute>
-              <Orders />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile/settings" element={
-            <ProtectedRoute>
-              <ProfileSettings />
-            </ProtectedRoute>
-          } />
-          <Route path="/wishlist" element={
-            <ProtectedRoute>
-              <Wishlist />
-            </ProtectedRoute>
-          } />
-          <Route path="/live-map" element={
-            <ProtectedRoute>
-              <LiveMap />
-            </ProtectedRoute>
-          } />
-          <Route path="/manage-addresses" element={
-            <ProtectedRoute>
-              <ManageAddresses />
-            </ProtectedRoute>
-          } />
-          <Route path="/payment-methods" element={
-            <ProtectedRoute>
-              <PaymentMethods />
-            </ProtectedRoute>
-          } />
-          <Route path="/edit-information" element={
-            <ProtectedRoute>
-              <EditInformation />
-            </ProtectedRoute>
-          } />
+          {/* Protected Routes using layout wrapper */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:orderId" element={<Orders />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/settings" element={<ProfileSettings />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/live-map" element={<LiveMap />} />
+            <Route path="/manage-addresses" element={<ManageAddresses />} />
+            <Route path="/payment-methods" element={<PaymentMethods />} />
+            <Route path="/edit-information" element={<EditInformation />} />
+          </Route>
 
           <Route path="*" element={<NotFound />} />
         </Routes>
