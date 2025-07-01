@@ -5,6 +5,7 @@ import { Auth } from "@/pages/Auth";
 import { OTPVerification } from "@/pages/OTPVerification";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { ResetPassword } from "@/pages/ResetPassword";
+import { AuthGuard } from "@/components/AuthGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import Admin from "@/pages/Admin";
 import { AdminOrders } from "@/pages/admin/AdminOrders";
@@ -33,27 +34,29 @@ export function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Admin Routes */}
+        {/* Admin Routes - Protected with AuthGuard */}
         <Route path="/admin/*" element={
-          <AdminLayout>
-            <Routes>
-              <Route index element={<Admin />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="customers" element={<AdminCustomers />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="collections" element={<AdminCollections />} />
-              <Route path="collections/:collectionId/products" element={<AdminCollectionProducts />} />
-              <Route path="featured" element={<AdminFeatured />} />
-              <Route path="support" element={<AdminSupport />} />
-              <Route path="warranty" element={<AdminWarranty />} />
-              <Route path="contact" element={<AdminContact />} />
-              <Route path="returns" element={<AdminReturns />} />
-              <Route path="shipping" element={<AdminShipping />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-              <Route path="emails" element={<AdminEmails />} />
-              <Route path="settings" element={<AdminSettings />} />
-            </Routes>
-          </AdminLayout>
+          <AuthGuard>
+            <AdminLayout>
+              <Routes>
+                <Route index element={<Admin />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="customers" element={<AdminCustomers />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="collections" element={<AdminCollections />} />
+                <Route path="collections/:collectionId/products" element={<AdminCollectionProducts />} />
+                <Route path="featured" element={<AdminFeatured />} />
+                <Route path="support" element={<AdminSupport />} />
+                <Route path="warranty" element={<AdminWarranty />} />
+                <Route path="contact" element={<AdminContact />} />
+                <Route path="returns" element={<AdminReturns />} />
+                <Route path="shipping" element={<AdminShipping />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="emails" element={<AdminEmails />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Routes>
+            </AdminLayout>
+          </AuthGuard>
         } />
 
         {/* Public Routes with Header/Footer */}

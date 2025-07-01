@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Order, CartItem } from '@/types/store';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,11 +33,30 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
 
   const fetchOrders = async () => {
+    if (!user) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Check if user is admin to fetch all orders or just user's orders
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin');
+
+      const isAdmin = roleData && roleData.length > 0;
+
+      let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+
+      // If not admin, only fetch user's own orders
+      if (!isAdmin) {
+        query = query.eq('user_id', user.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching orders:', error);
@@ -65,7 +83,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [user]);
 
   const createOrder = async (customerInfo: any, cartItems: CartItem[], cartTotal: number): Promise<Order | null> => {
     if (!user) {
