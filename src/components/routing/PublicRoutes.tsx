@@ -31,6 +31,7 @@ import { ManageAddresses } from "@/pages/ManageAddresses";
 import { PaymentMethods } from "@/pages/PaymentMethods";
 import { EditInformation } from "@/pages/EditInformation";
 import NotFound from "@/pages/NotFound";
+import Index from "@/pages/Index";
 
 export function PublicRoutes() {
   return (
@@ -38,7 +39,8 @@ export function PublicRoutes() {
       <Header />
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/product/:id/:collectionId" element={<ProductDetail />} />
