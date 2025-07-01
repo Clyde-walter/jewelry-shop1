@@ -25,8 +25,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <LanguageProvider>
-            <NotificationsProvider>
+          <NotificationsProvider>
+            <LanguageProvider>
               <ProductsProvider>
                 <CartProvider>
                   <WishlistProvider>
@@ -42,8 +42,8 @@ const App = () => (
                   </WishlistProvider>
                 </CartProvider>
               </ProductsProvider>
-            </NotificationsProvider>
-          </LanguageProvider>
+            </LanguageProvider>
+          </NotificationsProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
