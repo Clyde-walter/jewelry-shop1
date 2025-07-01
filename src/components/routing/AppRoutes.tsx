@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Auth } from "@/pages/Auth";
 import { OTPVerification } from "@/pages/OTPVerification";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { ResetPassword } from "@/pages/ResetPassword";
-import { AuthGuard } from "@/components/AuthGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import Admin from "@/pages/Admin";
 import { AdminOrders } from "@/pages/admin/AdminOrders";
@@ -26,16 +25,16 @@ import { PublicRoutes } from "./PublicRoutes";
 
 export function AppRoutes() {
   return (
-    <Routes>
-      {/* Auth Routes */}
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/otp-verification" element={<OTPVerification />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Auth Routes */}
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/otp-verification" element={<OTPVerification />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Admin Routes - Protected with AuthGuard */}
-      <Route path="/admin/*" element={
-        <AuthGuard>
+        {/* Admin Routes */}
+        <Route path="/admin/*" element={
           <AdminLayout>
             <Routes>
               <Route index element={<Admin />} />
@@ -55,11 +54,11 @@ export function AppRoutes() {
               <Route path="settings" element={<AdminSettings />} />
             </Routes>
           </AdminLayout>
-        </AuthGuard>
-      } />
+        } />
 
-      {/* Public Routes with Header/Footer */}
-      <Route path="/*" element={<PublicRoutes />} />
-    </Routes>
+        {/* Public Routes with Header/Footer */}
+        <Route path="/*" element={<PublicRoutes />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

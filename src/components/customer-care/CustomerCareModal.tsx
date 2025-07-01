@@ -1,21 +1,9 @@
 
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import React from 'react';
+import { MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MessageCircle, Send } from 'lucide-react';
-import { useSupport } from '@/contexts/SupportContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CustomerCareChat } from './CustomerCareChat';
 
 interface CustomerCareModalProps {
   isOpen: boolean;
@@ -23,139 +11,35 @@ interface CustomerCareModalProps {
 }
 
 export function CustomerCareModal({ isOpen, onClose }: CustomerCareModalProps) {
-  const { user } = useAuth();
-  const { createSupportRequest } = useSupport();
-  const [formData, setFormData] = useState({
-    customer_name: '',
-    customer_email: user?.email || '',
-    subject: '',
-    message: '',
-    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent'
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.customer_name || !formData.customer_email || !formData.subject || !formData.message) {
-      toast({
-        title: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await createSupportRequest(formData);
-      setFormData({
-        customer_name: '',
-        customer_email: user?.email || '',
-        subject: '',
-        message: '',
-        priority: 'medium'
-      });
-      onClose();
-    } catch (error) {
-      console.error('Error submitting support request:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            Customer Support
-          </DialogTitle>
-          <DialogDescription>
-            Get help from our customer support team. We'll respond as soon as possible.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={formData.customer_name}
-                onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                placeholder="Your full name"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.customer_email}
-                onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="subject">Subject *</Label>
-            <Input
-              id="subject"
-              value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-              placeholder="Brief description of your issue"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="priority">Priority</Label>
-            <Select value={formData.priority} onValueChange={(value: any) => setFormData({ ...formData, priority: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="message">Message *</Label>
-            <Textarea
-              id="message"
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              placeholder="Please describe your issue in detail..."
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? (
-                <>Sending...</>
-              ) : (
-                <>
-                  <Send className="w-4 h-4 mr-2" />
-                  Send Message
-                </>
-              )}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <Card className="w-full max-w-lg mx-4 h-[600px] flex flex-col">
+        <CardHeader className="bg-blue-600 text-white flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Customer Care Chat
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-white hover:bg-blue-700"
+            >
+              <X className="w-4 h-4" />
             </Button>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <p className="text-blue-100 text-sm">
+            Chat with our support team in real-time
+          </p>
+        </CardHeader>
+        
+        <CardContent className="flex-1 p-0">
+          <CustomerCareChat />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

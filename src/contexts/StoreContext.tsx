@@ -6,7 +6,6 @@ import { useWishlist } from './WishlistContext';
 import { useOrders } from './OrdersContext';
 import { useProducts } from './ProductsContext';
 import { useCustomers } from './CustomersContext';
-import { useSupport } from './SupportContext';
 
 interface StoreContextType {
   // Cart functions
@@ -38,12 +37,6 @@ interface StoreContextType {
   updateCustomer: (customerId: string, updates: any) => Promise<void>;
   deleteCustomer: (customerId: string) => Promise<void>;
   
-  // Support functions
-  supportRequests: any[];
-  createSupportRequest: (request: any) => Promise<void>;
-  updateSupportRequest: (id: string, updates: any) => Promise<void>;
-  deleteSupportRequest: (id: string) => Promise<void>;
-  
   // Auth functions
   user: any;
   session: any;
@@ -59,7 +52,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const { orders, createOrder: originalCreateOrder, updateOrderStatus, loading } = useOrders();
   const { products } = useProducts();
   const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
-  const { supportRequests, createSupportRequest, updateSupportRequest, deleteSupportRequest } = useSupport();
 
   // Wrap createOrder to clear cart after successful order creation
   const createOrder = async (customerInfo: any, cartItems: any[], cartTotal: number) => {
@@ -102,12 +94,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         addCustomer,
         updateCustomer,
         deleteCustomer,
-        
-        // Support
-        supportRequests,
-        createSupportRequest,
-        updateSupportRequest,
-        deleteSupportRequest,
         
         // Auth
         user,

@@ -310,27 +310,6 @@ export type Database = {
           },
         ]
       }
-      password_failed_verification_attempts: {
-        Row: {
-          attempt_count: number
-          created_at: string
-          last_failed_at: string
-          user_id: string
-        }
-        Insert: {
-          attempt_count?: number
-          created_at?: string
-          last_failed_at?: string
-          user_id: string
-        }
-        Update: {
-          attempt_count?: number
-          created_at?: string
-          last_failed_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       products: {
         Row: {
           category: string
