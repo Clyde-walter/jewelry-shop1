@@ -72,7 +72,14 @@ export function SupportProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      setSupportRequests(data || []);
+      // Type cast the data to match our interface
+      const typedData = (data || []).map(item => ({
+        ...item,
+        status: item.status as SupportRequest['status'],
+        priority: item.priority as SupportRequest['priority']
+      }));
+
+      setSupportRequests(typedData);
     } catch (error) {
       console.error('Error in fetchSupportRequests:', error);
     } finally {
