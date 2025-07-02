@@ -61,7 +61,7 @@ export function Orders() {
             <Link to="/orders" className="text-ecommerce-600 hover:text-ecommerce-700 mb-4 inline-block">
               ← Back to Orders
             </Link>
-            <h1 className="text-3xl font-bold">Order #{order.id}</h1>
+            <h1 className="text-3xl font-bold">Order {order.orderNumber}</h1>
             <p className="text-gray-600">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
           </div>
 
@@ -208,7 +208,7 @@ export function Orders() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">Order #{order.id}</h3>
+                      <h3 className="font-semibold">Order {order.orderNumber}</h3>
                       <Badge className={
                         order.status === 'delivered' ? 'bg-green-100 text-green-800' :
                         order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :

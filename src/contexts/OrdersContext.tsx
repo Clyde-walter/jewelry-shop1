@@ -16,14 +16,10 @@ interface OrdersContextType {
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
-// Generate a consistent order number format
+// Generate a consistent order number format (ORD-1234567890)
 const generateOrderNumber = (): string => {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `ORD-${year}${month}${day}-${random}`;
+  const timestamp = Date.now().toString();
+  return `ORD-${timestamp}`;
 };
 
 export function OrdersProvider({ children }: { children: React.ReactNode }) {
@@ -34,10 +30,18 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
 
   const fetchOrders = async () => {
+    if (!user) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Only fetch orders for the current user
       const { data, error } = await supabase
         .from('orders')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -65,7 +69,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [user]);
 
   const createOrder = async (customerInfo: any, cartItems: CartItem[], cartTotal: number): Promise<Order | null> => {
     if (!user) {
