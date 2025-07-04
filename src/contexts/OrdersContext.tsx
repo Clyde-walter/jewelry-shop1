@@ -16,10 +16,32 @@ interface OrdersContextType {
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
-// Generate a consistent order number format (ORD-1234567890)
+// Generate a professional order number format (ORD-ABC123DEF456)
 const generateOrderNumber = (): string => {
-  const timestamp = Date.now().toString();
-  return `ORD-${timestamp}`;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = 'ORD-';
+  
+  // Add 3 characters
+  for (let i = 0; i < 3; i++) {
+    result += chars.charAt(Math.floor(Math.random() * 26)); // Letters only for first 3
+  }
+  
+  // Add 3 numbers
+  for (let i = 0; i < 3; i++) {
+    result += Math.floor(Math.random() * 10);
+  }
+  
+  // Add 3 more characters
+  for (let i = 0; i < 3; i++) {
+    result += chars.charAt(Math.floor(Math.random() * 26)); // Letters only
+  }
+  
+  // Add 3 more numbers
+  for (let i = 0; i < 3; i++) {
+    result += Math.floor(Math.random() * 10);
+  }
+  
+  return result;
 };
 
 export function OrdersProvider({ children }: { children: React.ReactNode }) {
@@ -82,7 +104,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Generate consistent order number
+      // Generate professional order number
       const orderNumber = generateOrderNumber();
       console.log('Creating order with number:', orderNumber);
 
