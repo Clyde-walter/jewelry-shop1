@@ -36,6 +36,27 @@ export function AdminSupport() {
 
   useEffect(() => {
     fetchMessages();
+    
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('support_requests_admin')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'support_requests'
+        },
+        (payload) => {
+          console.log('Support request change detected:', payload);
+          fetchMessages();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchMessages = async () => {
@@ -46,7 +67,6 @@ export function AdminSupport() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      // Type assertion to ensure proper typing from Supabase
       setMessages((data || []) as SupportRequest[]);
     } catch (error) {
       console.error('Error fetching support requests:', error);
@@ -142,7 +162,7 @@ export function AdminSupport() {
 
       toast({
         title: "Response sent!",
-        description: "Your response has been saved and the request marked as resolved."
+        description: "Your response has been saved and the customer will be notified."
       });
 
       setResponseText('');
@@ -159,6 +179,7 @@ export function AdminSupport() {
 
   const generateAIResponse = (message: SupportRequest) => {
     const aiResponses: { [key: string]: string } = {
+      'Live Chat Support': 'Thank you for reaching out through our live chat. I understand you need assistance. Could you please provide more details about the specific issue you\'re experiencing so I can better help you?',
       'Order delivery issue': 'Thank you for contacting us. I understand your concern about the delayed delivery. Let me check the tracking information for your order and provide you with an update. We may also offer expedited shipping for a replacement if needed.',
       'Product return request': 'I apologize for the inconvenience with your purchase. Before processing a return, let me help you with some troubleshooting steps that might resolve the issue. If the problem persists, I will be happy to process your return request.',
       'Product inquiry': 'Thank you for your interest in our products. I\'d be happy to provide you with detailed information about our jewelry pieces. Could you please let me know which specific product you\'re interested in?',
@@ -189,7 +210,6 @@ export function AdminSupport() {
         <p className="text-gray-600">Manage customer inquiries with AI-powered assistance</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <Card>
           <CardContent className="p-4">
@@ -237,7 +257,6 @@ export function AdminSupport() {
         </Card>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -274,7 +293,6 @@ export function AdminSupport() {
         </Select>
       </div>
 
-      {/* Messages Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -359,6 +377,12 @@ export function AdminSupport() {
                               <label className="text-sm font-medium">Message</label>
                               <p className="bg-gray-50 p-3 rounded">{message.message}</p>
                             </div>
+                            {message.admin_response && (
+                              <div>
+                                <label className="text-sm font-medium">Previous Response</label>
+                                <p className="bg-green-50 p-3 rounded border border-green-200">{message.admin_response}</p>
+                              </div>
+                            )}
                             <div>
                               <label className="text-sm font-medium">Your Response</label>
                               <Textarea

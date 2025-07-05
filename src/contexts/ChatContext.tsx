@@ -8,6 +8,7 @@ interface ChatMessage {
   message: string;
   sender: 'user' | 'support';
   timestamp: string;
+  support_request_id?: string;
 }
 
 interface ChatContextType {
@@ -15,6 +16,7 @@ interface ChatContextType {
   addMessage: (message: string, sender: 'user' | 'support') => void;
   unreadCount: number;
   markAllAsRead: () => void;
+  refreshMessages: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -28,9 +30,95 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     // Load existing messages from localStorage for backward compatibility
     const existingMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
     const lastRead = localStorage.getItem('lastReadTimestamp') || '';
-    setMessages(existingMessages);
     setLastReadTimestamp(lastRead);
-  }, []);
+    
+    // Load messages from Supabase if user is authenticated
+    if (user) {
+      loadMessagesFromSupabase();
+    } else {
+      setMessages(existingMessages);
+    }
+  }, [user]);
+
+  // Set up real-time subscription for new admin responses
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('support_requests_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'support_requests',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Support request updated:', payload);
+          loadMessagesFromSupabase();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const loadMessagesFromSupabase = async () => {
+    if (!user) return;
+
+    try {
+      const { data: supportRequests, error } = await supabase
+        .from('support_requests')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error loading support requests:', error);
+        return;
+      }
+
+      const chatMessages: ChatMessage[] = [];
+      
+      supportRequests?.forEach((request) => {
+        // Add user message
+        chatMessages.push({
+          id: request.id,
+          message: request.message,
+          sender: 'user',
+          timestamp: request.created_at,
+          support_request_id: request.id
+        });
+
+        // Add admin response if it exists
+        if (request.admin_response) {
+          chatMessages.push({
+            id: `${request.id}_response`,
+            message: request.admin_response,
+            sender: 'support',
+            timestamp: request.updated_at,
+            support_request_id: request.id
+          });
+        }
+      });
+
+      setMessages(chatMessages);
+      
+      // Also update localStorage for backward compatibility
+      localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+    } catch (error) {
+      console.error('Error loading messages from Supabase:', error);
+    }
+  };
+
+  const refreshMessages = () => {
+    if (user) {
+      loadMessagesFromSupabase();
+    }
+  };
 
   const addMessage = async (message: string, sender: 'user' | 'support') => {
     const newMessage: ChatMessage = {
@@ -57,11 +145,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           user_id: user?.id || null
         });
         console.log('Chat message saved to support requests');
+        
+        // Refresh messages to get the latest data
+        setTimeout(() => {
+          loadMessagesFromSupabase();
+        }, 500);
       } catch (error) {
         console.error('Error saving chat message to database:', error);
       }
 
-      // Auto-response from support for user messages
+      // Auto-response from support for user messages (only if no admin is available)
       setTimeout(() => {
         const autoResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),
@@ -92,7 +185,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       messages,
       addMessage,
       unreadCount,
-      markAllAsRead
+      markAllAsRead,
+      refreshMessages
     }}>
       {children}
     </ChatContext.Provider>

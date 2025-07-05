@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, MessageCircle } from 'lucide-react';
+import { Send, MessageCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChat } from '@/contexts/ChatContext';
@@ -10,8 +10,9 @@ interface CustomerCareChatProps {
 }
 
 export function CustomerCareChat({ onSubmitSuccess }: CustomerCareChatProps) {
-  const { messages, addMessage, markAllAsRead } = useChat();
+  const { messages, addMessage, markAllAsRead, refreshMessages } = useChat();
   const [newMessage, setNewMessage] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -38,12 +39,39 @@ export function CustomerCareChat({ onSubmitSuccess }: CustomerCareChatProps) {
     }
   };
 
+  const handleRefreshMessages = async () => {
+    setIsRefreshing(true);
+    refreshMessages();
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
+  };
+
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString();
   };
 
+  const isAdminResponse = (message: any) => {
+    return message.sender === 'support' && 
+           !message.message.includes('Thank you for your message! Our support team will get back to you shortly.');
+  };
+
   return (
     <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-4 border-b">
+        <h3 className="font-medium">Customer Support</h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleRefreshMessages}
+          disabled={isRefreshing}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+
       <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-96">
         {messages.length === 0 ? (
           <div className="text-center py-8">
@@ -57,19 +85,28 @@ export function CustomerCareChat({ onSubmitSuccess }: CustomerCareChatProps) {
               key={message.id}
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.sender === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                }`}
-              >
-                <p className="text-sm">{message.message}</p>
-                <p className={`text-xs mt-1 ${
-                  message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
-                }`}>
-                  {formatTime(message.timestamp)}
-                </p>
+              <div className="flex flex-col max-w-xs lg:max-w-md">
+                <div
+                  className={`px-4 py-2 rounded-lg ${
+                    message.sender === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : isAdminResponse(message)
+                      ? 'bg-green-100 text-green-800 border border-green-200'
+                      : 'bg-gray-200 text-gray-800'
+                  }`}
+                >
+                  <p className="text-sm">{message.message}</p>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className={`text-xs ${
+                    message.sender === 'user' ? 'text-blue-600' : 'text-gray-500'
+                  }`}>
+                    {message.sender === 'user' ? 'You' : isAdminResponse(message) ? 'Support Team' : 'Auto Reply'}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {formatTime(message.timestamp)}
+                  </p>
+                </div>
               </div>
             </div>
           ))
