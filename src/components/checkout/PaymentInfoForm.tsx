@@ -59,6 +59,19 @@ export function PaymentInfoForm({ paymentMethod, onPaymentMethodChange }: Paymen
                 </div>
               </Label>
             </div>
+            
+            <div className="flex items-center space-x-2 p-3 border rounded-lg">
+              <RadioGroupItem value="flutterwave" id="flutterwave" />
+              <Label htmlFor="flutterwave" className="flex items-center gap-2 cursor-pointer flex-1">
+                <div className="w-8 h-8 bg-orange-100 rounded flex items-center justify-center">
+                  🦋
+                </div>
+                <div>
+                  <div className="font-medium">Flutterwave</div>
+                  <div className="text-sm text-gray-500">Cards, Bank Transfer, Mobile Money</div>
+                </div>
+              </Label>
+            </div>
           </RadioGroup>
         </div>
 

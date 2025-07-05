@@ -14,9 +14,12 @@ interface PaymentSettingsType {
   stripeEnabled: boolean;
   paypalEnabled: boolean;
   paystackEnabled: boolean;
+  flutterwaveEnabled: boolean;
   stripeApiKey: string;
   paystackPublicKey: string;
   paystackSecretKey: string;
+  flutterwavePublicKey: string;
+  flutterwaveSecretKey: string;
 }
 
 interface PaymentSettingsProps {
@@ -33,6 +36,7 @@ export function PaymentSettings({
   setShowApiKey 
 }: PaymentSettingsProps) {
   const [showPaystackKeys, setShowPaystackKeys] = React.useState(false);
+  const [showFlutterwaveKeys, setShowFlutterwaveKeys] = React.useState(false);
 
   const handleSavePayments = () => {
     saveToLocalStorage('paymentSettings', paymentSettings);
@@ -96,6 +100,22 @@ export function PaymentSettings({
               onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, paystackEnabled: checked})}
             />
           </div>
+
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                🦋
+              </div>
+              <div>
+                <p className="font-medium">Flutterwave</p>
+                <p className="text-sm text-gray-600">African payment gateway - Cards, Bank transfers, Mobile money</p>
+              </div>
+            </div>
+            <Switch 
+              checked={paymentSettings.flutterwaveEnabled}
+              onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, flutterwaveEnabled: checked})}
+            />
+          </div>
         </div>
         
         <Separator />
@@ -157,6 +177,46 @@ export function PaymentSettings({
                 onClick={() => setShowPaystackKeys(!showPaystackKeys)}
               >
                 {showPaystackKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="flutterwavePublicKey">Flutterwave Public Key</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                id="flutterwavePublicKey"
+                type={showFlutterwaveKeys ? "text" : "password"}
+                placeholder="FLWPUBK_TEST-..."
+                className="flex-1"
+                value={paymentSettings.flutterwavePublicKey}
+                onChange={(e) => setPaymentSettings({...paymentSettings, flutterwavePublicKey: e.target.value})}
+              />
+              <Button
+                variant="outline"
+                onClick={() => setShowFlutterwaveKeys(!showFlutterwaveKeys)}
+              >
+                {showFlutterwaveKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="flutterwaveSecretKey">Flutterwave Secret Key</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                id="flutterwaveSecretKey"
+                type={showFlutterwaveKeys ? "text" : "password"}
+                placeholder="FLWSECK_TEST-..."
+                className="flex-1"
+                value={paymentSettings.flutterwaveSecretKey}
+                onChange={(e) => setPaymentSettings({...paymentSettings, flutterwaveSecretKey: e.target.value})}
+              />
+              <Button
+                variant="outline"
+                onClick={() => setShowFlutterwaveKeys(!showFlutterwaveKeys)}
+              >
+                {showFlutterwaveKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
             </div>
           </div>

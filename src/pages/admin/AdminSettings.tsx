@@ -22,15 +22,18 @@ export function AdminSettings() {
     })
   );
 
-  // Payment settings state with Paystack support
+  // Payment settings state with Paystack and Flutterwave support
   const [paymentSettings, setPaymentSettings] = useState(() =>
     getFromLocalStorage('paymentSettings', {
       stripeEnabled: true,
       paypalEnabled: false,
       paystackEnabled: false,
+      flutterwaveEnabled: false,
       stripeApiKey: '',
       paystackPublicKey: '',
-      paystackSecretKey: ''
+      paystackSecretKey: '',
+      flutterwavePublicKey: '',
+      flutterwaveSecretKey: ''
     })
   );
   const [showApiKey, setShowApiKey] = useState(false);

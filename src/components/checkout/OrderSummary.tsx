@@ -76,7 +76,7 @@ export function OrderSummary({
         </div>
 
         {/* Payment Button */}
-        {paymentMethod === 'paystack' && renderPaymentButton ? (
+        {(paymentMethod === 'paystack' || paymentMethod === 'flutterwave') && renderPaymentButton ? (
           renderPaymentButton()
         ) : (
           onSubmit && (

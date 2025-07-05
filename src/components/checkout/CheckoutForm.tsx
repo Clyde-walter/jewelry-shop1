@@ -7,6 +7,7 @@ import { ShippingAddressForm } from './ShippingAddressForm';
 import { PaymentInfoForm } from './PaymentInfoForm';
 import { OrderSummary } from './OrderSummary';
 import { PaystackPayment } from './PaystackPayment';
+import { FlutterwavePayment } from './FlutterwavePayment';
 
 interface CheckoutFormProps {
   onOrderCreated: (order: any) => void;
@@ -122,6 +123,11 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     return validateRequiredFields();
   };
 
+  const handleFlutterwavePayment = () => {
+    // Validate before attempting Flutterwave payment
+    return validateRequiredFields();
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
@@ -164,6 +170,15 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
                     cartItems={cart}
                     onSuccess={handlePaystackSuccess}
                     onValidate={handlePaystackPayment}
+                  />
+                ) : paymentMethod === 'flutterwave' ? (
+                  <FlutterwavePayment
+                    amount={finalTotal}
+                    email={customerInfo.email}
+                    customerInfo={customerInfo}
+                    cartItems={cart}
+                    onSuccess={handlePaystackSuccess}
+                    onValidate={handleFlutterwavePayment}
                   />
                 ) : null
               }
