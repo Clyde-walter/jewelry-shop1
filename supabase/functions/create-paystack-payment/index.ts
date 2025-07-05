@@ -35,6 +35,18 @@ serve(async (req) => {
       throw new Error("Paystack secret key not configured");
     }
 
+    // Use current USD to NGN exchange rate (as of 2024: approximately 1 USD = 1,600 NGN)
+    // This is a more accurate rate for Nigerian banking system
+    const exchangeRate = 1600;
+    const amountInNGN = amount * exchangeRate;
+
+    console.log('Payment details:', {
+      originalAmountUSD: amount,
+      convertedAmountNGN: amountInNGN,
+      email,
+      exchangeRate
+    });
+
     // Initialize Paystack transaction
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
@@ -43,19 +55,22 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        amount: Math.round(amount * 100), // Convert to kobo (Paystack uses smallest currency unit)
+        amount: Math.round(amountInNGN * 100), // Convert to kobo (NGN smallest unit)
         email: email,
-        currency: "NGN", // Nigerian Naira - change as needed
+        currency: "NGN", // Use NGN which is supported by default
         callback_url: `${req.headers.get("origin")}/payment-success`,
         metadata: {
           user_id: user.id,
           customer_info: customerInfo,
           cart_items: cartItems,
+          original_amount_usd: amount, // Store original USD amount
+          exchange_rate: exchangeRate,
         },
       }),
     });
 
     const paymentData = await response.json();
+    console.log('Paystack response:', paymentData);
 
     if (!paymentData.status) {
       throw new Error(paymentData.message || "Failed to initialize payment");
@@ -74,7 +89,7 @@ serve(async (req) => {
         user_id: user.id,
         order_number: `PAY-${paymentData.data.reference}`,
         items: cartItems,
-        total: amount,
+        total: amount, // Store original USD amount
         status: "pending",
         customer_info: customerInfo,
       })

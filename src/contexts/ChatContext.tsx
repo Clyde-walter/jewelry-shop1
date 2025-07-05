@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
 
 interface ChatMessage {
   id: string;
@@ -20,16 +22,17 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [lastReadTimestamp, setLastReadTimestamp] = useState<string>('');
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Load existing messages from localStorage
+    // Load existing messages from localStorage for backward compatibility
     const existingMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
     const lastRead = localStorage.getItem('lastReadTimestamp') || '';
     setMessages(existingMessages);
     setLastReadTimestamp(lastRead);
   }, []);
 
-  const addMessage = (message: string, sender: 'user' | 'support') => {
+  const addMessage = async (message: string, sender: 'user' | 'support') => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       message,
@@ -41,8 +44,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setMessages(updatedMessages);
     localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
 
-    // Auto-response from support for user messages
+    // Save user messages to Supabase as support requests
     if (sender === 'user') {
+      try {
+        await supabase.from('support_requests').insert({
+          customer_name: user?.email?.split('@')[0] || 'Chat User',
+          customer_email: user?.email || 'chat@example.com',
+          subject: 'Live Chat Support',
+          message: message,
+          priority: 'medium',
+          status: 'open',
+          user_id: user?.id || null
+        });
+        console.log('Chat message saved to support requests');
+      } catch (error) {
+        console.error('Error saving chat message to database:', error);
+      }
+
+      // Auto-response from support for user messages
       setTimeout(() => {
         const autoResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),

@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -9,6 +8,10 @@ export interface Product {
   category: string;
   stock: number;
   collectionId?: string;
+  isFeatured?: boolean;
+  isMostPicked?: boolean;
+  featuredOrder?: number;
+  mostPickedOrder?: number;
 }
 
 export interface CartItem {

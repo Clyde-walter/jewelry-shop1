@@ -31,15 +31,15 @@ export function LiveMap() {
     ];
     
     const location = locations[index % locations.length];
-    mockTrackingData[order.id] = {
+    mockTrackingData[order.orderNumber] = {
       currentLocation: location.name,
       coordinates: { lat: location.lat, lng: location.lng },
-      trackingNumber: `TRK-${order.id.slice(-6)}-2024`,
+      trackingNumber: `TRK-${order.orderNumber.slice(-6)}-2024`,
     };
   });
 
-  const handleOrderFound = (orderId: string) => {
-    setSelectedOrder(orderId);
+  const handleOrderFound = (orderNumber: string) => {
+    setSelectedOrder(orderNumber);
     setOrderFound(true);
   };
 
@@ -48,7 +48,7 @@ export function LiveMap() {
     setSelectedOrder('');
   };
 
-  const currentOrder = selectedOrder ? orders.find(order => order.id === selectedOrder) : null;
+  const currentOrder = selectedOrder ? orders.find(order => order.orderNumber === selectedOrder) : null;
   const orderLocation = selectedOrder ? getOrderLocation(selectedOrder) : undefined;
   const trackingInfo = selectedOrder ? mockTrackingData[selectedOrder] : undefined;
 
@@ -159,10 +159,10 @@ export function LiveMap() {
                 <div
                   key={order.id}
                   className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleOrderFound(order.id)}
+                  onClick={() => handleOrderFound(order.orderNumber)}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-mono text-sm text-blue-600">{order.id}</span>
+                    <span className="font-mono text-sm text-blue-600">{order.orderNumber}</span>
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       order.status === 'delivered' ? 'bg-green-100 text-green-800' :
                       order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :

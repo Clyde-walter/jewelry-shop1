@@ -4,14 +4,26 @@ import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLinkClick = () => {
+    scrollToTop();
+  };
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Social Links */}
           <div className="space-y-4">
-            <Link to="/" className="text-2xl font-bold text-ecommerce-400">
-              ShopEase
+            <Link to="/" className="flex items-center" onClick={handleLinkClick}>
+              <img 
+                src="/lovable-uploads/06008771-3946-4cde-95f5-eed2a260f2ae.png" 
+                alt="Logo" 
+                className="h-12 w-auto"
+              />
             </Link>
             <p className="text-gray-400">
               Premium jewelry for every occasion. Crafted with love and precision.
@@ -37,22 +49,22 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/products" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/products" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Products
                 </Link>
               </li>
               <li>
-                <Link to="/collections" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/collections" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Collections
                 </Link>
               </li>
               <li>
-                <Link to="/orders" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/orders" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Track Orders
                 </Link>
               </li>
               <li>
-                <Link to="/live-map" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/live-map" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Live Tracking
                 </Link>
               </li>
@@ -64,22 +76,22 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/contact" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/support" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/support" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Support
                 </Link>
               </li>
               <li>
-                <Link to="/returns" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/returns" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Returns & Exchanges
                 </Link>
               </li>
               <li>
-                <Link to="/warranty" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/warranty" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Warranty
                 </Link>
               </li>
@@ -96,7 +108,7 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-ecommerce-400" />
-                <span className="text-gray-400">support@shopease.com</span>
+                <span className="text-gray-400">support@jewelryport.com</span>
               </div>
               <div className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-ecommerce-400 mt-1" />
@@ -112,16 +124,16 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 ShopEase. All rights reserved.
+              © 2024 Jewelryport. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors" onClick={handleLinkClick}>
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition-colors" onClick={handleLinkClick}>
                 Terms of Service
               </Link>
-              <Link to="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link to="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors" onClick={handleLinkClick}>
                 Cookie Policy
               </Link>
             </div>

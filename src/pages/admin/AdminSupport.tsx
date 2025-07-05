@@ -9,88 +9,62 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
-interface CustomerMessage {
+interface SupportRequest {
   id: string;
-  customerName: string;
-  customerEmail: string;
+  user_id: string;
+  customer_name: string;
+  customer_email: string;
   subject: string;
   message: string;
   priority: 'low' | 'medium' | 'high';
   status: 'open' | 'in-progress' | 'resolved';
-  createdAt: string;
-  lastResponse?: string;
-  aiSuggestion?: string;
-  responses: { id: string, message: string, sender: string, timestamp: string }[];
+  admin_response: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export function AdminSupport() {
-  const [messages, setMessages] = useState<CustomerMessage[]>([]);
+  const [messages, setMessages] = useState<SupportRequest[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [selectedMessage, setSelectedMessage] = useState<CustomerMessage | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<SupportRequest | null>(null);
   const [responseText, setResponseText] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // Load messages from localStorage on component mount
   useEffect(() => {
-    const loadMessages = () => {
-      const storedMessages = JSON.parse(localStorage.getItem('customerMessages') || '[]');
-      const defaultMessages = [
-        {
-          id: '1',
-          customerName: 'John Doe',
-          customerEmail: 'john@example.com',
-          subject: 'Order delivery issue',
-          message: 'My order #ORD-123456 has not arrived yet. It has been 5 days since the expected delivery date.',
-          priority: 'high' as const,
-          status: 'open' as const,
-          createdAt: '2024-01-15T10:30:00Z',
-          aiSuggestion: 'Suggest checking tracking information and offer expedited replacement if package is lost.',
-          responses: []
-        },
-        {
-          id: '2',
-          customerName: 'Jane Smith',
-          customerEmail: 'jane@example.com',
-          subject: 'Product return request',
-          message: 'I would like to return the wireless headphones I purchased last week. They are not working properly.',
-          priority: 'medium' as const,
-          status: 'in-progress' as const,
-          createdAt: '2024-01-14T14:20:00Z',
-          lastResponse: 'Return label has been sent to your email.',
-          aiSuggestion: 'Offer troubleshooting steps first, then process return if issue persists.',
-          responses: [
-            {
-              id: 'resp1',
-              message: 'Return label has been sent to your email.',
-              sender: 'admin' as const,
-              timestamp: '2024-01-14T15:30:00Z'
-            }
-          ]
-        }
-      ];
-      
-      const allMessages = [...defaultMessages, ...storedMessages];
-      setMessages(allMessages);
-    };
-
-    loadMessages();
-
-    // Listen for storage changes to sync across tabs
-    const handleStorageChange = () => {
-      loadMessages();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    fetchMessages();
   }, []);
+
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('support_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      // Type assertion to ensure proper typing from Supabase
+      setMessages((data || []) as SupportRequest[]);
+    } catch (error) {
+      console.error('Error fetching support requests:', error);
+      toast({
+        title: "Error loading messages",
+        description: "Failed to load support requests.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredMessages = messages.filter(message => {
     const matchesSearch = 
-      message.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      message.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
+      message.customer_email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || message.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || message.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
@@ -114,67 +88,86 @@ export function AdminSupport() {
     }
   };
 
-  const handleStatusUpdate = (messageId: string, newStatus: CustomerMessage['status']) => {
-    const updatedMessages = messages.map(msg => 
-      msg.id === messageId ? { ...msg, status: newStatus } : msg
-    );
-    setMessages(updatedMessages);
-    
-    // Update localStorage
-    const customerMessages = updatedMessages.filter(msg => !['1', '2'].includes(msg.id));
-    localStorage.setItem('customerMessages', JSON.stringify(customerMessages));
-    
-    const order = messages.find(o => o.id === messageId);
-    toast({
-      title: "Status updated!",
-      description: `Message from ${order?.customerName || messageId} status changed to ${newStatus}`
-    });
+  const handleStatusUpdate = async (messageId: string, newStatus: SupportRequest['status']) => {
+    try {
+      const { error } = await supabase
+        .from('support_requests')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId ? { ...msg, status: newStatus } : msg
+      ));
+
+      const message = messages.find(m => m.id === messageId);
+      toast({
+        title: "Status updated!",
+        description: `Message from ${message?.customer_name || messageId} status changed to ${newStatus}`
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error updating status",
+        description: "Failed to update support request status.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleSendResponse = () => {
+  const handleSendResponse = async () => {
     if (!selectedMessage || !responseText.trim()) return;
 
-    const newResponse = {
-      id: Date.now().toString(),
-      message: responseText,
-      sender: 'admin' as const,
-      timestamp: new Date().toISOString()
-    };
+    try {
+      const { error } = await supabase
+        .from('support_requests')
+        .update({ 
+          admin_response: responseText,
+          status: 'resolved',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedMessage.id);
 
-    const updatedMessages = messages.map(msg => 
-      msg.id === selectedMessage.id 
-        ? { 
-            ...msg, 
-            lastResponse: responseText, 
-            status: 'in-progress' as const,
-            responses: [...(msg.responses || []), newResponse]
-          }
-        : msg
-    );
-    
-    setMessages(updatedMessages);
+      if (error) throw error;
 
-    // Update localStorage for customer messages
-    const customerMessages = updatedMessages.filter(msg => !['1', '2'].includes(msg.id));
-    localStorage.setItem('customerMessages', JSON.stringify(customerMessages));
+      setMessages(prev => prev.map(msg => 
+        msg.id === selectedMessage.id 
+          ? { ...msg, admin_response: responseText, status: 'resolved' }
+          : msg
+      ));
 
-    toast({
-      title: "Response sent!",
-      description: "Your response has been sent to the customer"
-    });
+      toast({
+        title: "Response sent!",
+        description: "Your response has been saved and the request marked as resolved."
+      });
 
-    setResponseText('');
-    setSelectedMessage(null);
+      setResponseText('');
+      setSelectedMessage(null);
+    } catch (error) {
+      console.error('Error sending response:', error);
+      toast({
+        title: "Error sending response",
+        description: "Failed to save response.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const generateAIResponse = (message: CustomerMessage) => {
-    const aiResponses = {
+  const generateAIResponse = (message: SupportRequest) => {
+    const aiResponses: { [key: string]: string } = {
       'Order delivery issue': 'Thank you for contacting us. I understand your concern about the delayed delivery. Let me check the tracking information for your order and provide you with an update. We may also offer expedited shipping for a replacement if needed.',
-      'Product return request': 'I apologize for the inconvenience with your wireless headphones. Before processing a return, let me help you with some troubleshooting steps that might resolve the issue. If the problem persists, I will be happy to process your return request.',
-      'default': 'Thank you for reaching out to us. I have received your message and will review your case carefully. I will get back to you within 24 hours with a detailed response.'
+      'Product return request': 'I apologize for the inconvenience with your purchase. Before processing a return, let me help you with some troubleshooting steps that might resolve the issue. If the problem persists, I will be happy to process your return request.',
+      'Product inquiry': 'Thank you for your interest in our products. I\'d be happy to provide you with detailed information about our jewelry pieces. Could you please let me know which specific product you\'re interested in?',
+      'Payment issue': 'I apologize for any payment-related difficulties you\'ve experienced. Let me review your payment details and help resolve this issue promptly. Your security and satisfaction are our top priorities.',
+      'Technical support': 'Thank you for reporting this technical issue. I\'ll help you troubleshoot this problem step by step. Could you please provide more details about what you were trying to do when the issue occurred?',
+      'General inquiry': 'Thank you for reaching out to us. I have received your message and will review your inquiry carefully. I will get back to you within 24 hours with a detailed response.'
     };
 
-    const response = aiResponses[message.subject] || aiResponses['default'];
+    const response = aiResponses[message.subject] || aiResponses['General inquiry'];
     setResponseText(response);
   };
 
@@ -184,6 +177,10 @@ export function AdminSupport() {
     inProgress: messages.filter(m => m.status === 'in-progress').length,
     resolved: messages.filter(m => m.status === 'resolved').length
   };
+
+  if (loading) {
+    return <div className="p-8">Loading support requests...</div>;
+  }
 
   return (
     <div className="p-8">
@@ -302,8 +299,8 @@ export function AdminSupport() {
                 <TableRow key={message.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{message.customerName}</div>
-                      <div className="text-sm text-gray-500">{message.customerEmail}</div>
+                      <div className="font-medium">{message.customer_name}</div>
+                      <div className="text-sm text-gray-500">{message.customer_email}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -322,7 +319,7 @@ export function AdminSupport() {
                       {message.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{new Date(message.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(message.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Dialog>
@@ -330,7 +327,10 @@ export function AdminSupport() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedMessage(message)}
+                            onClick={() => {
+                              setSelectedMessage(message);
+                              setResponseText(message.admin_response || '');
+                            }}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -343,12 +343,12 @@ export function AdminSupport() {
                             <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <label className="text-sm font-medium">Customer</label>
-                                <p>{message.customerName}</p>
-                                <p className="text-sm text-gray-500">{message.customerEmail}</p>
+                                <p>{message.customer_name}</p>
+                                <p className="text-sm text-gray-500">{message.customer_email}</p>
                               </div>
                               <div>
                                 <label className="text-sm font-medium">Date</label>
-                                <p>{new Date(message.createdAt).toLocaleString()}</p>
+                                <p>{new Date(message.created_at).toLocaleString()}</p>
                               </div>
                             </div>
                             <div>
@@ -359,15 +359,6 @@ export function AdminSupport() {
                               <label className="text-sm font-medium">Message</label>
                               <p className="bg-gray-50 p-3 rounded">{message.message}</p>
                             </div>
-                            {message.aiSuggestion && (
-                              <div>
-                                <label className="text-sm font-medium flex items-center gap-2">
-                                  <Bot className="w-4 h-4" />
-                                  AI Suggestion
-                                </label>
-                                <p className="bg-blue-50 p-3 rounded text-blue-800">{message.aiSuggestion}</p>
-                              </div>
-                            )}
                             <div>
                               <label className="text-sm font-medium">Your Response</label>
                               <Textarea
@@ -397,7 +388,7 @@ export function AdminSupport() {
                             <div className="flex gap-2">
                               <Select
                                 value={message.status}
-                                onValueChange={(value) => handleStatusUpdate(message.id, value as CustomerMessage['status'])}
+                                onValueChange={(value) => handleStatusUpdate(message.id, value as SupportRequest['status'])}
                               >
                                 <SelectTrigger className="w-48">
                                   <SelectValue />
@@ -414,7 +405,7 @@ export function AdminSupport() {
                       </Dialog>
                       <Select
                         value={message.status}
-                        onValueChange={(value) => handleStatusUpdate(message.id, value as CustomerMessage['status'])}
+                        onValueChange={(value) => handleStatusUpdate(message.id, value as SupportRequest['status'])}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />

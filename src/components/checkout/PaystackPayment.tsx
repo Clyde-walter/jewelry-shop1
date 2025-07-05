@@ -109,7 +109,7 @@ export function PaystackPayment({
           Processing...
         </>
       ) : (
-        `Pay ₦${amount.toLocaleString()} with Paystack`
+        `Pay $${amount.toFixed(2)} with Paystack`
       )}
     </Button>
   );

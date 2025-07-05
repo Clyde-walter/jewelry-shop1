@@ -16,7 +16,7 @@ export function OrderConfirmation({ orderCreated, finalTotal }: OrderConfirmatio
 
   const copyOrderNumber = () => {
     if (orderCreated) {
-      navigator.clipboard.writeText(orderCreated.id);
+      navigator.clipboard.writeText(orderCreated.orderNumber || orderCreated.id);
       toast({
         title: "Order number copied!",
         description: "You can now use this number to track your order."
@@ -42,7 +42,7 @@ export function OrderConfirmation({ orderCreated, finalTotal }: OrderConfirmatio
                 <h3 className="text-lg font-semibold mb-2">Your Order Number</h3>
                 <div className="flex items-center justify-center gap-2 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                   <span className="text-2xl font-mono font-bold text-ecommerce-600">
-                    {orderCreated.id}
+                    {orderCreated.orderNumber || orderCreated.id}
                   </span>
                   <Button
                     variant="outline"

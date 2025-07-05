@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { HelpCircle, Search, Phone, Mail, MessageCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const faqs = [
   {
@@ -34,6 +34,12 @@ const faqs = [
 ];
 
 export function Support() {
+  const navigate = useNavigate();
+
+  const handleStartChat = () => {
+    navigate('/chat');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
@@ -81,7 +87,12 @@ export function Support() {
             <MessageCircle className="w-12 h-12 mx-auto mb-4 text-ecommerce-600" />
             <h3 className="text-lg font-semibold mb-2">Live Chat</h3>
             <p className="text-gray-600 mb-4">Chat with us in real-time</p>
-            <Button className="bg-ecommerce-600 hover:bg-ecommerce-700">Start Chat</Button>
+            <Button 
+              className="bg-ecommerce-600 hover:bg-ecommerce-700"
+              onClick={handleStartChat}
+            >
+              Start Chat
+            </Button>
           </CardContent>
         </Card>
       </div>

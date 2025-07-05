@@ -6,36 +6,23 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-
-interface CustomerMessage {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  subject: string;
-  message: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'open' | 'in-progress' | 'resolved';
-  createdAt: string;
-  responses?: Array<{
-    id: string;
-    message: string;
-    sender: 'customer' | 'admin';
-    timestamp: string;
-  }>;
-}
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CustomerCareFormProps {
   onSubmitSuccess: () => void;
 }
 
 export function CustomerCareForm({ onSubmitSuccess }: CustomerCareFormProps) {
+  const { user } = useAuth();
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!customerName || !customerEmail || !subject || !message) {
@@ -47,35 +34,45 @@ export function CustomerCareForm({ onSubmitSuccess }: CustomerCareFormProps) {
       return;
     }
 
-    const newMessage: CustomerMessage = {
-      id: Date.now().toString(),
-      customerName,
-      customerEmail,
-      subject,
-      message,
-      priority,
-      status: 'open',
-      createdAt: new Date().toISOString(),
-      responses: []
-    };
+    setIsSubmitting(true);
 
-    // Store the message in localStorage (will be synced with admin panel)
-    const existingMessages = JSON.parse(localStorage.getItem('customerMessages') || '[]');
-    existingMessages.push(newMessage);
-    localStorage.setItem('customerMessages', JSON.stringify(existingMessages));
+    try {
+      const { error } = await supabase
+        .from('support_requests')
+        .insert({
+          user_id: user?.id || null,
+          customer_name: customerName,
+          customer_email: customerEmail,
+          subject,
+          message,
+          priority,
+          status: 'open'
+        });
 
-    toast({
-      title: "Message sent!",
-      description: "Thank you for contacting us. We'll get back to you within 24 hours."
-    });
+      if (error) throw error;
 
-    // Reset form
-    setCustomerName('');
-    setCustomerEmail('');
-    setSubject('');
-    setMessage('');
-    setPriority('medium');
-    onSubmitSuccess();
+      toast({
+        title: "Message sent!",
+        description: "Thank you for contacting us. We'll get back to you within 24 hours."
+      });
+
+      // Reset form
+      setCustomerName('');
+      setCustomerEmail('');
+      setSubject('');
+      setMessage('');
+      setPriority('medium');
+      onSubmitSuccess();
+    } catch (error) {
+      console.error('Error submitting support request:', error);
+      toast({
+        title: "Error sending message",
+        description: "Please try again or contact us directly.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePriorityChange = (value: string) => {
@@ -147,9 +144,13 @@ export function CustomerCareForm({ onSubmitSuccess }: CustomerCareFormProps) {
         />
       </div>
       
-      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+      <Button 
+        type="submit" 
+        className="w-full bg-blue-600 hover:bg-blue-700"
+        disabled={isSubmitting}
+      >
         <Send className="w-4 h-4 mr-2" />
-        Send Message
+        {isSubmitting ? 'Sending...' : 'Send Message'}
       </Button>
     </form>
   );

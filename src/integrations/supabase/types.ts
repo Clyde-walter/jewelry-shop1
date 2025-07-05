@@ -90,6 +90,48 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_requests: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          id: string
+          message: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          id?: string
+          message: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          message?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
@@ -268,15 +310,40 @@ export type Database = {
           },
         ]
       }
+      password_failed_verification_attempts: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          last_failed_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          last_failed_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          last_failed_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string
           collection_id: string | null
           created_at: string
           description: string | null
+          featured_order: number | null
           id: string
           image: string | null
           images: string[] | null
+          is_featured: boolean | null
+          is_most_picked: boolean | null
+          most_picked_order: number | null
           name: string
           price: number
           stock: number | null
@@ -287,9 +354,13 @@ export type Database = {
           collection_id?: string | null
           created_at?: string
           description?: string | null
+          featured_order?: number | null
           id?: string
           image?: string | null
           images?: string[] | null
+          is_featured?: boolean | null
+          is_most_picked?: boolean | null
+          most_picked_order?: number | null
           name: string
           price: number
           stock?: number | null
@@ -300,9 +371,13 @@ export type Database = {
           collection_id?: string | null
           created_at?: string
           description?: string | null
+          featured_order?: number | null
           id?: string
           image?: string | null
           images?: string[] | null
+          is_featured?: boolean | null
+          is_most_picked?: boolean | null
+          most_picked_order?: number | null
           name?: string
           price?: number
           stock?: number | null
@@ -360,6 +435,93 @@ export type Database = {
         }
         Relationships: []
       }
+      return_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          customer_email: string
+          description: string | null
+          id: string
+          order_number: string
+          priority: string
+          reason: string
+          return_label_sent: boolean | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email: string
+          description?: string | null
+          id?: string
+          order_number: string
+          priority?: string
+          reason: string
+          return_label_sent?: boolean | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email?: string
+          description?: string | null
+          id?: string
+          order_number?: string
+          priority?: string
+          reason?: string
+          return_label_sent?: boolean | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      support_requests: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          id: string
+          message: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          id?: string
+          message: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          message?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -378,6 +540,57 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      warranty_claims: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          issue_description: string
+          order_number: string
+          priority: string
+          product_name: string
+          purchase_date: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          issue_description: string
+          order_number: string
+          priority?: string
+          product_name: string
+          purchase_date: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          issue_description?: string
+          order_number?: string
+          priority?: string
+          product_name?: string
+          purchase_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

@@ -31,15 +31,15 @@ export function Header() {
     try {
       await supabase.auth.signOut();
       toast({
-        title: t('auth.signout.success') || "Signed out successfully",
-        description: t('auth.signout.description') || "You have been logged out of your account."
+        title: "Signed out successfully",
+        description: "You have been logged out of your account."
       });
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
-        title: t('auth.signout.error') || "Error signing out",
-        description: t('auth.signout.error.description') || "There was an error signing you out. Please try again.",
+        title: "Error signing out",
+        description: "There was an error signing you out. Please try again.",
         variant: "destructive"
       });
     }
@@ -47,50 +47,79 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <Link to="/" className="text-2xl font-bold text-ecommerce-600 hover:text-ecommerce-700 transition-colors">
-              ShopEase
+            <Link to="/" className="flex items-center group flex-shrink-0">
+              <div className="relative flex items-center justify-center">
+                <img 
+                  src="/lovable-uploads/06008771-3946-4cde-95f5-eed2a260f2ae.png" 
+                  alt="Logo" 
+                  className="h-10 w-auto lg:h-12 group-hover:scale-110 transition-all duration-300"
+                />
+                <div className="absolute inset-0 bg-ecommerce-600/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-ecommerce-600 transition-colors">
-                {t('nav.home') || 'Home'}
+            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
+              <Link 
+                to="/" 
+                className="relative px-3 xl:px-4 py-2 text-sm xl:text-base text-gray-700 hover:text-ecommerce-600 transition-all duration-300 group"
+              >
+                <span className="relative z-10">Home</span>
+                <div className="absolute inset-0 bg-ecommerce-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-95 group-hover:scale-100"></div>
               </Link>
-              <Link to="/products" className="text-gray-700 hover:text-ecommerce-600 transition-colors">
-                {t('nav.products') || 'Products'}
+              <Link 
+                to="/products" 
+                className="relative px-3 xl:px-4 py-2 text-sm xl:text-base text-gray-700 hover:text-ecommerce-600 transition-all duration-300 group"
+              >
+                <span className="relative z-10">Products</span>
+                <div className="absolute inset-0 bg-ecommerce-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-95 group-hover:scale-100"></div>
               </Link>
-              <Link to="/collections" className="text-gray-700 hover:text-ecommerce-600 transition-colors">
-                {t('nav.collections') || 'Collections'}
+              <Link 
+                to="/collections" 
+                className="relative px-3 xl:px-4 py-2 text-sm xl:text-base text-gray-700 hover:text-ecommerce-600 transition-all duration-300 group"
+              >
+                <span className="relative z-10">Collections</span>
+                <div className="absolute inset-0 bg-ecommerce-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-95 group-hover:scale-100"></div>
               </Link>
-              <Link to="/live-map" className="text-gray-700 hover:text-ecommerce-600 transition-colors">
-                {t('nav.tracking') || 'Live Tracking'}
+              <Link 
+                to="/live-map" 
+                className="relative px-3 xl:px-4 py-2 text-sm xl:text-base text-gray-700 hover:text-ecommerce-600 transition-all duration-300 group"
+              >
+                <span className="relative z-10">Live Tracking</span>
+                <div className="absolute inset-0 bg-ecommerce-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-95 group-hover:scale-100"></div>
               </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-ecommerce-600 transition-colors">
-                {t('nav.contact') || 'Contact'}
+              <Link 
+                to="/contact" 
+                className="relative px-3 xl:px-4 py-2 text-sm xl:text-base text-gray-700 hover:text-ecommerce-600 transition-all duration-300 group"
+              >
+                <span className="relative z-10">Contact</span>
+                <div className="absolute inset-0 bg-ecommerce-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-95 group-hover:scale-100"></div>
               </Link>
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center space-x-4">
-              <LanguageSelector />
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="hidden sm:block">
+                <LanguageSelector />
+              </div>
               
-              {/* Search - Desktop only */}
-              <button className="hidden md:block p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <Search className="w-5 h-5" />
+              {/* Search - Desktop and Tablet */}
+              <button className="hidden md:flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 text-gray-400 hover:text-ecommerce-600 hover:bg-ecommerce-50 rounded-lg transition-all duration-300 group">
+                <Search className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform duration-300" />
               </button>
 
               {/* Wishlist */}
               <Link 
                 to="/wishlist" 
-                className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="relative flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 text-gray-400 hover:text-ecommerce-600 hover:bg-ecommerce-50 rounded-lg transition-all duration-300 group"
               >
-                <Heart className="w-5 h-5" />
+                <Heart className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform duration-300" />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-ecommerce-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-ecommerce-600 text-white text-xs rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center animate-pulse">
                     {wishlistCount}
                   </span>
                 )}
@@ -99,11 +128,11 @@ export function Header() {
               {/* Cart */}
               <button 
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="relative flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 text-gray-400 hover:text-ecommerce-600 hover:bg-ecommerce-50 rounded-lg transition-all duration-300 group"
               >
-                <ShoppingBag className="w-5 h-5" />
+                <ShoppingBag className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform duration-300" />
                 {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-ecommerce-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-ecommerce-600 text-white text-xs rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center animate-pulse">
                     {cartItemsCount}
                   </span>
                 )}
@@ -111,35 +140,39 @@ export function Header() {
 
               {/* User Menu */}
               {user ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   {isAdmin && (
-                    <Link to="/admin">
-                      <Button variant="outline" size="sm" className="hidden md:flex items-center space-x-1">
-                        <Settings className="w-4 h-4" />
-                        <span>Admin</span>
+                    <Link to="/admin" className="hidden lg:block">
+                      <Button variant="outline" size="sm" className="hover:bg-ecommerce-50 hover:border-ecommerce-300 hover:text-ecommerce-700 transition-all duration-300">
+                        <Settings className="w-4 h-4 mr-1" />
+                        <span className="hidden xl:inline">Admin</span>
                       </Button>
                     </Link>
                   )}
                   <Link 
                     to="/profile" 
-                    className="flex items-center space-x-2 p-2 text-gray-700 hover:text-ecommerce-600 transition-colors"
+                    className="hidden sm:flex items-center space-x-2 px-2 lg:px-3 py-2 text-gray-700 hover:text-ecommerce-600 hover:bg-ecommerce-50 rounded-lg transition-all duration-300 group"
                   >
-                    <User className="w-5 h-5" />
-                    <span className="hidden md:inline text-sm">{user.email}</span>
+                    <User className="w-4 h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="hidden md:inline text-xs lg:text-sm truncate max-w-24 lg:max-w-32">{user.email}</span>
                   </Link>
                   <Button 
                     onClick={handleSignOut}
                     variant="outline" 
                     size="sm"
-                    className="hidden md:block"
+                    className="hidden md:flex hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-300 text-xs lg:text-sm"
                   >
-                    {t('auth.signout') || 'Sign Out'}
+                    Sign Out
                   </Button>
                 </div>
               ) : (
                 <Link to="/auth">
-                  <Button variant="outline" size="sm">
-                    {t('auth.signin') || 'Sign In'}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-gradient-to-r from-ecommerce-600 to-ecommerce-700 text-white border-0 hover:from-ecommerce-700 hover:to-ecommerce-800 hover:shadow-lg hover:scale-105 transition-all duration-300 text-xs lg:text-sm px-3 lg:px-4"
+                  >
+                    Sign In
                   </Button>
                 </Link>
               )}
@@ -147,9 +180,9 @@ export function Header() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="md:hidden p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="lg:hidden flex items-center justify-center w-9 h-9 text-gray-400 hover:text-ecommerce-600 hover:bg-ecommerce-50 rounded-lg transition-all duration-300 group"
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
               </button>
             </div>
           </div>

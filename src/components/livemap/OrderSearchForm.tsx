@@ -10,7 +10,7 @@ import { Order } from '@/types/store';
 
 interface OrderSearchFormProps {
   orders: Order[];
-  onOrderFound: (orderId: string) => void;
+  onOrderFound: (orderNumber: string) => void;
   onOrderNotFound: () => void;
 }
 
@@ -24,12 +24,12 @@ export function OrderSearchForm({ orders, onOrderFound, onOrderNotFound }: Order
     setSearchAttempted(true);
     const trimmedInput = orderInput.trim().toUpperCase();
     
-    const actualOrder = orders.find(order => order.id.toUpperCase() === trimmedInput);
+    const actualOrder = orders.find(order => order.orderNumber.toUpperCase() === trimmedInput);
     
     if (actualOrder) {
       setOrderFound(true);
-      onOrderFound(trimmedInput);
-      console.log(`Order found: ${trimmedInput}`, actualOrder);
+      onOrderFound(actualOrder.orderNumber);
+      console.log(`Order found: ${actualOrder.orderNumber}`, actualOrder);
     } else {
       setOrderFound(false);
       onOrderNotFound();
@@ -51,11 +51,11 @@ export function OrderSearchForm({ orders, onOrderFound, onOrderNotFound }: Order
     }
   };
 
-  const handleQuickSelect = (orderId: string) => {
-    setOrderInput(orderId);
+  const handleQuickSelect = (orderNumber: string) => {
+    setOrderInput(orderNumber);
     setOrderFound(true);
     setSearchAttempted(true);
-    onOrderFound(orderId);
+    onOrderFound(orderNumber);
   };
 
   return (
@@ -98,10 +98,10 @@ export function OrderSearchForm({ orders, onOrderFound, onOrderNotFound }: Order
               {orders.slice(-5).map((order) => (
                 <button
                   key={order.id}
-                  onClick={() => handleQuickSelect(order.id)}
+                  onClick={() => handleQuickSelect(order.orderNumber)}
                   className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs rounded transition-colors"
                 >
-                  {order.id}
+                  {order.orderNumber}
                 </button>
               ))}
             </div>

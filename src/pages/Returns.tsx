@@ -8,22 +8,54 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RotateCcw, Package, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Returns() {
+  const { user } = useAuth();
   const [returnForm, setReturnForm] = useState({
     orderNumber: '',
     reason: '',
     description: '',
     email: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmitReturn = (e: React.FormEvent) => {
+  const handleSubmitReturn = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Return request submitted!",
-      description: "We'll send you a return label within 24 hours.",
-    });
-    setReturnForm({ orderNumber: '', reason: '', description: '', email: '' });
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('return_requests')
+        .insert({
+          user_id: user?.id || null,
+          order_number: returnForm.orderNumber,
+          customer_email: returnForm.email,
+          reason: returnForm.reason,
+          description: returnForm.description,
+          status: 'pending',
+          priority: 'medium'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Return request submitted!",
+        description: "We'll send you a return label within 24 hours.",
+      });
+
+      setReturnForm({ orderNumber: '', reason: '', description: '', email: '' });
+    } catch (error) {
+      console.error('Error submitting return request:', error);
+      toast({
+        title: "Error submitting return",
+        description: "Please try again or contact support.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -168,8 +200,12 @@ export function Returns() {
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-ecommerce-600 hover:bg-ecommerce-700">
-                Submit Return Request
+              <Button 
+                type="submit" 
+                className="w-full bg-ecommerce-600 hover:bg-ecommerce-700"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Return Request'}
               </Button>
             </form>
           </CardContent>
