@@ -4,13 +4,21 @@ import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLinkClick = () => {
+    scrollToTop();
+  };
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Social Links */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center" onClick={handleLinkClick}>
               <img 
                 src="/lovable-uploads/06008771-3946-4cde-95f5-eed2a260f2ae.png" 
                 alt="Logo" 
@@ -41,22 +49,22 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/products" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/products" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Products
                 </Link>
               </li>
               <li>
-                <Link to="/collections" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/collections" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Collections
                 </Link>
               </li>
               <li>
-                <Link to="/orders" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/orders" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Track Orders
                 </Link>
               </li>
               <li>
-                <Link to="/live-map" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/live-map" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Live Tracking
                 </Link>
               </li>
@@ -68,22 +76,22 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/contact" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/support" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/support" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Support
                 </Link>
               </li>
               <li>
-                <Link to="/returns" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/returns" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Returns & Exchanges
                 </Link>
               </li>
               <li>
-                <Link to="/warranty" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/warranty" className="text-gray-400 hover:text-white transition-colors" onClick={handleLinkClick}>
                   Warranty
                 </Link>
               </li>
@@ -119,13 +127,13 @@ export function Footer() {
               © 2024 Jewelryport. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors" onClick={handleLinkClick}>
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition-colors" onClick={handleLinkClick}>
                 Terms of Service
               </Link>
-              <Link to="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link to="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors" onClick={handleLinkClick}>
                 Cookie Policy
               </Link>
             </div>
