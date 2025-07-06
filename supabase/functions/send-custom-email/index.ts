@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from 'npm:resend@2.0.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,19 +65,47 @@ serve(async (req) => {
       processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
     });
 
-    // In a real implementation, you would use a service like Resend, SendGrid, etc.
-    // For this demo, we'll simulate sending and log the email history
+    // Send emails using Resend
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    const emailHistoryEntries = [];
     
-    const emailHistoryEntries = recipients.map(email => ({
-      template_id: templateId || null,
-      recipient_type: recipientType,
-      recipient_email: email,
-      subject: processedSubject,
-      content: processedContent,
-      status: 'sent' as const,
-      sent_at: new Date().toISOString(),
-      metadata: { variables }
-    }));
+    for (const recipientEmail of recipients) {
+      try {
+        const emailResult = await resend.emails.send({
+          from: 'Jewelry Port <noreply@resend.dev>',
+          to: [recipientEmail],
+          subject: processedSubject,
+          html: processedContent
+        });
+
+        console.log(`Email sent to ${recipientEmail}:`, emailResult.data?.id);
+
+        emailHistoryEntries.push({
+          template_id: templateId || null,
+          recipient_type: recipientType,
+          recipient_email: recipientEmail,
+          subject: processedSubject,
+          content: processedContent,
+          status: 'sent' as const,
+          sent_at: new Date().toISOString(),
+          metadata: { variables, resend_id: emailResult.data?.id }
+        });
+      } catch (error) {
+        console.error(`Failed to send email to ${recipientEmail}:`, error);
+        
+        emailHistoryEntries.push({
+          template_id: templateId || null,
+          recipient_type: recipientType,
+          recipient_email: recipientEmail,
+          subject: processedSubject,
+          content: processedContent,
+          status: 'failed' as const,
+          sent_at: new Date().toISOString(),
+          error_message: error.message,
+          metadata: { variables }
+        });
+      }
+    }
 
     // Save to email history
     const { error: historyError } = await supabase
