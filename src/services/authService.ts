@@ -91,22 +91,19 @@ class AuthService {
 
   async resetPassword(email: string) {
     try {
-      const response = await fetch(`https://kirxlakwwzpkrmipdelj.supabase.co/functions/v1/send-password-reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpcnhsYWt3d3pwa3JtaXBkZWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MzYyMDUsImV4cCI6MjA2NTMxMjIwNX0.0K47ffl2fgM3PteazMqgT87YNqj7GTzVHyxnfdo--R0`
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
           email,
           redirectUrl: `${window.location.origin}/reset-password`
-        })
+        }
       });
 
-      const result = await response.json();
+      if (error) {
+        throw error;
+      }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to send password reset email');
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to send password reset email');
       }
 
       toast({
