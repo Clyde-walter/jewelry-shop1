@@ -91,19 +91,18 @@ class AuthService {
 
   async resetPassword(email: string) {
     try {
-      const { data, error } = await supabase.functions.invoke('send-password-reset', {
-        body: {
-          email,
-          redirectUrl: `${window.location.origin}/reset-password`
-        }
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
       });
 
       if (error) {
-        throw error;
-      }
-
-      if (!data?.success) {
-        throw new Error(data?.error || 'Failed to send password reset email');
+        console.error('Password reset error:', error);
+        toast({
+          title: "Password reset failed",
+          description: error.message,
+          variant: "destructive"
+        });
+        return { error };
       }
 
       toast({
