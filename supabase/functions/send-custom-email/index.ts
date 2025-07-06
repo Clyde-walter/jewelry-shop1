@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Resend } from 'npm:resend@2.0.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -65,47 +64,21 @@ serve(async (req) => {
       processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
     });
 
-    // Send emails using Resend
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
-    const emailHistoryEntries = [];
-    
-    for (const recipientEmail of recipients) {
-      try {
-        const emailResult = await resend.emails.send({
-          from: 'Jewelry Port <noreply@resend.dev>',
-          to: [recipientEmail],
-          subject: processedSubject,
-          html: processedContent
-        });
+    // Note: Custom email sending requires an external email service
+    // This function now only logs the email request and saves to history
+    console.log(`Would send email to ${recipients.length} recipients`);
+    console.log('Email content:', { subject: processedSubject, content: processedContent });
 
-        console.log(`Email sent to ${recipientEmail}:`, emailResult.data?.id);
-
-        emailHistoryEntries.push({
-          template_id: templateId || null,
-          recipient_type: recipientType,
-          recipient_email: recipientEmail,
-          subject: processedSubject,
-          content: processedContent,
-          status: 'sent' as const,
-          sent_at: new Date().toISOString(),
-          metadata: { variables, resend_id: emailResult.data?.id }
-        });
-      } catch (error) {
-        console.error(`Failed to send email to ${recipientEmail}:`, error);
-        
-        emailHistoryEntries.push({
-          template_id: templateId || null,
-          recipient_type: recipientType,
-          recipient_email: recipientEmail,
-          subject: processedSubject,
-          content: processedContent,
-          status: 'failed' as const,
-          sent_at: new Date().toISOString(),
-          error_message: error.message,
-          metadata: { variables }
-        });
-      }
-    }
+    const emailHistoryEntries = recipients.map(recipientEmail => ({
+      template_id: templateId || null,
+      recipient_type: recipientType,
+      recipient_email: recipientEmail,
+      subject: processedSubject,
+      content: processedContent,
+      status: 'pending' as const,
+      sent_at: new Date().toISOString(),
+      metadata: { variables, note: 'Email service not configured' }
+    }));
 
     // Save to email history
     const { error: historyError } = await supabase
