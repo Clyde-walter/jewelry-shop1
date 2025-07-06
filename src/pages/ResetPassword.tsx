@@ -17,18 +17,52 @@ export function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isValidSession, setIsValidSession] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Check if we have the necessary parameters for password reset
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    
-    if (!accessToken || !refreshToken) {
-      navigate('/forgot-password');
-    }
-  }, [searchParams, navigate]);
+    const handleAuthCallback = async () => {
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const type = searchParams.get('type');
+      
+      console.log('Auth callback params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+
+      if (type === 'recovery' && accessToken && refreshToken) {
+        try {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error('Session error:', error);
+            setError('Invalid or expired reset link. Please request a new password reset.');
+            return;
+          }
+
+          if (data.session) {
+            console.log('Session established successfully');
+            setIsValidSession(true);
+          }
+        } catch (error: any) {
+          console.error('Auth callback error:', error);
+          setError('Failed to process reset link. Please try again.');
+        }
+      } else {
+        // Check if there's an existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setIsValidSession(true);
+        } else {
+          setError('Invalid or expired reset link. Please request a new password reset.');
+        }
+      }
+    };
+
+    handleAuthCallback();
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +105,49 @@ export function ResetPassword() {
       setLoading(false);
     }
   };
+
+  if (!isValidSession && error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center space-x-2">
+              <Gem className="w-8 h-8 text-ecommerce-600" />
+              <span className="text-3xl font-serif font-bold text-ecommerce-600">Jewelry Port</span>
+            </Link>
+            <p className="text-gray-600 mt-2">Password Reset</p>
+          </div>
+
+          <Card className="shadow-xl border-0">
+            <CardHeader className="text-center pb-4">
+              <CardTitle className="text-2xl font-bold">Link Expired</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={() => navigate('/forgot-password')}
+                  className="w-full bg-ecommerce-600 hover:bg-ecommerce-700 text-white"
+                >
+                  Request New Reset Link
+                </Button>
+                <Button
+                  onClick={() => navigate('/auth')}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Back to Sign In
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
@@ -148,7 +225,7 @@ export function ResetPassword() {
               <Button 
                 type="submit" 
                 className="w-full bg-ecommerce-600 hover:bg-ecommerce-700 text-white"
-                disabled={loading}
+                disabled={loading || !isValidSession}
               >
                 {loading ? 'Updating Password...' : 'Update Password'}
               </Button>
