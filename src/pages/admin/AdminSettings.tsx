@@ -22,21 +22,15 @@ export function AdminSettings() {
     })
   );
 
-  // Payment settings state with Paystack and Flutterwave support
+  // Payment settings state - only Flutterwave supported
   const [paymentSettings, setPaymentSettings] = useState(() =>
     getFromLocalStorage('paymentSettings', {
-      stripeEnabled: true,
-      paypalEnabled: false,
-      paystackEnabled: false,
-      flutterwaveEnabled: false,
-      stripeApiKey: '',
-      paystackPublicKey: '',
-      paystackSecretKey: '',
+      flutterwaveEnabled: true,
       flutterwavePublicKey: '',
       flutterwaveSecretKey: ''
     })
   );
-  const [showApiKey, setShowApiKey] = useState(false);
+  
 
   // Notification settings state
   const [notifications, setNotifications] = useState(() =>
@@ -85,8 +79,6 @@ export function AdminSettings() {
           <PaymentSettings 
             paymentSettings={paymentSettings}
             setPaymentSettings={setPaymentSettings}
-            showApiKey={showApiKey}
-            setShowApiKey={setShowApiKey}
           />
         </TabsContent>
 

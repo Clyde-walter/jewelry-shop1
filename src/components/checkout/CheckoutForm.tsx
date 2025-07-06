@@ -16,7 +16,7 @@ interface CheckoutFormProps {
 export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   const { cart, getCartTotal, createOrder } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('paystack');
+  const paymentMethod = 'flutterwave'; // Only Flutterwave supported
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -144,10 +144,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               customerInfo={customerInfo}
               onInputChange={handleInputChange}
             />
-            <PaymentInfoForm 
-              paymentMethod={paymentMethod}
-              onPaymentMethodChange={setPaymentMethod}
-            />
+            <PaymentInfoForm />
           </div>
 
           {/* Order Summary */}
@@ -159,29 +156,17 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               tax={tax}
               finalTotal={finalTotal}
               isProcessing={isProcessing}
-              onSubmit={paymentMethod === 'stripe' ? handleStripeSubmit : undefined}
               paymentMethod={paymentMethod}
-              renderPaymentButton={() => 
-                paymentMethod === 'paystack' ? (
-                  <PaystackPayment
-                    amount={finalTotal}
-                    email={customerInfo.email}
-                    customerInfo={customerInfo}
-                    cartItems={cart}
-                    onSuccess={handlePaystackSuccess}
-                    onValidate={handlePaystackPayment}
-                  />
-                ) : paymentMethod === 'flutterwave' ? (
-                  <FlutterwavePayment
-                    amount={finalTotal}
-                    email={customerInfo.email}
-                    customerInfo={customerInfo}
-                    cartItems={cart}
-                    onSuccess={handlePaystackSuccess}
-                    onValidate={handleFlutterwavePayment}
-                  />
-                ) : null
-              }
+              renderPaymentButton={() => (
+                <FlutterwavePayment
+                  amount={finalTotal}
+                  email={customerInfo.email}
+                  customerInfo={customerInfo}
+                  cartItems={cart}
+                  onSuccess={handlePaystackSuccess}
+                  onValidate={handleFlutterwavePayment}
+                />
+              )}
             />
           </div>
         </div>
