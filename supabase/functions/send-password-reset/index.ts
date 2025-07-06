@@ -56,7 +56,7 @@ serve(async (req) => {
     const resetUrl = data.properties?.action_link || `${redirectUrl}?token=${data.properties?.hashed_token}`;
     
     const emailResult = await resend.emails.send({
-      from: 'Jewelry Port <noreply@resend.dev>',
+      from: 'Jewelry Port <onboarding@resend.dev>',
       to: [email],
       subject: 'Reset Your Jewelry Port Password',
       html: `
