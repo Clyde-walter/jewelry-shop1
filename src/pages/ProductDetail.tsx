@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowLeft, ShoppingCart, Heart, Minus, Plus, Package } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Minus, Plus, Package, Shield, Truck, RefreshCcw } from 'lucide-react';
 import { useProducts } from '@/contexts/ProductsContext';
 import { useCollections } from '@/contexts/CollectionsContext';
 import { useStore } from '@/contexts/StoreContext';
@@ -102,6 +101,77 @@ export function ProductDetail() {
     });
   };
 
+  const getProductSpecifications = (product: Product) => {
+    const specs = [
+      { label: 'Brand', value: 'Jewelry Port' },
+      { label: 'Material', value: getProductMaterial(product.category) },
+      { label: 'Gender', value: 'Unisex' },
+      { label: 'Category', value: product.category.charAt(0).toUpperCase() + product.category.slice(1) },
+      { label: 'Stock Status', value: product.stock > 0 ? 'IN STOCK' : 'OUT OF STOCK' },
+      { label: 'SKU', value: product.id.slice(0, 8).toUpperCase() },
+      { label: 'Weight', value: getProductWeight(product.category) },
+      { label: 'Dimensions', value: getProductDimensions(product.category) },
+      { label: 'Finish', value: getProductFinish(product.category) },
+      { label: 'Care Instructions', value: 'Clean with soft cloth' },
+      { label: 'Warranty', value: 'Lifetime warranty included' },
+      { label: 'Country of Origin', value: 'Handcrafted' }
+    ];
+
+    if (collection) {
+      specs.splice(4, 0, { label: 'Collection', value: collection.name });
+    }
+
+    return specs;
+  };
+
+  const getProductMaterial = (category: string) => {
+    const materials = {
+      rings: 'Sterling Silver / Gold Plated',
+      necklaces: 'Sterling Silver Chain',
+      earrings: 'Hypoallergenic Metal',
+      bracelets: 'Stainless Steel',
+      watches: 'Stainless Steel Case',
+      pendants: 'Sterling Silver'
+    };
+    return materials[category as keyof typeof materials] || 'Premium Metal';
+  };
+
+  const getProductWeight = (category: string) => {
+    const weights = {
+      rings: '3-5g',
+      necklaces: '8-12g',
+      earrings: '2-4g',
+      bracelets: '15-25g',
+      watches: '45-65g',
+      pendants: '5-8g'
+    };
+    return weights[category as keyof typeof weights] || '5-10g';
+  };
+
+  const getProductDimensions = (category: string) => {
+    const dimensions = {
+      rings: 'Size 6-10 available',
+      necklaces: '16-20 inch length',
+      earrings: '1-2 inch drop',
+      bracelets: '7-8 inch circumference',
+      watches: '40-42mm case diameter',
+      pendants: '1-1.5 inch pendant'
+    };
+    return dimensions[category as keyof typeof dimensions] || 'Standard size';
+  };
+
+  const getProductFinish = (category: string) => {
+    const finishes = {
+      rings: 'Polished / Matte options',
+      necklaces: 'High polish finish',
+      earrings: 'Mirror polish',
+      bracelets: 'Brushed steel finish',
+      watches: 'Polished case',
+      pendants: 'Satin finish'
+    };
+    return finishes[category as keyof typeof finishes] || 'Premium finish';
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -134,6 +204,7 @@ export function ProductDetail() {
   }
 
   const displayImages = getDisplayImages();
+  const specifications = getProductSpecifications(product);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -272,62 +343,143 @@ export function ProductDetail() {
               {isInWishlist(product.id) ? 'In Wishlist' : 'Add to Wishlist'}
             </Button>
           </div>
+        </div>
+      </div>
 
-          {/* Product Information */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">Product Information</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Product ID</span>
-                  <span className="font-mono text-sm">{product.id.slice(0, 8)}...</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Category</span>
-                  <span className="capitalize">{product.category}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Stock Level</span>
-                  <span className={product.stock > 10 ? 'text-green-600' : product.stock > 0 ? 'text-yellow-600' : 'text-red-600'}>
-                    {product.stock > 10 ? 'In Stock' : product.stock > 0 ? 'Low Stock' : 'Out of Stock'}
-                  </span>
-                </div>
-                {collection && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Collection</span>
-                    <span>{collection.name}</span>
+      {/* Detailed Product Specifications */}
+      <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Package className="w-5 h-5 mr-2 text-ecommerce-600" />
+              Product Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-gray-600 leading-relaxed mb-6">
+                {product.description || `This exquisite ${product.category.slice(0, -1)} features premium craftsmanship and attention to detail. Each piece is carefully designed to complement your style and make a lasting impression.`}
+              </p>
+              
+              <div className="grid grid-cols-1 gap-3">
+                {specifications.map((spec, index) => (
+                  <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                    <span className="text-gray-600 font-medium">{spec.label}</span>
+                    <span className={`font-medium ${
+                      spec.label === 'Stock Status' 
+                        ? product.stock > 0 ? 'text-green-600' : 'text-red-600'
+                        : 'text-gray-900'
+                    }`}>
+                      {spec.value}
+                    </span>
                   </div>
-                )}
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Service Information */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Truck className="w-5 h-5 mr-2 text-ecommerce-600" />
+                Shipping Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Free Standard Shipping</p>
+                    <p className="text-gray-600">On orders over $100. Delivery in 5-7 business days.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Express Shipping Available</p>
+                    <p className="text-gray-600">2-3 business days delivery for urgent orders.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">International Shipping</p>
+                    <p className="text-gray-600">Worldwide delivery available with tracking.</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Product Features */}
           <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">Why Choose This Product</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <span className="text-ecommerce-600 mr-2">•</span>
-                  High-quality materials and craftsmanship
-                </li>
-                <li className="flex items-start">
-                  <span className="text-ecommerce-600 mr-2">•</span>
-                  Handcrafted with precision and care
-                </li>
-                <li className="flex items-start">
-                  <span className="text-ecommerce-600 mr-2">•</span>
-                  Lifetime warranty included
-                </li>
-                <li className="flex items-start">
-                  <span className="text-ecommerce-600 mr-2">•</span>
-                  Free shipping on orders over $100
-                </li>
-                <li className="flex items-start">
-                  <span className="text-ecommerce-600 mr-2">•</span>
-                  30-day return policy
-                </li>
-              </ul>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <RefreshCcw className="w-5 h-5 mr-2 text-ecommerce-600" />
+                Return Policy
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">30-Day Return Window</p>
+                    <p className="text-gray-600">Return or exchange within 30 days of purchase.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Free Return Shipping</p>
+                    <p className="text-gray-600">We cover return shipping costs for eligible items.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Money-Back Guarantee</p>
+                    <p className="text-gray-600">Full refund if you're not completely satisfied.</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Shield className="w-5 h-5 mr-2 text-ecommerce-600" />
+                Warranty & Care
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Lifetime Warranty</p>
+                    <p className="text-gray-600">Coverage against manufacturing defects.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Professional Cleaning</p>
+                    <p className="text-gray-600">Complimentary cleaning service available.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Repair Services</p>
+                    <p className="text-gray-600">Expert repair and maintenance services.</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
