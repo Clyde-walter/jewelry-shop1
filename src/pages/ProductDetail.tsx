@@ -1,15 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowLeft, ShoppingCart, Heart, Minus, Plus, Package, Shield, Truck, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Minus, Plus, Package } from 'lucide-react';
 import { useProducts } from '@/contexts/ProductsContext';
 import { useCollections } from '@/contexts/CollectionsContext';
 import { useStore } from '@/contexts/StoreContext';
 import { Product, Collection } from '@/types/store';
-import { ImageViewer } from '@/components/ImageViewer';
+import { ProductImageGallery } from '@/components/product/ProductImageGallery';
+import { ProductSpecifications } from '@/components/product/ProductSpecifications';
+import { ProductServiceInfo } from '@/components/product/ProductServiceInfo';
 
 export function ProductDetail() {
   const { id, collectionId } = useParams<{ id: string; collectionId?: string }>();
@@ -56,9 +57,12 @@ export function ProductDetail() {
     }
   };
 
-  const openImageViewer = (startIndex: number = 0) => {
-    setSelectedImageIndex(startIndex);
-    setImageViewerOpen(true);
+  const getDisplayImages = () => {
+    if (!product) return [];
+    const images = [];
+    if (product.image) images.push(product.image);
+    if (product.images?.length) images.push(...product.images);
+    return images.length > 0 ? images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'];
   };
 
   const handlePreviousImage = () => {
@@ -73,14 +77,6 @@ export function ProductDetail() {
     setSelectedImageIndex((prev) => 
       prev === images.length - 1 ? 0 : prev + 1
     );
-  };
-
-  const getDisplayImages = () => {
-    if (!product) return [];
-    const images = [];
-    if (product.image) images.push(product.image);
-    if (product.images?.length) images.push(...product.images);
-    return images.length > 0 ? images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'];
   };
 
   const handleAddToCart = () => {
@@ -99,77 +95,6 @@ export function ProductDetail() {
       image: product.image || '',
       description: product.description
     });
-  };
-
-  const getProductSpecifications = (product: Product) => {
-    const specs = [
-      { label: 'Brand', value: 'Jewelry Port' },
-      { label: 'Material', value: getProductMaterial(product.category) },
-      { label: 'Gender', value: 'Unisex' },
-      { label: 'Category', value: product.category.charAt(0).toUpperCase() + product.category.slice(1) },
-      { label: 'Stock Status', value: product.stock > 0 ? 'IN STOCK' : 'OUT OF STOCK' },
-      { label: 'SKU', value: product.id.slice(0, 8).toUpperCase() },
-      { label: 'Weight', value: getProductWeight(product.category) },
-      { label: 'Dimensions', value: getProductDimensions(product.category) },
-      { label: 'Finish', value: getProductFinish(product.category) },
-      { label: 'Care Instructions', value: 'Clean with soft cloth' },
-      { label: 'Warranty', value: 'Lifetime warranty included' },
-      { label: 'Country of Origin', value: 'Handcrafted' }
-    ];
-
-    if (collection) {
-      specs.splice(4, 0, { label: 'Collection', value: collection.name });
-    }
-
-    return specs;
-  };
-
-  const getProductMaterial = (category: string) => {
-    const materials = {
-      rings: 'Sterling Silver / Gold Plated',
-      necklaces: 'Sterling Silver Chain',
-      earrings: 'Hypoallergenic Metal',
-      bracelets: 'Stainless Steel',
-      watches: 'Stainless Steel Case',
-      pendants: 'Sterling Silver'
-    };
-    return materials[category as keyof typeof materials] || 'Premium Metal';
-  };
-
-  const getProductWeight = (category: string) => {
-    const weights = {
-      rings: '3-5g',
-      necklaces: '8-12g',
-      earrings: '2-4g',
-      bracelets: '15-25g',
-      watches: '45-65g',
-      pendants: '5-8g'
-    };
-    return weights[category as keyof typeof weights] || '5-10g';
-  };
-
-  const getProductDimensions = (category: string) => {
-    const dimensions = {
-      rings: 'Size 6-10 available',
-      necklaces: '16-20 inch length',
-      earrings: '1-2 inch drop',
-      bracelets: '7-8 inch circumference',
-      watches: '40-42mm case diameter',
-      pendants: '1-1.5 inch pendant'
-    };
-    return dimensions[category as keyof typeof dimensions] || 'Standard size';
-  };
-
-  const getProductFinish = (category: string) => {
-    const finishes = {
-      rings: 'Polished / Matte options',
-      necklaces: 'High polish finish',
-      earrings: 'Mirror polish',
-      bracelets: 'Brushed steel finish',
-      watches: 'Polished case',
-      pendants: 'Satin finish'
-    };
-    return finishes[category as keyof typeof finishes] || 'Premium finish';
   };
 
   if (loading) {
@@ -204,7 +129,6 @@ export function ProductDetail() {
   }
 
   const displayImages = getDisplayImages();
-  const specifications = getProductSpecifications(product);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -224,48 +148,20 @@ export function ProductDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Image Gallery */}
-        <div className="space-y-4">
-          {/* Main Image */}
-          <div 
-            className="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => openImageViewer(selectedImageIndex)}
-          >
-            <img
-              src={displayImages[selectedImageIndex]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
-              }}
-            />
-          </div>
-
-          {/* Thumbnail Images */}
-          {displayImages.length > 1 && (
-            <div className="grid grid-cols-5 gap-2">
-              {displayImages.slice(0, 5).map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImageIndex === index 
-                      ? 'border-ecommerce-600 shadow-md' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductImageGallery
+          images={displayImages}
+          productName={product.name}
+          selectedImageIndex={selectedImageIndex}
+          imageViewerOpen={imageViewerOpen}
+          onImageSelect={setSelectedImageIndex}
+          onImageViewerOpen={(index = 0) => {
+            setSelectedImageIndex(index);
+            setImageViewerOpen(true);
+          }}
+          onImageViewerClose={() => setImageViewerOpen(false)}
+          onPreviousImage={handlePreviousImage}
+          onNextImage={handleNextImage}
+        />
 
         {/* Product Details */}
         <div className="space-y-6">
@@ -346,154 +242,11 @@ export function ProductDetail() {
         </div>
       </div>
 
-      {/* Detailed Product Specifications */}
+      {/* Detailed Product Specifications and Service Information */}
       <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Package className="w-5 h-5 mr-2 text-ecommerce-600" />
-              Product Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-gray-600 leading-relaxed mb-6">
-                {product.description || `This exquisite ${product.category.slice(0, -1)} features premium craftsmanship and attention to detail. Each piece is carefully designed to complement your style and make a lasting impression.`}
-              </p>
-              
-              <div className="grid grid-cols-1 gap-3">
-                {specifications.map((spec, index) => (
-                  <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                    <span className="text-gray-600 font-medium">{spec.label}</span>
-                    <span className={`font-medium ${
-                      spec.label === 'Stock Status' 
-                        ? product.stock > 0 ? 'text-green-600' : 'text-red-600'
-                        : 'text-gray-900'
-                    }`}>
-                      {spec.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Service Information */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Truck className="w-5 h-5 mr-2 text-ecommerce-600" />
-                Shipping Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">Free Standard Shipping</p>
-                    <p className="text-gray-600">On orders over $100. Delivery in 5-7 business days.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">Express Shipping Available</p>
-                    <p className="text-gray-600">2-3 business days delivery for urgent orders.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">International Shipping</p>
-                    <p className="text-gray-600">Worldwide delivery available with tracking.</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <RefreshCcw className="w-5 h-5 mr-2 text-ecommerce-600" />
-                Return Policy
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">30-Day Return Window</p>
-                    <p className="text-gray-600">Return or exchange within 30 days of purchase.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">Free Return Shipping</p>
-                    <p className="text-gray-600">We cover return shipping costs for eligible items.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">Money-Back Guarantee</p>
-                    <p className="text-gray-600">Full refund if you're not completely satisfied.</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Shield className="w-5 h-5 mr-2 text-ecommerce-600" />
-                Warranty & Care
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">Lifetime Warranty</p>
-                    <p className="text-gray-600">Coverage against manufacturing defects.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">Professional Cleaning</p>
-                    <p className="text-gray-600">Complimentary cleaning service available.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-ecommerce-600 rounded-full mt-2"></div>
-                  <div>
-                    <p className="font-medium">Repair Services</p>
-                    <p className="text-gray-600">Expert repair and maintenance services.</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <ProductSpecifications product={product} collection={collection} />
+        <ProductServiceInfo />
       </div>
-
-      {/* Image Viewer */}
-      <ImageViewer
-        images={displayImages}
-        currentIndex={selectedImageIndex}
-        isOpen={imageViewerOpen}
-        onClose={() => setImageViewerOpen(false)}
-        onPrevious={handlePreviousImage}
-        onNext={handleNextImage}
-      />
     </div>
   );
 }
