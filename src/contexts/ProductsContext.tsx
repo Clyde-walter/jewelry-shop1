@@ -12,8 +12,8 @@ interface ProductsContextType {
   fetchFeaturedProducts: () => Promise<void>;
   fetchMostPickedProducts: () => Promise<void>;
   fetchProductById: (id: string) => Promise<Product | null>;
-  createProduct: (product: Omit<Product, 'id'>) => Promise<void>;
-  updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
+  createProduct: (product: Omit<Product, 'id'> & { specifications?: Record<string, any>; ringSizes?: string[]; watchSizes?: string[] }) => Promise<void>;
+  updateProduct: (id: string, product: Partial<Product> & { specifications?: Record<string, any>; ringSizes?: string[]; watchSizes?: string[] }) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   updateFeaturedProducts: (productIds: string[]) => Promise<void>;
   updateMostPickedProducts: (productIds: string[]) => Promise<void>;
@@ -50,7 +50,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         isFeatured: product.is_featured || false,
         isMostPicked: product.is_most_picked || false,
         featuredOrder: product.featured_order || 0,
-        mostPickedOrder: product.most_picked_order || 0
+        mostPickedOrder: product.most_picked_order || 0,
+        ...(product.specifications && { specifications: product.specifications }),
+        ...(product.ring_sizes && { ringSizes: product.ring_sizes }),
+        ...(product.watch_sizes && { watchSizes: product.watch_sizes })
       }));
 
       setProducts(formattedProducts);
@@ -89,7 +92,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         isFeatured: product.is_featured || false,
         isMostPicked: product.is_most_picked || false,
         featuredOrder: product.featured_order || 0,
-        mostPickedOrder: product.most_picked_order || 0
+        mostPickedOrder: product.most_picked_order || 0,
+        ...(product.specifications && { specifications: product.specifications }),
+        ...(product.ring_sizes && { ringSizes: product.ring_sizes }),
+        ...(product.watch_sizes && { watchSizes: product.watch_sizes })
       }));
 
       setFeaturedProducts(formattedProducts);
@@ -121,7 +127,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         isFeatured: product.is_featured || false,
         isMostPicked: product.is_most_picked || false,
         featuredOrder: product.featured_order || 0,
-        mostPickedOrder: product.most_picked_order || 0
+        mostPickedOrder: product.most_picked_order || 0,
+        ...(product.specifications && { specifications: product.specifications }),
+        ...(product.ring_sizes && { ringSizes: product.ring_sizes }),
+        ...(product.watch_sizes && { watchSizes: product.watch_sizes })
       }));
 
       setMostPickedProducts(formattedProducts);
@@ -153,7 +162,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         isFeatured: data.is_featured || false,
         isMostPicked: data.is_most_picked || false,
         featuredOrder: data.featured_order || 0,
-        mostPickedOrder: data.most_picked_order || 0
+        mostPickedOrder: data.most_picked_order || 0,
+        ...(data.specifications && { specifications: data.specifications }),
+        ...(data.ring_sizes && { ringSizes: data.ring_sizes }),
+        ...(data.watch_sizes && { watchSizes: data.watch_sizes })
       };
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -161,7 +173,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const createProduct = async (product: Omit<Product, 'id'>) => {
+  const createProduct = async (product: Omit<Product, 'id'> & { specifications?: Record<string, any>; ringSizes?: string[]; watchSizes?: string[] }) => {
     try {
       const { error } = await supabase.from('products').insert({
         name: product.name,
@@ -175,7 +187,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
         is_featured: product.isFeatured || false,
         is_most_picked: product.isMostPicked || false,
         featured_order: product.featuredOrder || 0,
-        most_picked_order: product.mostPickedOrder || 0
+        most_picked_order: product.mostPickedOrder || 0,
+        specifications: product.specifications || {},
+        ring_sizes: product.ringSizes || [],
+        watch_sizes: product.watchSizes || []
       });
 
       if (error) throw error;
@@ -196,7 +211,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateProduct = async (id: string, product: Partial<Product>) => {
+  const updateProduct = async (id: string, product: Partial<Product> & { specifications?: Record<string, any>; ringSizes?: string[]; watchSizes?: string[] }) => {
     try {
       const { error } = await supabase
         .from('products')
@@ -212,7 +227,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
           is_featured: product.isFeatured,
           is_most_picked: product.isMostPicked,
           featured_order: product.featuredOrder,
-          most_picked_order: product.mostPickedOrder
+          most_picked_order: product.mostPickedOrder,
+          specifications: product.specifications,
+          ring_sizes: product.ringSizes,
+          watch_sizes: product.watchSizes
         })
         .eq('id', id);
 

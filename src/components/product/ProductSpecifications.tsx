@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Package } from 'lucide-react';
 import { Product, Collection } from '@/types/store';
 
@@ -10,6 +11,12 @@ interface ProductSpecificationsProps {
 }
 
 export function ProductSpecifications({ product, collection }: ProductSpecificationsProps) {
+  const productWithSpecs = product as Product & {
+    specifications?: Record<string, any>;
+    ringSizes?: string[];
+    watchSizes?: string[];
+  };
+
   const getProductMaterial = (category: string) => {
     const materials = {
       rings: 'Sterling Silver / Gold Plated',
@@ -60,15 +67,30 @@ export function ProductSpecifications({ product, collection }: ProductSpecificat
 
   const specifications = [
     { label: 'Brand', value: 'Jewelry Port' },
-    { label: 'Material', value: getProductMaterial(product.category) },
+    { 
+      label: 'Material', 
+      value: productWithSpecs.specifications?.material || getProductMaterial(product.category) 
+    },
     { label: 'Gender', value: 'Unisex' },
     { label: 'Category', value: product.category.charAt(0).toUpperCase() + product.category.slice(1) },
     { label: 'Stock Status', value: product.stock > 0 ? 'IN STOCK' : 'OUT OF STOCK' },
     { label: 'SKU', value: product.id.slice(0, 8).toUpperCase() },
-    { label: 'Weight', value: getProductWeight(product.category) },
-    { label: 'Dimensions', value: getProductDimensions(product.category) },
-    { label: 'Finish', value: getProductFinish(product.category) },
-    { label: 'Care Instructions', value: 'Clean with soft cloth' },
+    { 
+      label: 'Weight', 
+      value: productWithSpecs.specifications?.weight || getProductWeight(product.category) 
+    },
+    { 
+      label: 'Dimensions', 
+      value: productWithSpecs.specifications?.dimensions || getProductDimensions(product.category) 
+    },
+    { 
+      label: 'Finish', 
+      value: productWithSpecs.specifications?.finish || getProductFinish(product.category) 
+    },
+    { 
+      label: 'Care Instructions', 
+      value: productWithSpecs.specifications?.care_instructions || 'Clean with soft cloth' 
+    },
     { label: 'Warranty', value: 'Lifetime warranty included' },
     { label: 'Country of Origin', value: 'Handcrafted' }
   ];
@@ -105,6 +127,33 @@ export function ProductSpecifications({ product, collection }: ProductSpecificat
               </div>
             ))}
           </div>
+
+          {/* Available Sizes */}
+          {product.category === 'rings' && productWithSpecs.ringSizes && productWithSpecs.ringSizes.length > 0 && (
+            <div className="pt-4 border-t">
+              <h4 className="font-medium text-gray-700 mb-3">Available Ring Sizes</h4>
+              <div className="flex flex-wrap gap-2">
+                {productWithSpecs.ringSizes.map((size) => (
+                  <Badge key={size} variant="outline" className="text-sm">
+                    Size {size}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {product.category === 'watches' && productWithSpecs.watchSizes && productWithSpecs.watchSizes.length > 0 && (
+            <div className="pt-4 border-t">
+              <h4 className="font-medium text-gray-700 mb-3">Available Watch Sizes</h4>
+              <div className="flex flex-wrap gap-2">
+                {productWithSpecs.watchSizes.map((size) => (
+                  <Badge key={size} variant="outline" className="text-sm">
+                    {size}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

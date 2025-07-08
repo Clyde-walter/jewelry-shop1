@@ -351,8 +351,11 @@ export type Database = {
           most_picked_order: number | null
           name: string
           price: number
+          ring_sizes: string[] | null
+          specifications: Json | null
           stock: number | null
           updated_at: string
+          watch_sizes: string[] | null
         }
         Insert: {
           category: string
@@ -368,8 +371,11 @@ export type Database = {
           most_picked_order?: number | null
           name: string
           price: number
+          ring_sizes?: string[] | null
+          specifications?: Json | null
           stock?: number | null
           updated_at?: string
+          watch_sizes?: string[] | null
         }
         Update: {
           category?: string
@@ -385,8 +391,11 @@ export type Database = {
           most_picked_order?: number | null
           name?: string
           price?: number
+          ring_sizes?: string[] | null
+          specifications?: Json | null
           stock?: number | null
           updated_at?: string
+          watch_sizes?: string[] | null
         }
         Relationships: [
           {

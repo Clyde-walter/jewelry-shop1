@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ImageUpload } from '@/components/ImageUpload';
+import { ProductSpecificationsForm } from '@/components/admin/ProductSpecificationsForm';
 import { useProducts } from '@/contexts/ProductsContext';
 import { Product } from '@/types/store';
 
@@ -24,7 +25,10 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
     description: '',
     stock: '',
     image: '',
-    images: [] as string[]
+    images: [] as string[],
+    specifications: {} as Record<string, any>,
+    ringSizes: [] as string[],
+    watchSizes: [] as string[]
   });
 
   const categories = [
@@ -45,7 +49,10 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
         description: product.description || '',
         stock: product.stock.toString(),
         image: product.image || '',
-        images: product.images || []
+        images: product.images || [],
+        specifications: (product as any).specifications || {},
+        ringSizes: (product as any).ringSizes || [],
+        watchSizes: (product as any).watchSizes || []
       });
     }
   }, [product]);
@@ -63,7 +70,10 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
         stock: parseInt(formData.stock),
         image: formData.images[0] || formData.image,
         images: formData.images,
-        collectionId: undefined
+        collectionId: undefined,
+        specifications: formData.specifications,
+        ringSizes: formData.ringSizes,
+        watchSizes: formData.watchSizes
       };
 
       if (product) {
@@ -170,6 +180,23 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
           </div>
         </div>
       </div>
+
+      {/* Product Specifications */}
+      <ProductSpecificationsForm
+        category={formData.category}
+        specifications={formData.specifications}
+        ringSizes={formData.ringSizes}
+        watchSizes={formData.watchSizes}
+        onSpecificationsChange={(specifications) => 
+          setFormData(prev => ({ ...prev, specifications }))
+        }
+        onRingSizesChange={(ringSizes) => 
+          setFormData(prev => ({ ...prev, ringSizes }))
+        }
+        onWatchSizesChange={(watchSizes) => 
+          setFormData(prev => ({ ...prev, watchSizes }))
+        }
+      />
 
       <div className="flex justify-end gap-4 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onClose}>
