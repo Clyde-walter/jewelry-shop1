@@ -4,6 +4,29 @@ import { Product } from '@/types/store';
 import { toast } from '@/hooks/use-toast';
 
 export const useProductsApi = () => {
+  const convertDbProductToProduct = (dbProduct: any): Product => {
+    return {
+      id: dbProduct.id,
+      name: dbProduct.name,
+      price: Number(dbProduct.price),
+      image: dbProduct.image || '',
+      images: dbProduct.images || [],
+      description: dbProduct.description || '',
+      category: dbProduct.category,
+      stock: dbProduct.stock || 0,
+      collectionId: dbProduct.collection_id,
+      isFeatured: dbProduct.is_featured || false,
+      isMostPicked: dbProduct.is_most_picked || false,
+      featuredOrder: dbProduct.featured_order || 0,
+      mostPickedOrder: dbProduct.most_picked_order || 0,
+      specifications: (dbProduct.specifications && typeof dbProduct.specifications === 'object' && !Array.isArray(dbProduct.specifications)) 
+        ? dbProduct.specifications as Record<string, any>
+        : {},
+      ringSizes: dbProduct.ring_sizes || [],
+      watchSizes: dbProduct.watch_sizes || []
+    };
+  };
+
   const fetchProducts = async (): Promise<Product[]> => {
     const { data, error } = await supabase
       .from('products')
@@ -12,24 +35,7 @@ export const useProductsApi = () => {
 
     if (error) throw error;
 
-    return data.map(product => ({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      image: product.image || '',
-      images: product.images || [],
-      description: product.description || '',
-      category: product.category,
-      stock: product.stock || 0,
-      collectionId: product.collection_id,
-      isFeatured: product.is_featured || false,
-      isMostPicked: product.is_most_picked || false,
-      featuredOrder: product.featured_order || 0,
-      mostPickedOrder: product.most_picked_order || 0,
-      ...(product.specifications && { specifications: product.specifications }),
-      ...(product.ring_sizes && { ringSizes: product.ring_sizes }),
-      ...(product.watch_sizes && { watchSizes: product.watch_sizes })
-    }));
+    return data.map(convertDbProductToProduct);
   };
 
   const fetchFeaturedProducts = async (): Promise<Product[]> => {
@@ -41,24 +47,7 @@ export const useProductsApi = () => {
 
     if (error) throw error;
 
-    return data.map(product => ({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      image: product.image || '',
-      images: product.images || [],
-      description: product.description || '',
-      category: product.category,
-      stock: product.stock || 0,
-      collectionId: product.collection_id,
-      isFeatured: product.is_featured || false,
-      isMostPicked: product.is_most_picked || false,
-      featuredOrder: product.featured_order || 0,
-      mostPickedOrder: product.most_picked_order || 0,
-      ...(product.specifications && { specifications: product.specifications }),
-      ...(product.ring_sizes && { ringSizes: product.ring_sizes }),
-      ...(product.watch_sizes && { watchSizes: product.watch_sizes })
-    }));
+    return data.map(convertDbProductToProduct);
   };
 
   const fetchMostPickedProducts = async (): Promise<Product[]> => {
@@ -70,24 +59,7 @@ export const useProductsApi = () => {
 
     if (error) throw error;
 
-    return data.map(product => ({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      image: product.image || '',
-      images: product.images || [],
-      description: product.description || '',
-      category: product.category,
-      stock: product.stock || 0,
-      collectionId: product.collection_id,
-      isFeatured: product.is_featured || false,
-      isMostPicked: product.is_most_picked || false,
-      featuredOrder: product.featured_order || 0,
-      mostPickedOrder: product.most_picked_order || 0,
-      ...(product.specifications && { specifications: product.specifications }),
-      ...(product.ring_sizes && { ringSizes: product.ring_sizes }),
-      ...(product.watch_sizes && { watchSizes: product.watch_sizes })
-    }));
+    return data.map(convertDbProductToProduct);
   };
 
   const fetchProductById = async (id: string): Promise<Product | null> => {
@@ -102,24 +74,7 @@ export const useProductsApi = () => {
       return null;
     }
 
-    return {
-      id: data.id,
-      name: data.name,
-      price: Number(data.price),
-      image: data.image || '',
-      images: data.images || [],
-      description: data.description || '',
-      category: data.category,
-      stock: data.stock || 0,
-      collectionId: data.collection_id,
-      isFeatured: data.is_featured || false,
-      isMostPicked: data.is_most_picked || false,
-      featuredOrder: data.featured_order || 0,
-      mostPickedOrder: data.most_picked_order || 0,
-      ...(data.specifications && { specifications: data.specifications }),
-      ...(data.ring_sizes && { ringSizes: data.ring_sizes }),
-      ...(data.watch_sizes && { watchSizes: data.watch_sizes })
-    };
+    return convertDbProductToProduct(data);
   };
 
   return {
