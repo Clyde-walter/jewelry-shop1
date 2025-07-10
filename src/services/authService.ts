@@ -72,8 +72,12 @@ class AuthService {
 
   async resetPassword(email: string) {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+      // Use the custom edge function instead of Supabase's built-in method
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: email,
+          redirectUrl: `${window.location.origin}/reset-password`
+        }
       });
 
       if (error) {
@@ -86,9 +90,19 @@ class AuthService {
         return { error };
       }
 
+      if (!data.success) {
+        console.error('Password reset failed:', data.error);
+        toast({
+          title: "Password reset failed",
+          description: data.error || "Failed to send reset code. Please try again.",
+          variant: "destructive"
+        });
+        return { error: new Error(data.error) };
+      }
+
       toast({
         title: "Reset code sent",
-        description: "Please check your email for the verification code.",
+        description: "Please check your email (including spam folder) for the verification code.",
       });
 
       return { error: null };
