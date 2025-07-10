@@ -17,10 +17,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return authService.signIn(email, password);
   };
 
-  const signInWithGoogle = async () => {
-    return authService.signInWithGoogle();
-  };
-
   const signOut = async () => {
     return authService.signOut();
   };
@@ -40,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signUp,
     signIn,
-    signInWithGoogle,
     signOut,
     resetPassword,
     updateProfile,

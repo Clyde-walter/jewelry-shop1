@@ -11,7 +11,6 @@ import { useAuth } from '@/contexts/AuthContext';
 export function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const { resetPassword } = useAuth();
   const navigate = useNavigate();
 
@@ -22,71 +21,13 @@ export function ForgotPassword() {
     try {
       const { error } = await resetPassword(email);
       if (!error) {
-        setEmailSent(true);
+        // Redirect to OTP verification for password reset
+        navigate(`/reset-password-otp?email=${encodeURIComponent(email)}`);
       }
     } finally {
       setLoading(false);
     }
   };
-
-  if (emailSent) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center space-x-2">
-              <Gem className="w-8 h-8 text-ecommerce-600" />
-              <span className="text-3xl font-serif font-bold text-ecommerce-600">Jewelry Port</span>
-            </Link>
-            <p className="text-gray-600 mt-2">Check your email</p>
-          </div>
-
-          <Card className="shadow-xl border-0">
-            <CardHeader className="text-center pb-4">
-              <CardTitle className="text-2xl font-bold">Email Sent!</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-6">
-              <div className="space-y-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <Mail className="w-8 h-8 text-green-600" />
-                </div>
-                <p className="text-gray-600">
-                  We've sent password reset instructions to:
-                  <br />
-                  <span className="font-medium text-gray-800">{email}</span>
-                </p>
-                <p className="text-sm text-gray-500">
-                  Didn't receive the email? Check your spam folder or try again.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  onClick={() => {
-                    setEmailSent(false);
-                    setEmail('');
-                  }}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Try Different Email
-                </Button>
-                <Button
-                  onClick={() => navigate('/auth')}
-                  variant="ghost"
-                  className="w-full text-gray-600 hover:text-ecommerce-600"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Sign In
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
@@ -104,7 +45,7 @@ export function ForgotPassword() {
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
             <p className="text-gray-600 text-sm mt-2">
-              Enter your email address and we'll send you instructions to reset your password.
+              Enter your email address and we'll send you a verification code to reset your password.
             </p>
           </CardHeader>
           <CardContent>
@@ -130,7 +71,7 @@ export function ForgotPassword() {
                 className="w-full bg-ecommerce-600 hover:bg-ecommerce-700 text-white"
                 disabled={loading}
               >
-                {loading ? 'Sending...' : 'Send Reset Instructions'}
+                {loading ? 'Sending...' : 'Send Reset Code'}
               </Button>
             </form>
 

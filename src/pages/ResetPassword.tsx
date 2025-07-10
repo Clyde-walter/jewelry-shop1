@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,50 +19,20 @@ export function ResetPassword() {
   const [error, setError] = useState('');
   const [isValidSession, setIsValidSession] = useState(false);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const handleAuthCallback = async () => {
-      const accessToken = searchParams.get('access_token');
-      const refreshToken = searchParams.get('refresh_token');
-      const type = searchParams.get('type');
-      
-      console.log('Auth callback params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
-
-      if (type === 'recovery' && accessToken && refreshToken) {
-        try {
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-
-          if (error) {
-            console.error('Session error:', error);
-            setError('Invalid or expired reset link. Please request a new password reset.');
-            return;
-          }
-
-          if (data.session) {
-            console.log('Session established successfully');
-            setIsValidSession(true);
-          }
-        } catch (error: any) {
-          console.error('Auth callback error:', error);
-          setError('Failed to process reset link. Please try again.');
-        }
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsValidSession(true);
       } else {
-        // Check if there's an existing session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setIsValidSession(true);
-        } else {
-          setError('Invalid or expired reset link. Please request a new password reset.');
-        }
+        setError('Invalid session. Please request a new password reset.');
+        setTimeout(() => navigate('/forgot-password'), 3000);
       }
     };
 
-    handleAuthCallback();
-  }, [searchParams]);
+    checkSession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +67,8 @@ export function ResetPassword() {
           title: "Password updated successfully",
           description: "You can now sign in with your new password.",
         });
+        // Sign out to clear the recovery session
+        await supabase.auth.signOut();
         navigate('/auth');
       }
     } catch (error: any) {
@@ -120,7 +92,7 @@ export function ResetPassword() {
 
           <Card className="shadow-xl border-0">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-2xl font-bold">Link Expired</CardTitle>
+              <CardTitle className="text-2xl font-bold">Session Expired</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <Alert variant="destructive">
@@ -132,7 +104,7 @@ export function ResetPassword() {
                   onClick={() => navigate('/forgot-password')}
                   className="w-full bg-ecommerce-600 hover:bg-ecommerce-700 text-white"
                 >
-                  Request New Reset Link
+                  Request New Reset Code
                 </Button>
                 <Button
                   onClick={() => navigate('/auth')}

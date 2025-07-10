@@ -54,25 +54,6 @@ class AuthService {
     return { error };
   }
 
-  async signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`
-      }
-    });
-
-    if (error) {
-      toast({
-        title: "Google sign in failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-
-    return { error };
-  }
-
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -106,8 +87,8 @@ class AuthService {
       }
 
       toast({
-        title: "Password reset email sent",
-        description: "Please check your email for password reset instructions.",
+        title: "Reset code sent",
+        description: "Please check your email for the verification code.",
       });
 
       return { error: null };
@@ -115,7 +96,7 @@ class AuthService {
       console.error('Password reset error:', error);
       toast({
         title: "Password reset failed",
-        description: error.message || "Failed to send password reset email. Please try again.",
+        description: error.message || "Failed to send reset code. Please try again.",
         variant: "destructive"
       });
       return { error };
