@@ -10,9 +10,9 @@ import { useCustomers } from './CustomersContext';
 interface StoreContextType {
   // Cart functions
   cart: any[];
-  addToCart: (product: any) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addToCart: (product: any, selectedSize?: string) => void;
+  removeFromCart: (productId: string, selectedSize?: string) => void;
+  updateQuantity: (productId: string, quantity: number, selectedSize?: string) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   

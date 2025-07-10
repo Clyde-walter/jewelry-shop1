@@ -4,9 +4,9 @@ import { CartItem, Product, WishlistItem } from '@/types/store';
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product | WishlistItem) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addToCart: (product: Product | WishlistItem, selectedSize?: string) => void;
+  removeFromCart: (productId: string, selectedSize?: string) => void;
+  updateQuantity: (productId: string, quantity: number, selectedSize?: string) => void;
   clearCart: () => void;
   getCartTotal: () => number;
 }
@@ -29,7 +29,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('ecommerce-cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Product | WishlistItem) => {
+  const addToCart = (product: Product | WishlistItem, selectedSize?: string) => {
     const cartProduct: Product = {
       id: product.id,
       name: product.name,
@@ -37,34 +37,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       image: product.image,
       description: product.description || '',
       category: 'category' in product ? product.category : 'General',
-      stock: 'stock' in product ? product.stock : 999
+      stock: 'stock' in product ? product.stock : 999,
+      ringSizes: 'ringSizes' in product ? product.ringSizes : undefined,
+      watchSizes: 'watchSizes' in product ? product.watchSizes : undefined,
+      specifications: 'specifications' in product ? product.specifications : undefined
     };
 
     setCart(currentCart => {
-      const existingItem = currentCart.find(item => item.product.id === cartProduct.id);
+      const existingItem = currentCart.find(item => 
+        item.product.id === cartProduct.id && item.selectedSize === selectedSize
+      );
+      
       if (existingItem) {
         return currentCart.map(item =>
-          item.product.id === cartProduct.id
+          item.product.id === cartProduct.id && item.selectedSize === selectedSize
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      return [...currentCart, { product: cartProduct, quantity: 1 }];
+      
+      return [...currentCart, { product: cartProduct, quantity: 1, selectedSize }];
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart(currentCart => currentCart.filter(item => item.product.id !== productId));
+  const removeFromCart = (productId: string, selectedSize?: string) => {
+    setCart(currentCart => currentCart.filter(item => 
+      !(item.product.id === productId && item.selectedSize === selectedSize)
+    ));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, selectedSize?: string) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, selectedSize);
       return;
     }
     setCart(currentCart =>
       currentCart.map(item =>
-        item.product.id === productId
+        item.product.id === productId && item.selectedSize === selectedSize
           ? { ...item, quantity }
           : item
       )

@@ -11,6 +11,7 @@ import { Product, Collection } from '@/types/store';
 import { ProductImageGallery } from '@/components/product/ProductImageGallery';
 import { ProductSpecifications } from '@/components/product/ProductSpecifications';
 import { ProductServiceInfo } from '@/components/product/ProductServiceInfo';
+import { ProductSizeSelector } from '@/components/product/ProductSizeSelector';
 
 export function ProductDetail() {
   const { id, collectionId } = useParams<{ id: string; collectionId?: string }>();
@@ -25,6 +26,7 @@ export function ProductDetail() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>('');
 
   useEffect(() => {
     const loadProductData = async () => {
@@ -33,7 +35,16 @@ export function ProductDetail() {
         const productData = await fetchProductById(id);
         setProduct(productData);
         
-        // If we have a collectionId from URL or product has collectionId, load collection data
+        // Auto-select first available size if only one option
+        if (productData) {
+          const availableSizes = productData.category === 'rings' 
+            ? productData.ringSizes 
+            : productData.watchSizes;
+          if (availableSizes && availableSizes.length === 1) {
+            setSelectedSize(availableSizes[0]);
+          }
+        }
+        
         const targetCollectionId = collectionId || productData?.collectionId;
         if (targetCollectionId) {
           const collectionData = getCollectionById(targetCollectionId);
@@ -81,8 +92,18 @@ export function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    
+    // Check if size selection is required
+    const requiresSize = (product.category === 'rings' && product.ringSizes && product.ringSizes.length > 0) ||
+                        (product.category === 'watches' && product.watchSizes && product.watchSizes.length > 0);
+    
+    if (requiresSize && !selectedSize) {
+      alert(`Please select a ${product.category === 'rings' ? 'ring' : 'watch'} size before adding to cart.`);
+      return;
+    }
+    
     for (let i = 0; i < quantity; i++) {
-      addToCart(product);
+      addToCart(product, selectedSize);
     }
   };
 
@@ -129,6 +150,10 @@ export function ProductDetail() {
   }
 
   const displayImages = getDisplayImages();
+  const requiresSizeSelection = product && (
+    (product.category === 'rings' && product.ringSizes && product.ringSizes.length > 0) ||
+    (product.category === 'watches' && product.watchSizes && product.watchSizes.length > 0)
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -193,6 +218,17 @@ export function ProductDetail() {
             </div>
           )}
 
+          {/* Size Selection */}
+          {requiresSizeSelection && (
+            <ProductSizeSelector
+              category={product.category}
+              ringSizes={product.ringSizes}
+              watchSizes={product.watchSizes}
+              selectedSize={selectedSize}
+              onSizeSelect={setSelectedSize}
+            />
+          )}
+
           {/* Quantity Selector */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Quantity</label>
@@ -239,6 +275,19 @@ export function ProductDetail() {
               {isInWishlist(product.id) ? 'In Wishlist' : 'Add to Wishlist'}
             </Button>
           </div>
+
+          {/* Size requirement notice */}
+          {requiresSizeSelection && !selectedSize && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+              <div className="flex">
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    Please select a {product.category === 'rings' ? 'ring' : 'watch'} size before adding to cart.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
