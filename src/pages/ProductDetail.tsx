@@ -1,137 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ShoppingCart, Heart, Minus, Plus, Package } from 'lucide-react';
-import { useProducts } from '@/contexts/ProductsContext';
-import { useCollections } from '@/contexts/CollectionsContext';
-import { useStore } from '@/contexts/StoreContext';
-import { Product, Collection } from '@/types/store';
+
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { Package } from 'lucide-react';
 import { ProductImageGallery } from '@/components/product/ProductImageGallery';
 import { ProductSpecifications } from '@/components/product/ProductSpecifications';
 import { ProductServiceInfo } from '@/components/product/ProductServiceInfo';
-import { ProductSizeSelector } from '@/components/product/ProductSizeSelector';
+import { ProductDetailHeader } from '@/components/product/ProductDetailHeader';
+import { ProductInfo } from '@/components/product/ProductInfo';
+import { ProductActions } from '@/components/product/ProductActions';
+import { useProductDetail } from '@/hooks/useProductDetail';
 
 export function ProductDetail() {
   const { id, collectionId } = useParams<{ id: string; collectionId?: string }>();
-  const navigate = useNavigate();
-  const { fetchProductById } = useProducts();
-  const { getCollectionById } = useCollections();
-  const { addToCart, addToWishlist, isInWishlist } = useStore();
   
-  const [product, setProduct] = useState<Product | null>(null);
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [imageViewerOpen, setImageViewerOpen] = useState(false);
-  const [selectedSize, setSelectedSize] = useState<string>('');
-
-  useEffect(() => {
-    const loadProductData = async () => {
-      if (id) {
-        setLoading(true);
-        const productData = await fetchProductById(id);
-        setProduct(productData);
-        
-        // Auto-select first available size if only one option
-        if (productData) {
-          const availableSizes = productData.category === 'rings' 
-            ? productData.ringSizes 
-            : productData.watchSizes;
-          if (availableSizes && availableSizes.length === 1) {
-            setSelectedSize(availableSizes[0]);
-          }
-        }
-        
-        const targetCollectionId = collectionId || productData?.collectionId;
-        if (targetCollectionId) {
-          const collectionData = getCollectionById(targetCollectionId);
-          setCollection(collectionData);
-        }
-        
-        setLoading(false);
-      }
-    };
-
-    loadProductData();
-  }, [id, collectionId, fetchProductById, getCollectionById]);
-
-  const handleBackNavigation = () => {
-    if (collectionId) {
-      navigate(`/admin/collections/${collectionId}/products`);
-    } else if (collection) {
-      navigate(`/collection/${collection.id}`);
-    } else {
-      navigate('/products');
-    }
-  };
-
-  const getDisplayImages = () => {
-    if (!product) return [];
-    const images = [];
-    if (product.image) images.push(product.image);
-    if (product.images?.length) images.push(...product.images);
-    return images.length > 0 ? images : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'];
-  };
-
-  const handlePreviousImage = () => {
-    const images = getDisplayImages();
-    setSelectedImageIndex((prev) => 
-      prev === 0 ? images.length - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = () => {
-    const images = getDisplayImages();
-    setSelectedImageIndex((prev) => 
-      prev === images.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const handleAddToCart = () => {
-    if (!product) return;
-    
-    // Check if size selection is required
-    const requiresSize = (product.category === 'rings' && product.ringSizes && product.ringSizes.length > 0) ||
-                        (product.category === 'watches' && product.watchSizes && product.watchSizes.length > 0);
-    
-    if (requiresSize && !selectedSize) {
-      alert(`Please select a ${product.category === 'rings' ? 'ring' : 'watch'} size before adding to cart.`);
-      return;
-    }
-    
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product, selectedSize);
-    }
-  };
-
-  const handleAddToWishlist = () => {
-    if (!product) return;
-    addToWishlist({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image || '',
-      description: product.description
-    });
-  };
-
-  // Helper function to format description into paragraphs
-  const formatDescription = (description: string) => {
-    if (!description) return null;
-    
-    // Split by double line breaks for paragraphs, or single line breaks if no double breaks exist
-    const paragraphs = description.includes('\n\n') 
-      ? description.split('\n\n').filter(p => p.trim())
-      : description.split('\n').filter(p => p.trim());
-    
-    return paragraphs.map((paragraph, index) => (
-      <p key={index} className="text-gray-600 leading-relaxed mb-3 last:mb-0">
-        {paragraph.trim()}
-      </p>
-    ));
-  };
+  const {
+    product,
+    collection,
+    loading,
+    selectedImageIndex,
+    quantity,
+    imageViewerOpen,
+    selectedSize,
+    handleBackNavigation,
+    getDisplayImages,
+    handlePreviousImage,
+    handleNextImage,
+    handleAddToCart,
+    handleAddToWishlist,
+    setSelectedImageIndex,
+    setQuantity,
+    setImageViewerOpen,
+    setSelectedSize,
+    isInWishlist
+  } = useProductDetail(id, collectionId);
 
   if (loading) {
     return (
@@ -149,10 +50,11 @@ export function ProductDetail() {
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <Button onClick={handleBackNavigation} className="mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+        <ProductDetailHeader 
+          onBackNavigation={handleBackNavigation}
+          collection={collection}
+          collectionId={collectionId}
+        />
         <div className="text-center py-16">
           <Package className="w-24 h-24 text-gray-300 mx-auto mb-6" />
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Product Not Found</h1>
@@ -173,18 +75,11 @@ export function ProductDetail() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Navigation */}
-      <div className="flex items-center justify-between mb-8">
-        <Button variant="ghost" onClick={handleBackNavigation}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {collectionId ? 'Back to Collection Management' : collection ? `Back to ${collection.name}` : 'Back to Products'}
-        </Button>
-
-        {collection && (
-          <Badge variant="outline" className="text-sm">
-            From {collection.name} Collection
-          </Badge>
-        )}
-      </div>
+      <ProductDetailHeader 
+        onBackNavigation={handleBackNavigation}
+        collection={collection}
+        collectionId={collectionId}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Image Gallery */}
@@ -205,107 +100,19 @@ export function ProductDetail() {
 
         {/* Product Details */}
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-            <p className="text-3xl font-semibold text-ecommerce-600">${Number(product.price).toFixed(2)}</p>
-          </div>
-
-          <div className="flex items-center gap-4 flex-wrap">
-            <Badge variant="secondary" className="text-sm capitalize">
-              {product.category}
-            </Badge>
-            <span className={`text-sm font-medium ${
-              product.stock > 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-            </span>
-            {collection && (
-              <Badge variant="outline" className="text-xs">
-                {collection.name} Collection
-              </Badge>
-            )}
-          </div>
-
-          {/* Enhanced Description with paragraph support */}
-          {product.description && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Description</h3>
-              <div className="prose prose-sm max-w-none">
-                {formatDescription(product.description)}
-              </div>
-            </div>
-          )}
-
-          {/* Size Selection */}
-          {requiresSizeSelection && (
-            <ProductSizeSelector
-              category={product.category}
-              ringSizes={product.ringSizes}
-              watchSizes={product.watchSizes}
-              selectedSize={selectedSize}
-              onSizeSelect={setSelectedSize}
-            />
-          )}
-
-          {/* Quantity Selector */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Quantity</label>
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-              >
-                <Minus className="w-4 h-4" />
-              </Button>
-              <span className="w-12 text-center font-medium">{quantity}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                disabled={quantity >= product.stock}
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-4">
-            <Button 
-              className="w-full bg-ecommerce-600 hover:bg-ecommerce-700" 
-              size="lg"
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-            >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Add to Cart ({quantity})
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              size="lg"
-              onClick={handleAddToWishlist}
-            >
-              <Heart className={`w-5 h-5 mr-2 ${isInWishlist(product.id) ? 'fill-current text-red-500' : ''}`} />
-              {isInWishlist(product.id) ? 'In Wishlist' : 'Add to Wishlist'}
-            </Button>
-          </div>
-
-          {/* Size requirement notice */}
-          {requiresSizeSelection && !selectedSize && (
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <p className="text-sm text-yellow-700">
-                    Please select a {product.category === 'rings' ? 'ring' : 'watch'} size before adding to cart.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          <ProductInfo product={product} collection={collection} />
+          
+          <ProductActions
+            product={product}
+            quantity={quantity}
+            selectedSize={selectedSize}
+            requiresSizeSelection={requiresSizeSelection}
+            isInWishlist={isInWishlist}
+            onQuantityChange={setQuantity}
+            onSizeSelect={setSelectedSize}
+            onAddToCart={handleAddToCart}
+            onAddToWishlist={handleAddToWishlist}
+          />
         </div>
       </div>
 
