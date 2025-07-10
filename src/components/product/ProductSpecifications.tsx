@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -104,15 +103,11 @@ export function ProductSpecifications({ product, collection }: ProductSpecificat
       <CardHeader>
         <CardTitle className="flex items-center">
           <Package className="w-5 h-5 mr-2 text-ecommerce-600" />
-          Product Details
+          Product Specifications
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <p className="text-gray-600 leading-relaxed mb-6">
-            {product.description || `This exquisite ${product.category.slice(0, -1)} features premium craftsmanship and attention to detail. Each piece is carefully designed to complement your style and make a lasting impression.`}
-          </p>
-          
           <div className="grid grid-cols-1 gap-3">
             {specifications.map((spec, index) => (
               <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">

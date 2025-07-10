@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -118,6 +117,22 @@ export function ProductDetail() {
     });
   };
 
+  // Helper function to format description into paragraphs
+  const formatDescription = (description: string) => {
+    if (!description) return null;
+    
+    // Split by double line breaks for paragraphs, or single line breaks if no double breaks exist
+    const paragraphs = description.includes('\n\n') 
+      ? description.split('\n\n').filter(p => p.trim())
+      : description.split('\n').filter(p => p.trim());
+    
+    return paragraphs.map((paragraph, index) => (
+      <p key={index} className="text-gray-600 leading-relaxed mb-3 last:mb-0">
+        {paragraph.trim()}
+      </p>
+    ));
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -211,10 +226,13 @@ export function ProductDetail() {
             )}
           </div>
 
+          {/* Enhanced Description with paragraph support */}
           {product.description && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <p className="text-gray-600 leading-relaxed">{product.description}</p>
+              <h3 className="text-lg font-semibold mb-3">Description</h3>
+              <div className="prose prose-sm max-w-none">
+                {formatDescription(product.description)}
+              </div>
             </div>
           )}
 
