@@ -7,10 +7,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
 interface PaymentInfoFormProps {
-  // No props needed since we only support Flutterwave
+  paymentMethod?: string;
+  onPaymentMethodChange?: (method: string) => void;
 }
 
-export function PaymentInfoForm({}: PaymentInfoFormProps) {
+export function PaymentInfoForm({ paymentMethod = 'flutterwave', onPaymentMethodChange }: PaymentInfoFormProps) {
   return (
     <Card>
       <CardHeader>
@@ -32,18 +33,34 @@ export function PaymentInfoForm({}: PaymentInfoFormProps) {
 
         <div>
           <label className="block text-sm font-medium mb-3">Payment Method</label>
-          <div className="flex items-center space-x-2 p-4 border-2 border-orange-200 bg-orange-50 rounded-lg">
-            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-              🦋
+          <RadioGroup value={paymentMethod} onValueChange={onPaymentMethodChange} className="space-y-3">
+            <div className="flex items-center space-x-2 p-4 border-2 border-orange-200 bg-orange-50 rounded-lg">
+              <RadioGroupItem value="flutterwave" id="flutterwave" />
+              <div className="flex items-center gap-3 flex-1">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  🦋
+                </div>
+                <div>
+                  <Label htmlFor="flutterwave" className="font-medium text-orange-800">Flutterwave</Label>
+                  <div className="text-sm text-orange-600">Cards, Bank Transfer, Mobile Money</div>
+                </div>
+              </div>
             </div>
-            <div className="flex-1">
-              <div className="font-medium text-orange-800">Flutterwave</div>
-              <div className="text-sm text-orange-600">Secure payments - Cards, Bank Transfer, Mobile Money</div>
-            </div>
-            <div className="w-4 h-4 bg-orange-600 rounded-full"></div>
-          </div>
-        </div>
 
+            <div className="flex items-center space-x-2 p-4 border-2 border-blue-200 bg-blue-50 rounded-lg">
+              <RadioGroupItem value="cryptomus" id="cryptomus" />
+              <div className="flex items-center gap-3 flex-1">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  ₿
+                </div>
+                <div>
+                  <Label htmlFor="cryptomus" className="font-medium text-blue-800">Cryptomus</Label>
+                  <div className="text-sm text-blue-600">Bitcoin, Ethereum, USDT & other cryptocurrencies</div>
+                </div>
+              </div>
+            </div>
+          </RadioGroup>
+        </div>
       </CardContent>
     </Card>
   );

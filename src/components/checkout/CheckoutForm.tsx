@@ -8,6 +8,7 @@ import { PaymentInfoForm } from './PaymentInfoForm';
 import { OrderSummary } from './OrderSummary';
 import { PaystackPayment } from './PaystackPayment';
 import { FlutterwavePayment } from './FlutterwavePayment';
+import { CryptomusPayment } from './CryptomusPayment';
 
 interface CheckoutFormProps {
   onOrderCreated: (order: any) => void;
@@ -16,7 +17,7 @@ interface CheckoutFormProps {
 export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   const { cart, getCartTotal, createOrder } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
-  const paymentMethod = 'flutterwave'; // Only Flutterwave supported
+  const [paymentMethod, setPaymentMethod] = useState('flutterwave');
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -63,7 +64,6 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       return false;
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(customerInfo.email)) {
       toast({
@@ -77,40 +77,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     return true;
   };
 
-  const handleStripeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateRequiredFields()) {
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // Simulate Stripe payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const order = await createOrder(customerInfo, cart, finalTotal);
-      if (order) {
-        onOrderCreated(order);
-        
-        toast({
-          title: "Order placed successfully!",
-          description: `Order #${order.orderNumber || order.id} has been created.`
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Payment failed",
-        description: "Please try again or contact support.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handlePaystackSuccess = (order: any) => {
+  const handlePaymentSuccess = (order: any) => {
     onOrderCreated(order);
     toast({
       title: "Payment successful!",
@@ -118,14 +85,46 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     });
   };
 
-  const handlePaystackPayment = () => {
-    // Validate before attempting Paystack payment
+  const handlePaymentValidation = () => {
     return validateRequiredFields();
   };
 
-  const handleFlutterwavePayment = () => {
-    // Validate before attempting Flutterwave payment
-    return validateRequiredFields();
+  const renderPaymentButton = () => {
+    switch (paymentMethod) {
+      case 'flutterwave':
+        return (
+          <FlutterwavePayment
+            amount={finalTotal}
+            email={customerInfo.email}
+            customerInfo={customerInfo}
+            cartItems={cart}
+            onSuccess={handlePaymentSuccess}
+            onValidate={handlePaymentValidation}
+          />
+        );
+      case 'cryptomus':
+        return (
+          <CryptomusPayment
+            amount={finalTotal}
+            email={customerInfo.email}
+            customerInfo={customerInfo}
+            cartItems={cart}
+            onSuccess={handlePaymentSuccess}
+            onValidate={handlePaymentValidation}
+          />
+        );
+      default:
+        return (
+          <FlutterwavePayment
+            amount={finalTotal}
+            email={customerInfo.email}
+            customerInfo={customerInfo}
+            cartItems={cart}
+            onSuccess={handlePaymentSuccess}
+            onValidate={handlePaymentValidation}
+          />
+        );
+    }
   };
 
   return (
@@ -134,7 +133,6 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
         <h1 className="text-3xl font-bold mb-8">Checkout</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Customer Information Form */}
           <div className="space-y-6">
             <CustomerInfoForm 
               customerInfo={customerInfo}
@@ -144,10 +142,12 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               customerInfo={customerInfo}
               onInputChange={handleInputChange}
             />
-            <PaymentInfoForm />
+            <PaymentInfoForm 
+              paymentMethod={paymentMethod}
+              onPaymentMethodChange={setPaymentMethod}
+            />
           </div>
 
-          {/* Order Summary */}
           <div>
             <OrderSummary
               cart={cart}
@@ -157,16 +157,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               finalTotal={finalTotal}
               isProcessing={isProcessing}
               paymentMethod={paymentMethod}
-              renderPaymentButton={() => (
-                <FlutterwavePayment
-                  amount={finalTotal}
-                  email={customerInfo.email}
-                  customerInfo={customerInfo}
-                  cartItems={cart}
-                  onSuccess={handlePaystackSuccess}
-                  onValidate={handleFlutterwavePayment}
-                />
-              )}
+              renderPaymentButton={renderPaymentButton}
             />
           </div>
         </div>
