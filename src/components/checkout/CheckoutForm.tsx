@@ -8,7 +8,6 @@ import { PaymentInfoForm } from './PaymentInfoForm';
 import { OrderSummary } from './OrderSummary';
 import { PaystackPayment } from './PaystackPayment';
 import { FlutterwavePayment } from './FlutterwavePayment';
-import { CryptomusPayment } from './CryptomusPayment';
 
 interface CheckoutFormProps {
   onOrderCreated: (order: any) => void;
@@ -90,41 +89,16 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   };
 
   const renderPaymentButton = () => {
-    switch (paymentMethod) {
-      case 'flutterwave':
-        return (
-          <FlutterwavePayment
-            amount={finalTotal}
-            email={customerInfo.email}
-            customerInfo={customerInfo}
-            cartItems={cart}
-            onSuccess={handlePaymentSuccess}
-            onValidate={handlePaymentValidation}
-          />
-        );
-      case 'cryptomus':
-        return (
-          <CryptomusPayment
-            amount={finalTotal}
-            email={customerInfo.email}
-            customerInfo={customerInfo}
-            cartItems={cart}
-            onSuccess={handlePaymentSuccess}
-            onValidate={handlePaymentValidation}
-          />
-        );
-      default:
-        return (
-          <FlutterwavePayment
-            amount={finalTotal}
-            email={customerInfo.email}
-            customerInfo={customerInfo}
-            cartItems={cart}
-            onSuccess={handlePaymentSuccess}
-            onValidate={handlePaymentValidation}
-          />
-        );
-    }
+    return (
+      <FlutterwavePayment
+        amount={finalTotal}
+        email={customerInfo.email}
+        customerInfo={customerInfo}
+        cartItems={cart}
+        onSuccess={handlePaymentSuccess}
+        onValidate={handlePaymentValidation}
+      />
+    );
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GeneralSettings } from '@/components/admin/settings/GeneralSettings';
@@ -21,15 +22,12 @@ export function AdminSettings() {
     })
   );
 
-  // Payment settings state - now includes both Flutterwave and Cryptomus
+  // Payment settings state - only Flutterwave now
   const [paymentSettings, setPaymentSettings] = useState(() =>
     getFromLocalStorage('paymentSettings', {
       flutterwaveEnabled: true,
       flutterwavePublicKey: '',
-      flutterwaveSecretKey: '',
-      cryptomusEnabled: false,
-      cryptomusApiKey: '',
-      cryptomusMerchantId: ''
+      flutterwaveSecretKey: ''
     })
   );
   
