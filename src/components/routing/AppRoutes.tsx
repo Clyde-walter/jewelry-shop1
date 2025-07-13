@@ -5,6 +5,7 @@ import { Auth } from "@/pages/Auth";
 import { OTPVerification } from "@/pages/OTPVerification";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { ResetPassword } from "@/pages/ResetPassword";
+import { ResetPasswordOTP } from "@/pages/ResetPasswordOTP";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import Admin from "@/pages/Admin";
 import { AdminOrders } from "@/pages/admin/AdminOrders";
@@ -31,6 +32,7 @@ export function AppRoutes() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/otp-verification" element={<OTPVerification />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password-otp" element={<ResetPasswordOTP />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Admin Routes */}

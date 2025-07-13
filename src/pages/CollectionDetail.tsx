@@ -157,27 +157,30 @@ export function CollectionDetail() {
           </div>
         </div>
 
-        {/* Collection Images */}
+        {/* Hero Section with Background Image */}
         {collection.images.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Collection Gallery</h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {collection.images.slice(0, 5).map((image, index) => (
-                <div 
-                  key={index} 
-                  className="relative group cursor-pointer overflow-hidden rounded-lg"
-                  onClick={() => openImageViewer(collection.images, index)}
-                >
-                  <img
-                    src={image}
-                    alt={`${collection.name} ${index + 1}`}
-                    className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                    <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-              ))}
+          <div className="relative mb-16 h-96 rounded-2xl overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${collection.images[0]})` }}
+            />
+            <div className="absolute inset-0 bg-black/40" />
+            <div className="relative h-full flex items-center justify-center">
+              <div className="text-center text-white">
+                <h2 className="text-4xl font-bold mb-4">Explore Collection</h2>
+                <p className="text-xl opacity-90 max-w-2xl mx-auto">
+                  Discover our carefully curated pieces that embody excellence and craftsmanship
+                </p>
+                {collection.images.length > 1 && (
+                  <button
+                    onClick={() => openImageViewer(collection.images, 0)}
+                    className="mt-6 inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-colors duration-300"
+                  >
+                    <Eye className="w-5 h-5 mr-2" />
+                    View Gallery ({collection.images.length} images)
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -188,58 +191,40 @@ export function CollectionDetail() {
             <h2 className="text-3xl font-bold text-gray-900 mb-8">
               Collection Products ({products.length} items)
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
-                <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <Card key={product.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white/80 backdrop-blur-sm">
                   <div className="relative">
-                    {/* Product Images */}
-                    <div className="grid grid-cols-5 gap-1 h-48">
-                      {/* Main image */}
-                      <div 
-                        className="col-span-3 cursor-pointer group"
-                        onClick={() => handleViewProduct(product.id)}
-                      >
-                        <img
-                          src={product.image || '/placeholder.svg'}
-                          alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                          <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {/* Main Product Image */}
+                    <div 
+                      className="relative h-64 cursor-pointer overflow-hidden"
+                      onClick={() => handleViewProduct(product.id)}
+                    >
+                      <img
+                        src={product.image || '/placeholder.svg'}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+                          <Eye className="w-6 h-6 text-white" />
                         </div>
                       </div>
                       
-                      {/* Additional images */}
-                      <div className="col-span-2 grid grid-rows-4 gap-1">
-                        {(product.images || []).slice(0, 4).map((image, imageIndex) => (
-                          <div 
-                            key={imageIndex}
-                            className="cursor-pointer group overflow-hidden"
-                            onClick={() => {
-                              const allImages = [product.image, ...(product.images || [])].filter(Boolean);
-                              openImageViewer(allImages, imageIndex + 1);
-                            }}
-                          >
-                            <img
-                              src={image}
-                              alt={`${product.name} ${imageIndex + 2}`}
-                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                            />
-                          </div>
-                        ))}
-                        {/* Show "+X more" if there are more images */}
-                        {(product.images || []).length > 4 && (
-                          <div 
-                            className="bg-black/70 flex items-center justify-center text-white text-xs cursor-pointer hover:bg-black/80 transition-colors"
-                            onClick={() => {
-                              const allImages = [product.image, ...(product.images || [])].filter(Boolean);
-                              openImageViewer(allImages, 5);
-                            }}
-                          >
-                            +{(product.images || []).length - 4} more
-                          </div>
-                        )}
-                      </div>
+                      {/* Image count indicator */}
+                      {(product.images && product.images.length > 0) && (
+                        <div className="absolute top-3 right-3 bg-black/60 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm">
+                          +{product.images.length}
+                        </div>
+                      )}
+                      
+                      {/* Stock status */}
+                      {product.stock === 0 && (
+                        <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                          Out of Stock
+                        </div>
+                      )}
                     </div>
                   </div>
 

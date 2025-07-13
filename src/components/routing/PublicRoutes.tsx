@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { AdvertBanner } from "@/components/AdvertBanner";
 import { Footer } from "@/components/Footer";
 import { CustomerCareButton } from "@/components/CustomerCareButton";
 import { Home } from "@/pages/Home";
@@ -36,6 +37,7 @@ export function PublicRoutes() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
+      <AdvertBanner />
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />

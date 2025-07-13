@@ -12,11 +12,15 @@ export interface Product {
   isMostPicked?: boolean;
   featuredOrder?: number;
   mostPickedOrder?: number;
+  ringSizes?: string[];
+  watchSizes?: string[];
+  specifications?: Record<string, any>;
 }
 
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedSize?: string;
 }
 
 export interface WishlistItem {

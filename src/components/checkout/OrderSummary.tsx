@@ -76,28 +76,7 @@ export function OrderSummary({
         </div>
 
         {/* Payment Button */}
-        {paymentMethod === 'paystack' && renderPaymentButton ? (
-          renderPaymentButton()
-        ) : (
-          onSubmit && (
-            <form onSubmit={onSubmit}>
-              <Button
-                type="submit"
-                className="w-full bg-ecommerce-600 hover:bg-ecommerce-700"
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  `Pay $${finalTotal.toFixed(2)}`
-                )}
-              </Button>
-            </form>
-          )
-        )}
+        {renderPaymentButton && renderPaymentButton()}
         
         <p className="text-xs text-gray-500 text-center">
           By placing your order, you agree to our terms and conditions.

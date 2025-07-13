@@ -7,11 +7,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
 interface PaymentInfoFormProps {
-  paymentMethod: string;
-  onPaymentMethodChange: (method: string) => void;
+  // No props needed since we only support Flutterwave
 }
 
-export function PaymentInfoForm({ paymentMethod, onPaymentMethodChange }: PaymentInfoFormProps) {
+export function PaymentInfoForm({}: PaymentInfoFormProps) {
   return (
     <Card>
       <CardHeader>
@@ -32,54 +31,19 @@ export function PaymentInfoForm({ paymentMethod, onPaymentMethodChange }: Paymen
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-3">Select Payment Method</label>
-          <RadioGroup value={paymentMethod} onValueChange={onPaymentMethodChange}>
-            <div className="flex items-center space-x-2 p-3 border rounded-lg">
-              <RadioGroupItem value="paystack" id="paystack" />
-              <Label htmlFor="paystack" className="flex items-center gap-2 cursor-pointer flex-1">
-                <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
-                  🏦
-                </div>
-                <div>
-                  <div className="font-medium">Paystack</div>
-                  <div className="text-sm text-gray-500">Cards, Bank Transfer, USSD</div>
-                </div>
-              </Label>
+          <label className="block text-sm font-medium mb-3">Payment Method</label>
+          <div className="flex items-center space-x-2 p-4 border-2 border-orange-200 bg-orange-50 rounded-lg">
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+              🦋
             </div>
-            
-            <div className="flex items-center space-x-2 p-3 border rounded-lg">
-              <RadioGroupItem value="stripe" id="stripe" />
-              <Label htmlFor="stripe" className="flex items-center gap-2 cursor-pointer flex-1">
-                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                  💳
-                </div>
-                <div>
-                  <div className="font-medium">Stripe</div>
-                  <div className="text-sm text-gray-500">Credit/Debit Cards</div>
-                </div>
-              </Label>
+            <div className="flex-1">
+              <div className="font-medium text-orange-800">Flutterwave</div>
+              <div className="text-sm text-orange-600">Secure payments - Cards, Bank Transfer, Mobile Money</div>
             </div>
-          </RadioGroup>
+            <div className="w-4 h-4 bg-orange-600 rounded-full"></div>
+          </div>
         </div>
 
-        {paymentMethod === 'stripe' && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Card Number</label>
-              <Input placeholder="4242 4242 4242 4242" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Expiry Date</label>
-                <Input placeholder="MM/YY" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">CVC</label>
-                <Input placeholder="123" />
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

@@ -11,28 +11,21 @@ import { toast } from '@/hooks/use-toast';
 import { saveToLocalStorage } from '@/utils/adminSettings';
 
 interface PaymentSettingsType {
-  stripeEnabled: boolean;
-  paypalEnabled: boolean;
-  paystackEnabled: boolean;
-  stripeApiKey: string;
-  paystackPublicKey: string;
-  paystackSecretKey: string;
+  flutterwaveEnabled: boolean;
+  flutterwavePublicKey: string;
+  flutterwaveSecretKey: string;
 }
 
 interface PaymentSettingsProps {
   paymentSettings: PaymentSettingsType;
   setPaymentSettings: (settings: PaymentSettingsType) => void;
-  showApiKey: boolean;
-  setShowApiKey: (show: boolean) => void;
 }
 
 export function PaymentSettings({ 
   paymentSettings, 
-  setPaymentSettings, 
-  showApiKey, 
-  setShowApiKey 
+  setPaymentSettings
 }: PaymentSettingsProps) {
-  const [showPaystackKeys, setShowPaystackKeys] = React.useState(false);
+  const [showFlutterwaveKeys, setShowFlutterwaveKeys] = React.useState(false);
 
   const handleSavePayments = () => {
     saveToLocalStorage('paymentSettings', paymentSettings);
@@ -45,118 +38,74 @@ export function PaymentSettings({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Payment Methods</CardTitle>
+        <CardTitle>Payment Method</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                💳
-              </div>
-              <div>
-                <p className="font-medium">Stripe</p>
-                <p className="text-sm text-gray-600">Credit cards, Apple Pay, Google Pay</p>
-              </div>
-            </div>
-            <Switch 
-              checked={paymentSettings.stripeEnabled}
-              onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, stripeEnabled: checked})}
-            />
+        <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+          <div className="flex items-center gap-2 text-orange-700">
+            <div className="w-4 h-4 bg-orange-600 rounded-full"></div>
+            <span className="text-sm font-medium">Flutterwave Payment Gateway</span>
           </div>
-          
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                🅿️
-              </div>
-              <div>
-                <p className="font-medium">PayPal</p>
-                <p className="text-sm text-gray-600">PayPal payments</p>
-              </div>
-            </div>
-            <Switch 
-              checked={paymentSettings.paypalEnabled}
-              onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, paypalEnabled: checked})}
-            />
-          </div>
+          <p className="text-sm text-orange-600 mt-1">
+            Secure payment processing for cards, bank transfers, and mobile money across Africa and globally.
+          </p>
+        </div>
 
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                🏦
-              </div>
-              <div>
-                <p className="font-medium">Paystack</p>
-                <p className="text-sm text-gray-600">African payment gateway - Cards, Bank transfers, Mobile money</p>
-              </div>
+        <div className="flex items-center justify-between p-4 border-2 border-orange-200 bg-orange-50/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+              🦋
             </div>
-            <Switch 
-              checked={paymentSettings.paystackEnabled}
-              onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, paystackEnabled: checked})}
-            />
+            <div>
+              <p className="font-medium text-orange-800">Flutterwave</p>
+              <p className="text-sm text-orange-600">Cards, Bank transfers, Mobile money</p>
+            </div>
           </div>
+          <Switch 
+            checked={paymentSettings.flutterwaveEnabled}
+            onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, flutterwaveEnabled: checked})}
+          />
         </div>
         
         <Separator />
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="stripeKey">Stripe API Key</Label>
+            <Label htmlFor="flutterwavePublicKey">Flutterwave Public Key</Label>
             <div className="flex gap-2 mt-2">
               <Input
-                id="stripeKey"
-                type={showApiKey ? "text" : "password"}
-                placeholder="sk_test_..."
+                id="flutterwavePublicKey"
+                type={showFlutterwaveKeys ? "text" : "password"}
+                placeholder="FLWPUBK_TEST-..."
                 className="flex-1"
-                value={paymentSettings.stripeApiKey}
-                onChange={(e) => setPaymentSettings({...paymentSettings, stripeApiKey: e.target.value})}
+                value={paymentSettings.flutterwavePublicKey}
+                onChange={(e) => setPaymentSettings({...paymentSettings, flutterwavePublicKey: e.target.value})}
               />
               <Button
                 variant="outline"
-                onClick={() => setShowApiKey(!showApiKey)}
+                onClick={() => setShowFlutterwaveKeys(!showFlutterwaveKeys)}
               >
-                {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showFlutterwaveKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="paystackPublicKey">Paystack Public Key</Label>
+            <Label htmlFor="flutterwaveSecretKey">Flutterwave Secret Key</Label>
             <div className="flex gap-2 mt-2">
               <Input
-                id="paystackPublicKey"
-                type={showPaystackKeys ? "text" : "password"}
-                placeholder="pk_test_..."
+                id="flutterwaveSecretKey"
+                type={showFlutterwaveKeys ? "text" : "password"}
+                placeholder="FLWSECK_TEST-..."
                 className="flex-1"
-                value={paymentSettings.paystackPublicKey}
-                onChange={(e) => setPaymentSettings({...paymentSettings, paystackPublicKey: e.target.value})}
+                value={paymentSettings.flutterwaveSecretKey}
+                onChange={(e) => setPaymentSettings({...paymentSettings, flutterwaveSecretKey: e.target.value})}
               />
               <Button
                 variant="outline"
-                onClick={() => setShowPaystackKeys(!showPaystackKeys)}
+                onClick={() => setShowFlutterwaveKeys(!showFlutterwaveKeys)}
               >
-                {showPaystackKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="paystackSecretKey">Paystack Secret Key</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                id="paystackSecretKey"
-                type={showPaystackKeys ? "text" : "password"}
-                placeholder="sk_test_..."
-                className="flex-1"
-                value={paymentSettings.paystackSecretKey}
-                onChange={(e) => setPaymentSettings({...paymentSettings, paystackSecretKey: e.target.value})}
-              />
-              <Button
-                variant="outline"
-                onClick={() => setShowPaystackKeys(!showPaystackKeys)}
-              >
-                {showPaystackKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showFlutterwaveKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
             </div>
           </div>

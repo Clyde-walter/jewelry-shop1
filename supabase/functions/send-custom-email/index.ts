@@ -64,18 +64,20 @@ serve(async (req) => {
       processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
     });
 
-    // In a real implementation, you would use a service like Resend, SendGrid, etc.
-    // For this demo, we'll simulate sending and log the email history
-    
-    const emailHistoryEntries = recipients.map(email => ({
+    // Note: Custom email sending requires an external email service
+    // This function now only logs the email request and saves to history
+    console.log(`Would send email to ${recipients.length} recipients`);
+    console.log('Email content:', { subject: processedSubject, content: processedContent });
+
+    const emailHistoryEntries = recipients.map(recipientEmail => ({
       template_id: templateId || null,
       recipient_type: recipientType,
-      recipient_email: email,
+      recipient_email: recipientEmail,
       subject: processedSubject,
       content: processedContent,
-      status: 'sent' as const,
+      status: 'pending' as const,
       sent_at: new Date().toISOString(),
-      metadata: { variables }
+      metadata: { variables, note: 'Email service not configured' }
     }));
 
     // Save to email history

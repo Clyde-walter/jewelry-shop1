@@ -7,6 +7,7 @@ import { ShippingAddressForm } from './ShippingAddressForm';
 import { PaymentInfoForm } from './PaymentInfoForm';
 import { OrderSummary } from './OrderSummary';
 import { PaystackPayment } from './PaystackPayment';
+import { FlutterwavePayment } from './FlutterwavePayment';
 
 interface CheckoutFormProps {
   onOrderCreated: (order: any) => void;
@@ -15,7 +16,7 @@ interface CheckoutFormProps {
 export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   const { cart, getCartTotal, createOrder } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('paystack');
+  const paymentMethod = 'flutterwave'; // Only Flutterwave supported
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -122,6 +123,11 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     return validateRequiredFields();
   };
 
+  const handleFlutterwavePayment = () => {
+    // Validate before attempting Flutterwave payment
+    return validateRequiredFields();
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
@@ -138,10 +144,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               customerInfo={customerInfo}
               onInputChange={handleInputChange}
             />
-            <PaymentInfoForm 
-              paymentMethod={paymentMethod}
-              onPaymentMethodChange={setPaymentMethod}
-            />
+            <PaymentInfoForm />
           </div>
 
           {/* Order Summary */}
@@ -153,20 +156,17 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
               tax={tax}
               finalTotal={finalTotal}
               isProcessing={isProcessing}
-              onSubmit={paymentMethod === 'stripe' ? handleStripeSubmit : undefined}
               paymentMethod={paymentMethod}
-              renderPaymentButton={() => 
-                paymentMethod === 'paystack' ? (
-                  <PaystackPayment
-                    amount={finalTotal}
-                    email={customerInfo.email}
-                    customerInfo={customerInfo}
-                    cartItems={cart}
-                    onSuccess={handlePaystackSuccess}
-                    onValidate={handlePaystackPayment}
-                  />
-                ) : null
-              }
+              renderPaymentButton={() => (
+                <FlutterwavePayment
+                  amount={finalTotal}
+                  email={customerInfo.email}
+                  customerInfo={customerInfo}
+                  cartItems={cart}
+                  onSuccess={handlePaystackSuccess}
+                  onValidate={handleFlutterwavePayment}
+                />
+              )}
             />
           </div>
         </div>

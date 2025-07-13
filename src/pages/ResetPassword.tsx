@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,18 +17,22 @@ export function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isValidSession, setIsValidSession] = useState(false);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Check if we have the necessary parameters for password reset
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    
-    if (!accessToken || !refreshToken) {
-      navigate('/forgot-password');
-    }
-  }, [searchParams, navigate]);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsValidSession(true);
+      } else {
+        setError('Invalid session. Please request a new password reset.');
+        setTimeout(() => navigate('/forgot-password'), 3000);
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +67,8 @@ export function ResetPassword() {
           title: "Password updated successfully",
           description: "You can now sign in with your new password.",
         });
+        // Sign out to clear the recovery session
+        await supabase.auth.signOut();
         navigate('/auth');
       }
     } catch (error: any) {
@@ -71,6 +77,49 @@ export function ResetPassword() {
       setLoading(false);
     }
   };
+
+  if (!isValidSession && error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center space-x-2">
+              <Gem className="w-8 h-8 text-ecommerce-600" />
+              <span className="text-3xl font-serif font-bold text-ecommerce-600">Jewelry Port</span>
+            </Link>
+            <p className="text-gray-600 mt-2">Password Reset</p>
+          </div>
+
+          <Card className="shadow-xl border-0">
+            <CardHeader className="text-center pb-4">
+              <CardTitle className="text-2xl font-bold">Session Expired</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={() => navigate('/forgot-password')}
+                  className="w-full bg-ecommerce-600 hover:bg-ecommerce-700 text-white"
+                >
+                  Request New Reset Code
+                </Button>
+                <Button
+                  onClick={() => navigate('/auth')}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Back to Sign In
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4">
@@ -148,7 +197,7 @@ export function ResetPassword() {
               <Button 
                 type="submit" 
                 className="w-full bg-ecommerce-600 hover:bg-ecommerce-700 text-white"
-                disabled={loading}
+                disabled={loading || !isValidSession}
               >
                 {loading ? 'Updating Password...' : 'Update Password'}
               </Button>

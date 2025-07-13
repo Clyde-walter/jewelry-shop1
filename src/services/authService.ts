@@ -54,25 +54,6 @@ class AuthService {
     return { error };
   }
 
-  async signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`
-      }
-    });
-
-    if (error) {
-      toast({
-        title: "Google sign in failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-
-    return { error };
-  }
-
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -91,27 +72,37 @@ class AuthService {
 
   async resetPassword(email: string) {
     try {
-      const response = await fetch(`https://kirxlakwwzpkrmipdelj.supabase.co/functions/v1/send-password-reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpcnhsYWt3d3pwa3JtaXBkZWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MzYyMDUsImV4cCI6MjA2NTMxMjIwNX0.0K47ffl2fgM3PteazMqgT87YNqj7GTzVHyxnfdo--R0`
-        },
-        body: JSON.stringify({
-          email,
+      // Use the custom edge function instead of Supabase's built-in method
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: email,
           redirectUrl: `${window.location.origin}/reset-password`
-        })
+        }
       });
 
-      const result = await response.json();
+      if (error) {
+        console.error('Password reset error:', error);
+        toast({
+          title: "Password reset failed",
+          description: error.message,
+          variant: "destructive"
+        });
+        return { error };
+      }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to send password reset email');
+      if (!data.success) {
+        console.error('Password reset failed:', data.error);
+        toast({
+          title: "Password reset failed",
+          description: data.error || "Failed to send reset code. Please try again.",
+          variant: "destructive"
+        });
+        return { error: new Error(data.error) };
       }
 
       toast({
-        title: "Password reset email sent",
-        description: "Please check your email for password reset instructions.",
+        title: "Reset code sent",
+        description: "Please check your email (including spam folder) for the verification code.",
       });
 
       return { error: null };
@@ -119,7 +110,7 @@ class AuthService {
       console.error('Password reset error:', error);
       toast({
         title: "Password reset failed",
-        description: error.message || "Failed to send password reset email. Please try again.",
+        description: error.message || "Failed to send reset code. Please try again.",
         variant: "destructive"
       });
       return { error };
