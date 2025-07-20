@@ -160,34 +160,47 @@ export function CryptoPayment({
           </ol>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Wallet Address</label>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <div className="flex-1 p-3 bg-muted rounded-lg font-mono text-xs sm:text-sm break-all min-h-[2.5rem] flex items-center">
-                {cryptoSettings.walletAddress}
+            <label className="block text-sm font-medium mb-3">Wallet Address</label>
+            <div className="flex flex-col gap-3">
+              <div className="p-4 bg-muted rounded-lg border">
+                <p className="font-mono text-sm break-all leading-relaxed">
+                  {cryptoSettings.walletAddress}
+                </p>
               </div>
               <Button
                 variant="outline"
-                size="icon"
                 onClick={copyToClipboard}
                 disabled={copied}
-                className="shrink-0"
+                className="w-full"
               >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Copied to Clipboard
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Wallet Address
+                  </>
+                )}
               </Button>
             </div>
           </div>
 
           {cryptoSettings.qrCodeImage && (
-            <div className="text-center">
-              <label className="block text-sm font-medium mb-2">QR Code</label>
-              <div className="inline-block p-4 bg-white rounded-lg">
-                <img 
-                  src={cryptoSettings.qrCodeImage} 
-                  alt="Wallet QR Code" 
-                  className="w-32 h-32 sm:w-48 sm:h-48 mx-auto"
-                />
+            <div>
+              <label className="block text-sm font-medium mb-3">QR Code</label>
+              <div className="flex justify-center">
+                <div className="p-4 bg-white rounded-lg border shadow-sm">
+                  <img 
+                    src={cryptoSettings.qrCodeImage} 
+                    alt="Wallet QR Code" 
+                    className="w-40 h-40 lg:w-48 lg:h-48 object-contain"
+                  />
+                </div>
               </div>
             </div>
           )}
