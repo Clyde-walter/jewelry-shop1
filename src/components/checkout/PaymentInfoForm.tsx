@@ -33,17 +33,35 @@ export function PaymentInfoForm({ paymentMethod = 'flutterwave', onPaymentMethod
 
         <div>
           <label className="block text-sm font-medium mb-3">Payment Method</label>
-          <div className="flex items-center space-x-2 p-4 border-2 border-orange-200 bg-orange-50 rounded-lg">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                🦋
+          <RadioGroup value={paymentMethod} onValueChange={onPaymentMethodChange}>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 p-4 border-2 border-orange-200 bg-orange-50 rounded-lg">
+                <RadioGroupItem value="flutterwave" id="flutterwave" />
+                <Label htmlFor="flutterwave" className="flex items-center gap-3 flex-1 cursor-pointer">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    🦋
+                  </div>
+                  <div>
+                    <div className="font-medium text-orange-800">Flutterwave</div>
+                    <div className="text-sm text-orange-600">Cards, Bank Transfer, Mobile Money</div>
+                  </div>
+                </Label>
               </div>
-              <div>
-                <div className="font-medium text-orange-800">Flutterwave</div>
-                <div className="text-sm text-orange-600">Cards, Bank Transfer, Mobile Money</div>
+              
+              <div className="flex items-center space-x-2 p-4 border-2 border-blue-200 bg-blue-50 rounded-lg">
+                <RadioGroupItem value="crypto" id="crypto" />
+                <Label htmlFor="crypto" className="flex items-center gap-3 flex-1 cursor-pointer">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    ₿
+                  </div>
+                  <div>
+                    <div className="font-medium text-blue-800">Cryptocurrency</div>
+                    <div className="text-sm text-blue-600">Bitcoin, Ethereum & other cryptos</div>
+                  </div>
+                </Label>
               </div>
             </div>
-          </div>
+          </RadioGroup>
         </div>
       </CardContent>
     </Card>

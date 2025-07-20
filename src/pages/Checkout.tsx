@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useStore } from '@/contexts/StoreContext';
 import { EmptyCart } from '@/components/checkout/EmptyCart';
