@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Wallet, Upload } from 'lucide-react';
@@ -23,8 +23,11 @@ export function CryptoPayment({
   isProcessing = false 
 }: CryptoPaymentProps) {
   const [copied, setCopied] = useState(false);
+  const [btcAmountCopied, setBtcAmountCopied] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [proofImages, setProofImages] = useState<string[]>([]);
+  const [btcAmount, setBtcAmount] = useState<string>('');
+  const [btcPrice, setBtcPrice] = useState<number>(0);
   const { toast } = useToast();
 
   // Get crypto settings from admin configuration
@@ -32,6 +35,29 @@ export function CryptoPayment({
     walletAddress: '',
     qrCodeImage: ''
   });
+
+  // Fetch Bitcoin price and calculate BTC amount
+  useEffect(() => {
+    const fetchBitcoinPrice = async () => {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+        const data = await response.json();
+        const price = data.bitcoin.usd;
+        setBtcPrice(price);
+        
+        // Calculate BTC amount with 8 decimal places (satoshi precision)
+        const btcValue = (cartTotal / price).toFixed(8);
+        setBtcAmount(btcValue);
+      } catch (error) {
+        console.error('Error fetching Bitcoin price:', error);
+        setBtcAmount((cartTotal / 50000).toFixed(8)); // Fallback with estimated price
+      }
+    };
+
+    if (cartTotal > 0) {
+      fetchBitcoinPrice();
+    }
+  }, [cartTotal]);
 
   const copyToClipboard = async () => {
     try {
@@ -46,6 +72,24 @@ export function CryptoPayment({
       toast({
         title: "Error",
         description: "Failed to copy wallet address",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyBtcAmount = async () => {
+    try {
+      await navigator.clipboard.writeText(btcAmount);
+      setBtcAmountCopied(true);
+      toast({
+        title: "Copied!",
+        description: "BTC amount copied to clipboard",
+      });
+      setTimeout(() => setBtcAmountCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy BTC amount",
         variant: "destructive",
       });
     }
@@ -157,13 +201,46 @@ export function CryptoPayment({
           <h3 className="font-medium mb-3">Payment Instructions</h3>
           <ol className="text-sm text-muted-foreground space-y-2">
             <li>1. Copy the wallet address below or scan the QR code</li>
-            <li>2. Send exactly <span className="font-medium text-foreground">${cartTotal.toFixed(2)}</span> worth of cryptocurrency</li>
-            <li>3. Click "Confirm Payment" after sending</li>
-            <li>4. We'll verify your payment and process your order</li>
+            <li>2. Send exactly <span className="font-medium text-foreground">{btcAmount} BTC</span> (${cartTotal.toFixed(2)} USD)</li>
+            <li>3. Upload proof of payment (optional but recommended)</li>
+            <li>4. Click "Confirm Payment" after sending</li>
+            <li>5. We'll verify your payment and process your order</li>
           </ol>
         </div>
 
         <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-3">Amount to Send</label>
+            <div className="flex flex-col gap-3">
+              <div className="p-4 bg-muted rounded-lg border">
+                <p className="font-mono text-lg font-bold text-center break-all leading-relaxed">
+                  {btcAmount} BTC
+                </p>
+                <p className="text-sm text-muted-foreground text-center mt-1">
+                  ≈ ${cartTotal.toFixed(2)} USD {btcPrice > 0 && `(BTC Price: $${btcPrice.toLocaleString()})`}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={copyBtcAmount}
+                disabled={btcAmountCopied || !btcAmount}
+                className="w-full"
+              >
+                {btcAmountCopied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    BTC Amount Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy BTC Amount
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-3">Wallet Address</label>
             <div className="flex flex-col gap-3">
