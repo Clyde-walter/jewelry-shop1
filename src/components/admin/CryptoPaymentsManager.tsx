@@ -23,6 +23,7 @@ interface CryptoPayment {
   created_at: string;
   confirmed_at: string | null;
   confirmed_by: string | null;
+  proof_of_payment_images: string[];
 }
 
 export function CryptoPaymentsManager() {
@@ -213,10 +214,28 @@ export function CryptoPaymentsManager() {
                                 <p><strong>Submitted:</strong> {new Date(payment.created_at).toLocaleString()}</p>
                               </div>
                             </div>
-                          </div>
-                          
-                          <div>
-                            <h4 className="font-medium mb-2">Admin Notes</h4>
+                           </div>
+
+                           {payment.proof_of_payment_images && payment.proof_of_payment_images.length > 0 && (
+                             <div>
+                               <h4 className="font-medium mb-2">Proof of Payment</h4>
+                               <div className="grid grid-cols-2 gap-3">
+                                 {payment.proof_of_payment_images.map((imageUrl, index) => (
+                                   <div key={index} className="border rounded-lg overflow-hidden">
+                                     <img 
+                                       src={imageUrl} 
+                                       alt={`Proof of payment ${index + 1}`}
+                                       className="w-full h-32 object-cover cursor-pointer hover:opacity-90"
+                                       onClick={() => window.open(imageUrl, '_blank')}
+                                     />
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                           )}
+                           
+                           <div>
+                             <h4 className="font-medium mb-2">Admin Notes</h4>
                             <Textarea
                               value={adminNotes}
                               onChange={(e) => setAdminNotes(e.target.value)}

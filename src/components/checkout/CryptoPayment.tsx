@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Wallet } from 'lucide-react';
+import { Copy, Check, Wallet, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getFromLocalStorage } from '@/utils/adminSettings';
 import { supabase } from '@/integrations/supabase/client';
+import { ImageUpload } from '@/components/ImageUpload';
 
 interface CryptoPaymentProps {
   onPaymentComplete: (result: any) => void;
@@ -23,6 +24,7 @@ export function CryptoPayment({
 }: CryptoPaymentProps) {
   const [copied, setCopied] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [proofImages, setProofImages] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Get crypto settings from admin configuration
@@ -69,7 +71,8 @@ export function CryptoPayment({
           city: customerInfo.city,
           zipCode: customerInfo.zipCode,
           country: customerInfo.country
-        }
+        },
+        proof_of_payment_images: proofImages
       };
 
       // Save to database
@@ -204,6 +207,24 @@ export function CryptoPayment({
               </div>
             </div>
           )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-3 flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Upload Proof of Payment (Optional)
+          </label>
+          <div className="bg-background border rounded-lg p-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Upload a screenshot or photo of your transaction as proof of payment. This helps us verify your payment faster.
+            </p>
+            <ImageUpload
+              images={proofImages}
+              onImagesChange={setProofImages}
+              maxImages={3}
+              bucketName="product-images"
+            />
+          </div>
         </div>
 
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
