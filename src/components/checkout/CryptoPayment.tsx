@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Copy, Check, Wallet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getFromLocalStorage } from '@/utils/adminSettings';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CryptoPaymentProps {
   onPaymentComplete: (result: any) => void;
@@ -48,25 +49,82 @@ export function CryptoPayment({
     }
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (!onValidatePayment()) {
       return;
     }
 
-    // Create a mock order for crypto payment
-    const order = {
-      id: `crypto-${Date.now()}`,
-      orderNumber: `ORD-${Date.now()}`,
-      customerInfo,
-      total: cartTotal,
-      paymentMethod: 'crypto',
-      status: 'pending_verification',
-      walletAddress: cryptoSettings.walletAddress,
-      createdAt: new Date().toISOString()
-    };
+    try {
+      // Create crypto payment record in database
+      const cryptoPaymentData = {
+        order_id: `ORD-${Date.now()}`,
+        customer_email: customerInfo.email,
+        customer_name: customerInfo.name,
+        amount: cartTotal,
+        wallet_address: cryptoSettings.walletAddress,
+        customer_info: customerInfo,
+        cart_items: [], // Will be populated from cart context
+        shipping_address: {
+          address: customerInfo.address,
+          city: customerInfo.city,
+          zipCode: customerInfo.zipCode,
+          country: customerInfo.country
+        }
+      };
 
-    setPaymentConfirmed(true);
-    onPaymentComplete(order);
+      // Save to database
+      const { data, error } = await supabase
+        .from('crypto_payments')
+        .insert([cryptoPaymentData]);
+
+      if (error) {
+        throw new Error('Failed to save crypto payment: ' + error.message);
+      }
+
+      // Send pending email notification
+      await fetch('https://kirxlakwwzpkrmipdelj.supabase.co/functions/v1/send-crypto-payment-emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'pending',
+          customerName: customerInfo.name,
+          customerEmail: customerInfo.email,
+          orderId: cryptoPaymentData.order_id,
+          amount: cartTotal,
+          walletAddress: cryptoSettings.walletAddress
+        })
+      });
+
+      setPaymentConfirmed(true);
+      
+      toast({
+        title: "Payment Confirmation Received",
+        description: "Your payment is being verified. You'll receive an email confirmation once approved.",
+      });
+
+      // Create a special order object for the confirmation page
+      const order = {
+        id: cryptoPaymentData.order_id,
+        orderNumber: cryptoPaymentData.order_id,
+        customerInfo,
+        total: cartTotal,
+        paymentMethod: 'crypto',
+        status: 'pending_verification',
+        walletAddress: cryptoSettings.walletAddress,
+        createdAt: new Date().toISOString()
+      };
+
+      onPaymentComplete(order);
+    } catch (error) {
+      console.error('Error processing crypto payment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process payment confirmation. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (!cryptoSettings.walletAddress) {

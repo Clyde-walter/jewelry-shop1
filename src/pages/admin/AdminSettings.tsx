@@ -7,6 +7,7 @@ import { NotificationSettings } from '@/components/admin/settings/NotificationSe
 import { SecuritySettings } from '@/components/admin/settings/SecuritySettings';
 import { IntegrationSettings } from '@/components/admin/settings/IntegrationSettings';
 import { CryptoSettings } from '@/components/admin/settings/CryptoSettings';
+import { CryptoPaymentsManager } from '@/components/admin/CryptoPaymentsManager';
 import { getFromLocalStorage } from '@/utils/adminSettings';
 
 export function AdminSettings() {
@@ -69,10 +70,11 @@ export function AdminSettings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="crypto">Crypto</TabsTrigger>
+          <TabsTrigger value="crypto-payments">Crypto Payments</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
@@ -97,6 +99,10 @@ export function AdminSettings() {
             cryptoSettings={cryptoSettings}
             setCryptoSettings={setCryptoSettings}
           />
+        </TabsContent>
+
+        <TabsContent value="crypto-payments">
+          <CryptoPaymentsManager />
         </TabsContent>
 
         <TabsContent value="notifications">

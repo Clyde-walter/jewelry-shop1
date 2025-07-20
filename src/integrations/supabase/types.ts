@@ -137,6 +137,57 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_payments: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          cart_items: Json
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          customer_email: string
+          customer_info: Json
+          customer_name: string
+          id: string
+          order_id: string
+          shipping_address: Json
+          status: string
+          wallet_address: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          cart_items: Json
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          customer_email: string
+          customer_info: Json
+          customer_name: string
+          id?: string
+          order_id: string
+          shipping_address: Json
+          status?: string
+          wallet_address: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          cart_items?: Json
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_info?: Json
+          customer_name?: string
+          id?: string
+          order_id?: string
+          shipping_address?: Json
+          status?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
