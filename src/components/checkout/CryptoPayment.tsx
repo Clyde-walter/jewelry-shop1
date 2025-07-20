@@ -163,8 +163,8 @@ export function CryptoPayment({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">Wallet Address</label>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 p-3 bg-muted rounded-lg font-mono text-sm break-all">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="flex-1 p-3 bg-muted rounded-lg font-mono text-xs sm:text-sm break-all min-h-[2.5rem] flex items-center">
                 {cryptoSettings.walletAddress}
               </div>
               <Button
@@ -172,6 +172,7 @@ export function CryptoPayment({
                 size="icon"
                 onClick={copyToClipboard}
                 disabled={copied}
+                className="shrink-0"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
@@ -185,7 +186,7 @@ export function CryptoPayment({
                 <img 
                   src={cryptoSettings.qrCodeImage} 
                   alt="Wallet QR Code" 
-                  className="w-48 h-48 mx-auto"
+                  className="w-32 h-32 sm:w-48 sm:h-48 mx-auto"
                 />
               </div>
             </div>

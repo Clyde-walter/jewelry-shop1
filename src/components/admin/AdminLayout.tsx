@@ -12,7 +12,8 @@ import {
   MessageSquare,
   Shield,
   RotateCcw,
-  Phone
+  Phone,
+  Coins
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +36,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { name: 'Warranty', href: '/admin/warranty', icon: Shield },
     { name: 'Contact', href: '/admin/contact', icon: Phone },
     { name: 'Returns', href: '/admin/returns', icon: RotateCcw },
+    { name: 'Crypto Payments', href: '/admin/crypto-payments', icon: Coins },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
