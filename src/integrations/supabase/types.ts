@@ -322,6 +322,45 @@ export type Database = {
         }
         Relationships: []
       }
+      order_locations: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number | null
+          location_name: string
+          longitude: number | null
+          notes: string | null
+          order_id: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location_name: string
+          longitude?: number | null
+          notes?: string | null
+          order_id: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location_name?: string
+          longitude?: number | null
+          notes?: string | null
+          order_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string

@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useOrders } from '@/contexts/OrdersContext';
 import { useLocation } from '@/contexts/LocationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { OrderMap } from '@/components/map/OrderMap';
+import { GoogleMap } from '@/components/map/GoogleMap';
 import { OrderSearchForm } from '@/components/livemap/OrderSearchForm';
 import { OrderDetailsCard } from '@/components/livemap/OrderDetailsCard';
 import { OrderTimeline } from '@/components/livemap/OrderTimeline';
+import { supabase } from '@/integrations/supabase/client';
 
 export function LiveMap() {
   const { orders, loading } = useOrders();
@@ -16,6 +17,7 @@ export function LiveMap() {
   const { t } = useLanguage();
   const [selectedOrder, setSelectedOrder] = useState('');
   const [orderFound, setOrderFound] = useState(false);
+  const [shippingLocations, setShippingLocations] = useState<any[]>([]);
 
   // Enhanced mock tracking data for demo - includes all current orders
   const mockTrackingData: Record<string, any> = {};
@@ -38,14 +40,37 @@ export function LiveMap() {
     };
   });
 
-  const handleOrderFound = (orderNumber: string) => {
+  const fetchShippingLocations = async (orderId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('order_locations')
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setShippingLocations(data || []);
+    } catch (error) {
+      console.error('Error fetching shipping locations:', error);
+      setShippingLocations([]);
+    }
+  };
+
+  const handleOrderFound = async (orderNumber: string) => {
     setSelectedOrder(orderNumber);
     setOrderFound(true);
+    
+    // Fetch shipping locations for the selected order
+    const order = orders.find(o => o.orderNumber === orderNumber);
+    if (order) {
+      await fetchShippingLocations(order.id);
+    }
   };
 
   const handleOrderNotFound = () => {
     setOrderFound(false);
     setSelectedOrder('');
+    setShippingLocations([]);
   };
 
   const currentOrder = selectedOrder ? orders.find(order => order.orderNumber === selectedOrder) : null;
@@ -106,25 +131,22 @@ export function LiveMap() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <OrderMap
-                  coordinates={displayCoordinates}
-                  location={displayLocation}
-                  orderId={selectedOrder}
+                <GoogleMap 
+                  locations={shippingLocations.filter(loc => loc.latitude && loc.longitude)}
+                  orderNumber={currentOrder.orderNumber}
                 />
-                {(orderLocation || trackingInfo) && (
+                {shippingLocations.length > 0 && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm text-green-800">
                       <strong>Last Updated:</strong> {
-                        orderLocation ? 
-                        new Date(orderLocation.lastUpdated).toLocaleString() :
-                        'Demo data - Updated 2 hours ago'
+                        shippingLocations.length > 0 ? 
+                        new Date(shippingLocations[shippingLocations.length - 1].created_at).toLocaleString() :
+                        'No updates yet'
                       }
                     </p>
-                    {!orderLocation && (
-                      <p className="text-xs text-green-600 mt-1">
-                        * This is demo tracking data for demonstration purposes
-                      </p>
-                    )}
+                    <p className="text-xs text-green-600 mt-1">
+                      {shippingLocations.length} location update(s) available
+                    </p>
                   </div>
                 )}
               </CardContent>
