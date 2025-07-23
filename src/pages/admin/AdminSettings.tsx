@@ -57,8 +57,8 @@ export function AdminSettings() {
   // Crypto settings state
   const [cryptoSettings, setCryptoSettings] = useState(() =>
     getFromLocalStorage('cryptoSettings', {
-      walletAddress: '',
-      qrCodeImage: ''
+      walletAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      qrCodeImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
     })
   );
 
