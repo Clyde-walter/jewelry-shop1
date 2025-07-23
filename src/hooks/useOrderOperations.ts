@@ -103,6 +103,28 @@ export function useOrderOperations() {
 
       await fetchOrders();
       
+      // Send order confirmation email
+      try {
+        await supabase.functions.invoke('send-order-confirmation', {
+          body: {
+            customerName: customerInfo.name,
+            customerEmail: customerInfo.email,
+            orderNumber: orderNumber,
+            orderTotal: cartTotal,
+            orderItems: cartItems.map(item => ({
+              name: item.product.name,
+              price: item.product.price,
+              quantity: item.quantity
+            })),
+            shippingAddress: customerInfo
+          }
+        });
+        console.log('Order confirmation email sent for:', orderNumber);
+      } catch (emailError) {
+        console.error('Error sending order confirmation email:', emailError);
+        // Don't fail the order creation if email fails
+      }
+      
       addNotification({
         title: t('notification.new.order') || 'New Order',
         message: `${t('notification.order.created') || 'Order created'} ${orderNumber}`,
@@ -148,6 +170,28 @@ export function useOrderOperations() {
       await fetchOrders();
       
       const order = orders.find(o => o.id === orderId);
+      
+      // Send shipping alert email for status changes
+      if (order && ['confirmed', 'processing', 'shipped', 'in_transit', 'delivered'].includes(status)) {
+        try {
+          await supabase.functions.invoke('send-shipping-alert', {
+            body: {
+              customerName: order.customerInfo?.name || 'Customer',
+              customerEmail: order.customerInfo?.email,
+              orderNumber: order.orderNumber,
+              status: status,
+              trackingNumber: undefined,
+              estimatedDelivery: undefined,
+              shippingCarrier: undefined
+            }
+          });
+          console.log('Shipping alert email sent for:', order.orderNumber, 'Status:', status);
+        } catch (emailError) {
+          console.error('Error sending shipping alert email:', emailError);
+          // Don't fail the status update if email fails
+        }
+      }
+      
       addNotification({
         title: t('notification.order.status.changed') || 'Order Status Changed',
         message: `${t('order.status') || 'Status'}: ${order?.orderNumber || orderId} - ${t(`status.${status}`) || status}`,
