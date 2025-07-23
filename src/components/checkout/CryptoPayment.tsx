@@ -231,53 +231,59 @@ export function CryptoPayment({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="bg-background border rounded-lg p-4">
-          <h3 className="font-medium mb-3">Payment Instructions</h3>
-          <ol className="text-sm text-muted-foreground space-y-2">
-            <li>1. Copy the wallet address below or scan the QR code</li>
-            <li>2. Send exactly <span className="font-medium text-foreground">{btcAmount} BTC</span> (${cartTotal.toFixed(2)} USD)</li>
-            <li>3. Upload proof of payment (optional but recommended)</li>
-            <li>4. Click "Confirm Payment" after sending</li>
-            <li>5. We'll verify your payment and process your order</li>
+        <div className="bg-muted/50 border rounded-lg p-4 md:p-6">
+          <h3 className="font-semibold mb-4 text-center">Payment Instructions</h3>
+          <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+            <li>Copy the wallet address below</li>
+            <li>Send exactly <span className="font-medium text-foreground">{btcAmount} BTC</span> (${cartTotal.toFixed(2)} USD)</li>
+            <li>Upload proof of payment (optional but recommended)</li>
+            <li>Click "Confirm Payment" after sending</li>
+            <li>We'll verify your payment and process your order</li>
           </ol>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-3">Amount to Send</label>
-            <div className="flex flex-col gap-3">
-              <div className="p-4 bg-muted rounded-lg border">
-                <p className="font-mono text-lg font-bold text-center break-all leading-relaxed select-text">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-3">
+            <label className="block text-sm font-medium">Amount to Send</label>
+            <div className="space-y-3">
+              <div className="p-4 bg-muted rounded-lg border text-center">
+                <p className="font-mono text-xl md:text-2xl font-bold break-all leading-relaxed select-text text-primary">
                   {btcAmount} BTC
                 </p>
-                <p className="text-sm text-muted-foreground text-center mt-1">
-                  ≈ ${cartTotal.toFixed(2)} USD {btcPrice > 0 && `(BTC Price: $${btcPrice.toLocaleString()})`}
+                <p className="text-sm text-muted-foreground mt-2">
+                  ≈ ${cartTotal.toFixed(2)} USD
                 </p>
+                {btcPrice > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    BTC Price: ${btcPrice.toLocaleString()}
+                  </p>
+                )}
               </div>
               <Button
                 variant="outline"
                 onClick={copyBtcAmount}
                 disabled={btcAmountCopied || !btcAmount}
                 className="w-full"
+                size="sm"
               >
                 {btcAmountCopied ? (
                   <>
                     <Check className="w-4 h-4 mr-2" />
-                    BTC Amount Copied
+                    Amount Copied
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4 mr-2" />
-                    Copy BTC Amount
+                    Copy Amount
                   </>
                 )}
               </Button>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-3">Wallet Address</label>
-            <div className="flex flex-col gap-3">
+          <div className="space-y-3">
+            <label className="block text-sm font-medium">Bitcoin Wallet Address</label>
+            <div className="space-y-3">
               <div className="p-4 bg-muted rounded-lg border">
                 <p className="font-mono text-sm break-all leading-relaxed select-text">
                   {cryptoSettings.walletAddress}
@@ -288,36 +294,22 @@ export function CryptoPayment({
                 onClick={copyToClipboard}
                 disabled={copied}
                 className="w-full"
+                size="sm"
               >
                 {copied ? (
                   <>
                     <Check className="w-4 h-4 mr-2" />
-                    Copied to Clipboard
+                    Address Copied
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4 mr-2" />
-                    Copy Wallet Address
+                    Copy Address
                   </>
                 )}
               </Button>
             </div>
           </div>
-
-          {cryptoSettings.qrCodeImage && (
-            <div>
-              <label className="block text-sm font-medium mb-3">QR Code</label>
-              <div className="flex justify-center">
-                <div className="p-4 bg-white rounded-lg border shadow-sm">
-                  <img 
-                    src={cryptoSettings.qrCodeImage} 
-                    alt="Wallet QR Code" 
-                    className="w-40 h-40 lg:w-48 lg:h-48 object-contain"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         <div>
