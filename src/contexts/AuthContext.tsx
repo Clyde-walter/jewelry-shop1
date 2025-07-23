@@ -30,6 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return authService.updateProfile(user.id, data);
   };
 
+  const resendVerificationEmail = async (email: string) => {
+    return authService.resendVerificationEmail(email);
+  };
+
   const value = {
     user,
     session,
@@ -39,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resetPassword,
     updateProfile,
+    resendVerificationEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
