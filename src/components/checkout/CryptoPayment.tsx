@@ -61,7 +61,23 @@ export function CryptoPayment({
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(cryptoSettings.walletAddress);
+      // Check if clipboard API is available (for modern browsers)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(cryptoSettings.walletAddress);
+      } else {
+        // Fallback for older browsers or non-HTTPS contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = cryptoSettings.walletAddress;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      
       setCopied(true);
       toast({
         title: "Copied!",
@@ -69,9 +85,10 @@ export function CryptoPayment({
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
+      console.error('Copy failed:', err);
       toast({
         title: "Error",
-        description: "Failed to copy wallet address",
+        description: "Failed to copy wallet address. Please select and copy manually.",
         variant: "destructive",
       });
     }
@@ -79,7 +96,23 @@ export function CryptoPayment({
 
   const copyBtcAmount = async () => {
     try {
-      await navigator.clipboard.writeText(btcAmount);
+      // Check if clipboard API is available (for modern browsers)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(btcAmount);
+      } else {
+        // Fallback for older browsers or non-HTTPS contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = btcAmount;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      
       setBtcAmountCopied(true);
       toast({
         title: "Copied!",
@@ -87,9 +120,10 @@ export function CryptoPayment({
       });
       setTimeout(() => setBtcAmountCopied(false), 2000);
     } catch (err) {
+      console.error('Copy failed:', err);
       toast({
         title: "Error",
-        description: "Failed to copy BTC amount",
+        description: "Failed to copy BTC amount. Please select and copy manually.",
         variant: "destructive",
       });
     }
@@ -213,7 +247,7 @@ export function CryptoPayment({
             <label className="block text-sm font-medium mb-3">Amount to Send</label>
             <div className="flex flex-col gap-3">
               <div className="p-4 bg-muted rounded-lg border">
-                <p className="font-mono text-lg font-bold text-center break-all leading-relaxed">
+                <p className="font-mono text-lg font-bold text-center break-all leading-relaxed select-text">
                   {btcAmount} BTC
                 </p>
                 <p className="text-sm text-muted-foreground text-center mt-1">
@@ -245,7 +279,7 @@ export function CryptoPayment({
             <label className="block text-sm font-medium mb-3">Wallet Address</label>
             <div className="flex flex-col gap-3">
               <div className="p-4 bg-muted rounded-lg border">
-                <p className="font-mono text-sm break-all leading-relaxed">
+                <p className="font-mono text-sm break-all leading-relaxed select-text">
                   {cryptoSettings.walletAddress}
                 </p>
               </div>
