@@ -22,7 +22,6 @@ import { AdminWarranty } from "@/pages/admin/AdminWarranty";
 import { AdminContact } from "@/pages/admin/AdminContact";
 import { AdminReturns } from "@/pages/admin/AdminReturns";
 import { AdminFeatured } from "@/pages/admin/AdminFeatured";
-import { AdminCryptoPayments } from "@/pages/admin/AdminCryptoPayments";
 import { PublicRoutes } from "./PublicRoutes";
 
 export function AppRoutes() {
@@ -54,7 +53,7 @@ export function AppRoutes() {
               <Route path="shipping" element={<AdminShipping />} />
               <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="emails" element={<AdminEmails />} />
-              <Route path="crypto-payments" element={<AdminCryptoPayments />} />
+              
               <Route path="settings" element={<AdminSettings />} />
             </Routes>
           </AdminLayout>

@@ -3,7 +3,6 @@ import { useStore } from '@/contexts/StoreContext';
 import { EmptyCart } from '@/components/checkout/EmptyCart';
 import { CheckoutForm } from '@/components/checkout/CheckoutForm';
 import { OrderConfirmation } from '@/components/checkout/OrderConfirmation';
-import { PendingCryptoPayment } from '@/components/checkout/PendingCryptoPayment';
 
 export function Checkout() {
   const { cart, getCartTotal } = useStore();
@@ -24,10 +23,6 @@ export function Checkout() {
 
   // Show order confirmation if order was created
   if (orderCreated) {
-    // Show different confirmation page for crypto payments
-    if (orderCreated.paymentMethod === 'crypto' && orderCreated.status === 'pending_verification') {
-      return <PendingCryptoPayment orderCreated={orderCreated} finalTotal={finalTotal} />;
-    }
     return <OrderConfirmation orderCreated={orderCreated} finalTotal={finalTotal} />;
   }
 

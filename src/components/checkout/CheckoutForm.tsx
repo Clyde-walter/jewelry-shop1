@@ -8,7 +8,6 @@ import { PaymentInfoForm } from './PaymentInfoForm';
 import { OrderSummary } from './OrderSummary';
 import { PaystackPayment } from './PaystackPayment';
 import { FlutterwavePayment } from './FlutterwavePayment';
-import { CryptoPayment } from './CryptoPayment';
 
 interface CheckoutFormProps {
   onOrderCreated: (order: any) => void;
@@ -90,18 +89,6 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   };
 
   const renderPaymentButton = () => {
-    if (paymentMethod === 'crypto') {
-      return (
-        <CryptoPayment
-          customerInfo={customerInfo}
-          cartTotal={finalTotal}
-          onPaymentComplete={handlePaymentSuccess}
-          onValidatePayment={handlePaymentValidation}
-          isProcessing={isProcessing}
-        />
-      );
-    }
-
     return (
       <FlutterwavePayment
         amount={finalTotal}
