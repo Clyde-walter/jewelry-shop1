@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Copy, Upload, Check, Bitcoin, Banknote, Zap, DollarSign } from 'lucide-react';
 import { ImageUpload } from '@/components/ImageUpload';
 import { toast } from '@/hooks/use-toast';
@@ -22,7 +24,6 @@ interface CryptoPaymentProps {
   customerInfo: any;
   cartItems: any[];
   onPaymentComplete: (order: any) => void;
-  onValidatePayment: () => boolean;
 }
 
 const currencyIcons = {
@@ -43,14 +44,19 @@ export function CryptoPayment({
   amount, 
   customerInfo, 
   cartItems, 
-  onPaymentComplete, 
-  onValidatePayment 
+  onPaymentComplete
 }: CryptoPaymentProps) {
   const [wallets, setWallets] = useState<CryptoWallet[]>([]);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('BTC');
   const [proofImages, setProofImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState<string>('');
+  const [localCustomerInfo, setLocalCustomerInfo] = useState({
+    name: customerInfo.name || '',
+    email: customerInfo.email || '',
+    phone: customerInfo.phone || '',
+    address: customerInfo.address || ''
+  });
 
   useEffect(() => {
     fetchWallets();
@@ -102,7 +108,13 @@ export function CryptoPayment({
   };
 
   const handleSubmitPayment = async () => {
-    if (!onValidatePayment()) {
+    // Validate customer info
+    if (!localCustomerInfo.name || !localCustomerInfo.email) {
+      toast({
+        title: "Customer information required",
+        description: "Please fill in your name and email",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -128,18 +140,18 @@ export function CryptoPayment({
       // Create crypto payment record
       const { data: cryptoPayment, error: paymentError } = await supabase
         .from('crypto_payments')
-        .insert({
-          order_id: orderId,
-          wallet_address: selectedWallet.wallet_address,
-          amount,
-          customer_info: customerInfo,
-          customer_name: customerInfo.name || '',
-          customer_email: customerInfo.email || '',
-          cart_items: cartItems,
-          shipping_address: customerInfo.address || {},
-          proof_images: proofImages,
-          status: 'pending'
-        })
+         .insert({
+           order_id: orderId,
+           wallet_address: selectedWallet.wallet_address,
+           amount,
+           customer_info: localCustomerInfo,
+           customer_name: localCustomerInfo.name,
+           customer_email: localCustomerInfo.email,
+           cart_items: cartItems,
+           shipping_address: { address: localCustomerInfo.address },
+           proof_images: proofImages,
+           status: 'pending'
+         })
         .select()
         .single();
 
@@ -148,14 +160,14 @@ export function CryptoPayment({
       // Create order record
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          order_number: orderId,
-          customer_info: customerInfo,
-          items: cartItems,
-          total: amount,
-          status: 'pending_verification',
-          user_id: null // Allow anonymous orders
-        })
+         .insert({
+           order_number: orderId,
+           customer_info: localCustomerInfo,
+           items: cartItems,
+           total: amount,
+           status: 'pending_verification',
+           user_id: null // Allow anonymous orders
+         })
         .select()
         .single();
 
@@ -201,6 +213,50 @@ export function CryptoPayment({
         <div className="text-center p-4 bg-muted rounded-lg">
           <p className="text-sm text-muted-foreground">Total Amount</p>
           <p className="text-2xl font-bold">${amount.toFixed(2)} USD</p>
+        </div>
+
+        {/* Customer Information */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Customer Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name *</Label>
+              <Input
+                id="name"
+                value={localCustomerInfo.name}
+                onChange={(e) => setLocalCustomerInfo(prev => ({...prev, name: e.target.value}))}
+                placeholder="Enter your full name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={localCustomerInfo.email}
+                onChange={(e) => setLocalCustomerInfo(prev => ({...prev, email: e.target.value}))}
+                placeholder="Enter your email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                value={localCustomerInfo.phone}
+                onChange={(e) => setLocalCustomerInfo(prev => ({...prev, phone: e.target.value}))}
+                placeholder="Enter your phone number"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Shipping Address</Label>
+              <Input
+                id="address"
+                value={localCustomerInfo.address}
+                onChange={(e) => setLocalCustomerInfo(prev => ({...prev, address: e.target.value}))}
+                placeholder="Enter your address"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Currency Selection */}

@@ -151,7 +151,6 @@ export type Database = {
           id: string
           order_id: string
           proof_images: string[] | null
-          proof_of_payment_images: string[] | null
           shipping_address: Json
           status: string
           wallet_address: string
@@ -169,7 +168,6 @@ export type Database = {
           id?: string
           order_id: string
           proof_images?: string[] | null
-          proof_of_payment_images?: string[] | null
           shipping_address: Json
           status?: string
           wallet_address: string
@@ -187,7 +185,6 @@ export type Database = {
           id?: string
           order_id?: string
           proof_images?: string[] | null
-          proof_of_payment_images?: string[] | null
           shipping_address?: Json
           status?: string
           wallet_address?: string

@@ -132,16 +132,24 @@ export function Cart() {
                 <span>Total</span>
                 <span>${(total + (total > 50 ? 0 : 9.99) + (total * 0.08)).toFixed(2)}</span>
               </div>
-              <Link to="/checkout">
-                <Button className="w-full bg-ecommerce-600 hover:bg-ecommerce-700">
-                  Proceed to Checkout
-                </Button>
-              </Link>
-              <Link to="/products">
-                <Button variant="outline" className="w-full">
-                  Continue Shopping
-                </Button>
-              </Link>
+              <div className="space-y-3">
+                <div className="text-sm font-medium text-foreground mb-2">Choose Payment Method:</div>
+                <Link to="/checkout">
+                  <Button className="w-full bg-ecommerce-600 hover:bg-ecommerce-700">
+                    Traditional Checkout
+                  </Button>
+                </Link>
+                <Link to="/checkout?method=crypto">
+                  <Button variant="outline" className="w-full">
+                    Pay with Cryptocurrency
+                  </Button>
+                </Link>
+                <Link to="/products">
+                  <Button variant="ghost" className="w-full">
+                    Continue Shopping
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </div>
