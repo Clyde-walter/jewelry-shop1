@@ -150,6 +150,7 @@ export type Database = {
           customer_name: string
           id: string
           order_id: string
+          proof_images: string[] | null
           proof_of_payment_images: string[] | null
           shipping_address: Json
           status: string
@@ -167,6 +168,7 @@ export type Database = {
           customer_name: string
           id?: string
           order_id: string
+          proof_images?: string[] | null
           proof_of_payment_images?: string[] | null
           shipping_address: Json
           status?: string
@@ -184,9 +186,40 @@ export type Database = {
           customer_name?: string
           id?: string
           order_id?: string
+          proof_images?: string[] | null
           proof_of_payment_images?: string[] | null
           shipping_address?: Json
           status?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      crypto_wallets: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          qr_code_url: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          id?: string
+          is_active?: boolean
+          qr_code_url?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          qr_code_url?: string | null
+          updated_at?: string
           wallet_address?: string
         }
         Relationships: []
