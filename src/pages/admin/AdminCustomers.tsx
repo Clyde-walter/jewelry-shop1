@@ -1,17 +1,50 @@
 import React, { useState } from 'react';
-import { Search, UserCheck, Mail, Phone, Loader2, RefreshCw } from 'lucide-react';
+import { Search, UserCheck, Mail, Phone, Loader2, RefreshCw, Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
 import { useCustomers } from '@/contexts/CustomersContext';
 
 export function AdminCustomers() {
-  const { customers, loading, refreshCustomers } = useCustomers();
+  const { customers, loading, refreshCustomers, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<any>(null);
+  const [newCustomer, setNewCustomer] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    email_confirmed_at: null,
+    join_date: new Date().toISOString()
+  });
+
+  const handleAddCustomer = async () => {
+    if (!newCustomer.name || !newCustomer.email) return;
+    
+    await addCustomer(newCustomer);
+    setNewCustomer({ name: '', email: '', phone: '', email_confirmed_at: null, join_date: new Date().toISOString() });
+    setIsAddDialogOpen(false);
+  };
+
+  const handleEditCustomer = async () => {
+    if (!editingCustomer || !editingCustomer.name || !editingCustomer.email) return;
+    
+    await updateCustomer(editingCustomer.id, editingCustomer);
+    setEditingCustomer(null);
+    setIsEditDialogOpen(false);
+  };
+
+  const handleDeleteCustomer = async (customerId: string) => {
+    await deleteCustomer(customerId);
+  };
 
   const filteredCustomers = customers.filter((customer: any) => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,12 +78,65 @@ export function AdminCustomers() {
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold mb-4">Customer Management</h1>
-          <p className="text-gray-600">View all registered users and their activity.</p>
+          <p className="text-gray-600">Manage all registered users and their activity.</p>
         </div>
-        <Button onClick={refreshCustomers} variant="outline" className="flex items-center gap-2">
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Customer
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Customer</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={newCustomer.name}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                    placeholder="Customer name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newCustomer.email}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                    placeholder="customer@example.com"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={newCustomer.phone}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                    placeholder="Phone number (optional)"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddCustomer}>
+                    Add Customer
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button onClick={refreshCustomers} variant="outline" className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats Overview */}
@@ -148,6 +234,7 @@ export function AdminCustomers() {
                 <TableHead>Orders</TableHead>
                 <TableHead>Total Spent</TableHead>
                 <TableHead>Last Order</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,11 +260,93 @@ export function AdminCustomers() {
                   <TableCell>{customer.total_orders}</TableCell>
                   <TableCell>${customer.total_spent.toFixed(2)}</TableCell>
                   <TableCell>{customer.last_order ? new Date(customer.last_order).toLocaleDateString() : 'Never'}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Dialog open={isEditDialogOpen && editingCustomer?.id === customer.id} onOpenChange={setIsEditDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingCustomer({ ...customer });
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit Customer</DialogTitle>
+                          </DialogHeader>
+                          {editingCustomer && (
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="edit-name">Name</Label>
+                                <Input
+                                  id="edit-name"
+                                  value={editingCustomer.name}
+                                  onChange={(e) => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="edit-email">Email</Label>
+                                <Input
+                                  id="edit-email"
+                                  type="email"
+                                  value={editingCustomer.email}
+                                  onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value })}
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="edit-phone">Phone</Label>
+                                <Input
+                                  id="edit-phone"
+                                  value={editingCustomer.phone || ''}
+                                  onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
+                                />
+                              </div>
+                              <div className="flex justify-end gap-2">
+                                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                                  Cancel
+                                </Button>
+                                <Button onClick={handleEditCustomer}>
+                                  Update Customer
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-800">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Customer</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete {customer.name}? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {filteredCustomers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                     No customers found matching your search criteria.
                   </TableCell>
                 </TableRow>

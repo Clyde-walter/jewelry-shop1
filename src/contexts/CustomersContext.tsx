@@ -14,12 +14,16 @@ interface Customer {
   last_order: string | null;
   created_at: string;
   updated_at: string;
+  user_id?: string;
 }
 
 interface CustomersContextType {
   customers: Customer[];
   loading: boolean;
   refreshCustomers: () => Promise<void>;
+  addCustomer: (customer: Omit<Customer, 'id' | 'created_at' | 'updated_at' | 'total_orders' | 'total_spent' | 'last_order'>) => Promise<void>;
+  updateCustomer: (id: string, updates: Partial<Customer>) => Promise<void>;
+  deleteCustomer: (id: string) => Promise<void>;
 }
 
 const CustomersContext = createContext<CustomersContextType | undefined>(undefined);
@@ -30,130 +34,185 @@ export function CustomersProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCustomers = async () => {
     try {
-      // Fetch all users from auth.users via Supabase admin API
+      setLoading(true);
+      
+      // First try to get all users from auth.users
       const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
       
-      if (authError) {
-        console.error('Error fetching auth users:', authError);
-        // Fall back to profiles table if admin access isn't available
-        return fetchFromProfiles();
-      }
-
-      // Get profiles for additional info
+      // Get all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*');
 
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-      }
-
-      // Get order statistics for each user
-      const { data: orderStats, error: orderError } = await supabase
+      // Get all orders with statistics
+      const { data: orders, error: ordersError } = await supabase
         .from('orders')
         .select('user_id, total, created_at')
         .not('user_id', 'is', null);
 
-      if (orderError) {
-        console.error('Error fetching order stats:', orderError);
+      const combinedCustomers: Customer[] = [];
+
+      // Process auth users if available
+      if (!authError && authUsers?.users) {
+        authUsers.users.forEach((user: any) => {
+          const profile = profiles?.find(p => p.id === user.id);
+          const userOrders = orders?.filter(order => order.user_id === user.id) || [];
+          
+          const totalOrders = userOrders.length;
+          const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.total.toString()), 0);
+          const lastOrder = userOrders.length > 0 
+            ? userOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].created_at
+            : null;
+
+          const name = profile 
+            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || user.email?.split('@')[0] || 'Unknown User'
+            : user.email?.split('@')[0] || 'Unknown User';
+
+          combinedCustomers.push({
+            id: user.id,
+            name,
+            email: user.email || 'No email',
+            phone: profile?.phone || null,
+            email_confirmed_at: user.email_confirmed_at,
+            total_orders: totalOrders,
+            total_spent: totalSpent,
+            join_date: user.created_at,
+            last_order: lastOrder,
+            created_at: user.created_at,
+            updated_at: user.updated_at || user.created_at,
+            user_id: user.id
+          });
+        });
       }
 
-      // Combine data from auth users, profiles, and order stats
-      const formattedCustomers: Customer[] = authUsers.users.map((user: any) => {
-        const profile = profiles?.find(p => p.id === user.id);
-        const userOrders = orderStats?.filter(order => order.user_id === user.id) || [];
-        
-        const totalOrders = userOrders.length;
-        const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.total.toString()), 0);
-        const lastOrder = userOrders.length > 0 
-          ? userOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].created_at
-          : null;
+      // Add profiles that might not be in auth.users (edge case)
+      if (profiles) {
+        profiles.forEach((profile: any) => {
+          if (!combinedCustomers.find(c => c.id === profile.id)) {
+            const userOrders = orders?.filter(order => order.user_id === profile.id) || [];
+            
+            const totalOrders = userOrders.length;
+            const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.total.toString()), 0);
+            const lastOrder = userOrders.length > 0 
+              ? userOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].created_at
+              : null;
 
-        const name = profile 
-          ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || user.email
-          : user.email;
+            const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User';
 
-        return {
-          id: user.id,
-          name,
-          email: user.email,
-          phone: profile?.phone || null,
-          email_confirmed_at: user.email_confirmed_at,
-          total_orders: totalOrders,
-          total_spent: totalSpent,
-          join_date: user.created_at,
-          last_order: lastOrder,
-          created_at: user.created_at,
-          updated_at: user.updated_at || user.created_at
-        };
-      });
+            combinedCustomers.push({
+              id: profile.id,
+              name,
+              email: 'Not available',
+              phone: profile.phone || null,
+              email_confirmed_at: null,
+              total_orders: totalOrders,
+              total_spent: totalSpent,
+              join_date: profile.created_at,
+              last_order: lastOrder,
+              created_at: profile.created_at,
+              updated_at: profile.updated_at,
+              user_id: profile.id
+            });
+          }
+        });
+      }
 
-      setCustomers(formattedCustomers);
+      setCustomers(combinedCustomers.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     } catch (error) {
-      console.error('Error in fetchCustomers:', error);
-      // Fall back to profiles table
-      await fetchFromProfiles();
+      console.error('Error fetching customers:', error);
+      toast({
+        title: "Error loading customers",
+        description: "Failed to load customer data",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchFromProfiles = async () => {
+  const addCustomer = async (customerData: Omit<Customer, 'id' | 'created_at' | 'updated_at' | 'total_orders' | 'total_spent' | 'last_order'>) => {
     try {
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('customers')
+        .insert([{
+          name: customerData.name,
+          email: customerData.email,
+          phone: customerData.phone,
+          join_date: customerData.join_date || new Date().toISOString()
+        }])
+        .select()
+        .single();
 
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        toast({
-          title: "Error loading customers",
-          description: profilesError.message,
-          variant: "destructive"
-        });
-        return;
-      }
+      if (error) throw error;
 
-      // Get order statistics for each user
-      const { data: orderStats, error: orderError } = await supabase
-        .from('orders')
-        .select('user_id, total, created_at')
-        .not('user_id', 'is', null);
-
-      if (orderError) {
-        console.error('Error fetching order stats:', orderError);
-      }
-
-      const formattedCustomers: Customer[] = profiles.map((profile: any) => {
-        const userOrders = orderStats?.filter(order => order.user_id === profile.id) || [];
-        
-        const totalOrders = userOrders.length;
-        const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.total.toString()), 0);
-        const lastOrder = userOrders.length > 0 
-          ? userOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].created_at
-          : null;
-
-        const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User';
-
-        return {
-          id: profile.id,
-          name,
-          email: 'N/A', // Email not available from profiles table
-          phone: profile.phone || null,
-          email_confirmed_at: null,
-          total_orders: totalOrders,
-          total_spent: totalSpent,
-          join_date: profile.created_at,
-          last_order: lastOrder,
-          created_at: profile.created_at,
-          updated_at: profile.updated_at
-        };
+      toast({
+        title: "Customer added",
+        description: "New customer has been successfully added",
       });
 
-      setCustomers(formattedCustomers);
-    } catch (error) {
-      console.error('Error in fetchFromProfiles:', error);
+      await fetchCustomers();
+    } catch (error: any) {
+      console.error('Error adding customer:', error);
+      toast({
+        title: "Error adding customer",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const updateCustomer = async (id: string, updates: Partial<Customer>) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({
+          name: updates.name,
+          email: updates.email,
+          phone: updates.phone,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Customer updated",
+        description: "Customer information has been successfully updated",
+      });
+
+      await fetchCustomers();
+    } catch (error: any) {
+      console.error('Error updating customer:', error);
+      toast({
+        title: "Error updating customer",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const deleteCustomer = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Customer deleted",
+        description: "Customer has been successfully deleted",
+      });
+
+      await fetchCustomers();
+    } catch (error: any) {
+      console.error('Error deleting customer:', error);
+      toast({
+        title: "Error deleting customer", 
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
@@ -195,7 +254,10 @@ export function CustomersProvider({ children }: { children: React.ReactNode }) {
       value={{
         customers,
         loading,
-        refreshCustomers: fetchCustomers
+        refreshCustomers: fetchCustomers,
+        addCustomer,
+        updateCustomer,
+        deleteCustomer
       }}
     >
       {children}
