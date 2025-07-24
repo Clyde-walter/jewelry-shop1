@@ -31,6 +31,8 @@ import { LiveMap } from "@/pages/LiveMap";
 import { ManageAddresses } from "@/pages/ManageAddresses";
 import { PaymentMethods } from "@/pages/PaymentMethods";
 import { EditInformation } from "@/pages/EditInformation";
+import { CryptoCheckout } from "@/pages/CryptoCheckout";
+import { FlutterwaveCheckout } from "@/pages/FlutterwaveCheckout";
 import NotFound from "@/pages/NotFound";
 
 export function PublicRoutes() {
@@ -62,6 +64,16 @@ export function PublicRoutes() {
           <Route path="/checkout" element={
             <ProtectedRoute>
               <Checkout />
+            </ProtectedRoute>
+          } />
+          <Route path="/crypto-checkout" element={
+            <ProtectedRoute>
+              <CryptoCheckout />
+            </ProtectedRoute>
+          } />
+          <Route path="/flutterwave-checkout" element={
+            <ProtectedRoute>
+              <FlutterwaveCheckout />
             </ProtectedRoute>
           } />
           <Route path="/orders" element={

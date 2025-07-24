@@ -36,7 +36,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { name: 'Warranty', href: '/admin/warranty', icon: Shield },
     { name: 'Contact', href: '/admin/contact', icon: Phone },
     { name: 'Returns', href: '/admin/returns', icon: RotateCcw },
-    { name: 'Crypto Payments', href: '/admin/crypto-payments', icon: Coins },
+    { name: 'Crypto Wallets', href: '/admin/crypto-wallets', icon: Coins },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 

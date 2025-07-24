@@ -134,14 +134,14 @@ export function Cart() {
               </div>
               <div className="space-y-3">
                 <div className="text-sm font-medium text-foreground mb-2">Choose Payment Method:</div>
-                <Link to="/checkout">
+                <Link to="/flutterwave-checkout">
                   <Button className="w-full bg-ecommerce-600 hover:bg-ecommerce-700">
-                    Traditional Checkout
+                    Flutterwave Checkout
                   </Button>
                 </Link>
-                <Link to="/checkout?method=crypto">
+                <Link to="/crypto-checkout">
                   <Button variant="outline" className="w-full">
-                    Pay with Cryptocurrency
+                    Crypto Checkout
                   </Button>
                 </Link>
                 <Link to="/products">
