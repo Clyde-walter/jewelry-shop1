@@ -33,9 +33,6 @@ interface StoreContextType {
   
   // Customers functions
   customers: any[];
-  addCustomer: (customer: any) => Promise<void>;
-  updateCustomer: (customerId: string, updates: any) => Promise<void>;
-  deleteCustomer: (customerId: string) => Promise<void>;
   
   // Auth functions
   user: any;
@@ -51,7 +48,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const { wishlist, addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { orders, createOrder: originalCreateOrder, updateOrderStatus, loading } = useOrders();
   const { products } = useProducts();
-  const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
+  const { customers } = useCustomers();
 
   // Wrap createOrder to clear cart after successful order creation
   const createOrder = async (customerInfo: any, cartItems: any[], cartTotal: number) => {
@@ -91,9 +88,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         
         // Customers
         customers,
-        addCustomer,
-        updateCustomer,
-        deleteCustomer,
         
         // Auth
         user,

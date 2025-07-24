@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -7,8 +6,8 @@ interface Customer {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  status: 'active' | 'inactive';
+  phone: string | null;
+  email_confirmed_at: string | null;
   total_orders: number;
   total_spent: number;
   join_date: string;
@@ -19,10 +18,8 @@ interface Customer {
 
 interface CustomersContextType {
   customers: Customer[];
-  addCustomer: (customer: Omit<Customer, 'id' | 'total_orders' | 'total_spent' | 'join_date' | 'last_order' | 'created_at' | 'updated_at'>) => Promise<void>;
-  updateCustomer: (id: string, customer: Partial<Customer>) => Promise<void>;
-  deleteCustomer: (id: string) => Promise<void>;
   loading: boolean;
+  refreshCustomers: () => Promise<void>;
 }
 
 const CustomersContext = createContext<CustomersContextType | undefined>(undefined);
@@ -33,173 +30,172 @@ export function CustomersProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCustomers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('customers')
+      // Fetch all users from auth.users via Supabase admin API
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error('Error fetching auth users:', authError);
+        // Fall back to profiles table if admin access isn't available
+        return fetchFromProfiles();
+      }
+
+      // Get profiles for additional info
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*');
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+      }
+
+      // Get order statistics for each user
+      const { data: orderStats, error: orderError } = await supabase
+        .from('orders')
+        .select('user_id, total, created_at')
+        .not('user_id', 'is', null);
+
+      if (orderError) {
+        console.error('Error fetching order stats:', orderError);
+      }
+
+      // Combine data from auth users, profiles, and order stats
+      const formattedCustomers: Customer[] = authUsers.users.map((user: any) => {
+        const profile = profiles?.find(p => p.id === user.id);
+        const userOrders = orderStats?.filter(order => order.user_id === user.id) || [];
+        
+        const totalOrders = userOrders.length;
+        const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.total.toString()), 0);
+        const lastOrder = userOrders.length > 0 
+          ? userOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].created_at
+          : null;
+
+        const name = profile 
+          ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || user.email
+          : user.email;
+
+        return {
+          id: user.id,
+          name,
+          email: user.email,
+          phone: profile?.phone || null,
+          email_confirmed_at: user.email_confirmed_at,
+          total_orders: totalOrders,
+          total_spent: totalSpent,
+          join_date: user.created_at,
+          last_order: lastOrder,
+          created_at: user.created_at,
+          updated_at: user.updated_at || user.created_at
+        };
+      });
+
+      setCustomers(formattedCustomers);
+    } catch (error) {
+      console.error('Error in fetchCustomers:', error);
+      // Fall back to profiles table
+      await fetchFromProfiles();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFromProfiles = async () => {
+    try {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching customers:', error);
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
         toast({
           title: "Error loading customers",
-          description: error.message,
+          description: profilesError.message,
           variant: "destructive"
         });
         return;
       }
 
-      const formattedCustomers: Customer[] = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        email: item.email,
-        phone: item.phone || '',
-        status: item.status as 'active' | 'inactive',
-        total_orders: item.total_orders || 0,
-        total_spent: parseFloat(item.total_spent.toString()) || 0,
-        join_date: item.join_date,
-        last_order: item.last_order,
-        created_at: item.created_at,
-        updated_at: item.updated_at
-      }));
+      // Get order statistics for each user
+      const { data: orderStats, error: orderError } = await supabase
+        .from('orders')
+        .select('user_id, total, created_at')
+        .not('user_id', 'is', null);
+
+      if (orderError) {
+        console.error('Error fetching order stats:', orderError);
+      }
+
+      const formattedCustomers: Customer[] = profiles.map((profile: any) => {
+        const userOrders = orderStats?.filter(order => order.user_id === profile.id) || [];
+        
+        const totalOrders = userOrders.length;
+        const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.total.toString()), 0);
+        const lastOrder = userOrders.length > 0 
+          ? userOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].created_at
+          : null;
+
+        const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User';
+
+        return {
+          id: profile.id,
+          name,
+          email: 'N/A', // Email not available from profiles table
+          phone: profile.phone || null,
+          email_confirmed_at: null,
+          total_orders: totalOrders,
+          total_spent: totalSpent,
+          join_date: profile.created_at,
+          last_order: lastOrder,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at
+        };
+      });
 
       setCustomers(formattedCustomers);
     } catch (error) {
-      console.error('Error in fetchCustomers:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error in fetchFromProfiles:', error);
     }
   };
 
   useEffect(() => {
     fetchCustomers();
 
-    // Set up real-time subscription
-    const channel = supabase
-      .channel('customers-changes')
+    // Set up real-time subscription for profiles changes
+    const profilesChannel = supabase
+      .channel('profiles-changes')
       .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'customers' }, 
+        { event: '*', schema: 'public', table: 'profiles' }, 
         () => {
-          console.log('Customers table changed, refetching...');
+          console.log('Profiles table changed, refetching...');
+          fetchCustomers();
+        }
+      )
+      .subscribe();
+
+    // Set up real-time subscription for orders changes
+    const ordersChannel = supabase
+      .channel('orders-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'orders' }, 
+        () => {
+          console.log('Orders table changed, refetching...');
           fetchCustomers();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(ordersChannel);
     };
   }, []);
-
-  const addCustomer = async (customerData: Omit<Customer, 'id' | 'total_orders' | 'total_spent' | 'join_date' | 'last_order' | 'created_at' | 'updated_at'>) => {
-    try {
-      const { data, error } = await supabase
-        .from('customers')
-        .insert([{
-          name: customerData.name,
-          email: customerData.email,
-          phone: customerData.phone,
-          status: customerData.status
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        toast({
-          title: "Error adding customer",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "Customer added successfully!",
-        description: `${customerData.name} has been added to your customers.`
-      });
-    } catch (error) {
-      console.error('Error adding customer:', error);
-      toast({
-        title: "Error adding customer",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const updateCustomer = async (id: string, customerData: Partial<Customer>) => {
-    try {
-      const { error } = await supabase
-        .from('customers')
-        .update({
-          name: customerData.name,
-          email: customerData.email,
-          phone: customerData.phone,
-          status: customerData.status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-      if (error) {
-        toast({
-          title: "Error updating customer",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "Customer updated successfully!",
-        description: "Customer information has been updated."
-      });
-    } catch (error) {
-      console.error('Error updating customer:', error);
-      toast({
-        title: "Error updating customer",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const deleteCustomer = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('customers')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        toast({
-          title: "Error deleting customer",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "Customer deleted successfully!",
-        description: "The customer has been removed."
-      });
-    } catch (error) {
-      console.error('Error deleting customer:', error);
-      toast({
-        title: "Error deleting customer",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   return (
     <CustomersContext.Provider
       value={{
         customers,
-        addCustomer,
-        updateCustomer,
-        deleteCustomer,
-        loading
+        loading,
+        refreshCustomers: fetchCustomers
       }}
     >
       {children}
