@@ -1,4 +1,5 @@
 
+// Store Context - Updated for customer management restructure
 import React, { createContext, useContext } from 'react';
 import { useAuth } from './AuthContext';
 import { useCart } from './CartContext';
@@ -49,6 +50,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const { orders, createOrder: originalCreateOrder, updateOrderStatus, loading } = useOrders();
   const { products } = useProducts();
   const { customers } = useCustomers();
+  
+  console.log('StoreProvider rendering, customers:', customers);
 
   // Wrap createOrder to clear cart after successful order creation
   const createOrder = async (customerInfo: any, cartItems: any[], cartTotal: number) => {
