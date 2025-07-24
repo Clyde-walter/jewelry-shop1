@@ -135,12 +135,7 @@ export function Cart() {
               <div className="space-y-3">
                 <Link to="/flutterwave-checkout">
                   <Button className="w-full bg-primary hover:bg-primary/90">
-                    Flutterwave Checkout
-                  </Button>
-                </Link>
-                <Link to="/crypto-checkout">
-                  <Button variant="outline" className="w-full">
-                    Crypto Checkout
+                    Proceed to Checkout
                   </Button>
                 </Link>
                 <Link to="/products">
