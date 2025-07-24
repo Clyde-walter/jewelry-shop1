@@ -130,11 +130,13 @@ export function CryptoPayment({
         .from('crypto_payments')
         .insert({
           order_id: orderId,
-          currency: selectedCurrency,
           wallet_address: selectedWallet.wallet_address,
           amount,
           customer_info: customerInfo,
+          customer_name: customerInfo.name || '',
+          customer_email: customerInfo.email || '',
           cart_items: cartItems,
+          shipping_address: customerInfo.address || {},
           proof_images: proofImages,
           status: 'pending'
         })
