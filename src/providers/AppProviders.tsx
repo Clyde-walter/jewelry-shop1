@@ -36,13 +36,13 @@ export function AppProviders({ children }: AppProvidersProps) {
                       <ProductsProvider>
                         <CollectionsProvider>
                           <EmailProvider>
-                            <CustomersProvider>
-                              <OrdersProvider>
+                            <OrdersProvider>
+                              <CustomersProvider>
                                 <StoreProvider>
                                   {children}
                                 </StoreProvider>
-                              </OrdersProvider>
-                            </CustomersProvider>
+                              </CustomersProvider>
+                            </OrdersProvider>
                           </EmailProvider>
                         </CollectionsProvider>
                       </ProductsProvider>
