@@ -60,33 +60,19 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
     {
       id: 'bank-transfer',
       title: 'Bank Transfer',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop',
       description: 'Transfer funds directly to our bank account'
-    },
-    {
-      id: 'mobile-money',
-      title: 'Mobile Money',
-      image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop',
-      description: 'Pay using your mobile money wallet'
     },
     {
       id: 'crypto',
       title: 'Cryptocurrency',
-      image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=400&fit=crop',
-      description: 'Pay with Bitcoin, Ethereum, or other cryptocurrencies'
-    },
-    {
-      id: 'cash-deposit',
-      title: 'Cash Deposit',
-      image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&h=400&fit=crop',
-      description: 'Make a cash deposit at our partner locations'
+      description: 'Pay with Bitcoin or USDT'
     }
   ];
 
   return (
     <div className="w-full">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
           {paymentMethods.map((method) => (
             <TabsTrigger key={method.id} value={method.id} className="text-xs">
               {method.title}
@@ -98,17 +84,54 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
           <TabsContent key={method.id} value={method.id}>
             <Card>
               <CardContent className="p-6">
-                {/* Tab Hero Image */}
-                <div className="relative h-32 mb-6 rounded-lg overflow-hidden">
-                  <img
-                    src={method.image}
-                    alt={method.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <h3 className="text-xl font-bold text-white">{method.title}</h3>
+                {/* Payment Details Section */}
+                {method.id === 'bank-transfer' ? (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                    <h3 className="text-xl font-bold text-blue-800 mb-4">Bank Account Details</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-blue-700">Bank Name:</span>
+                        <span className="text-blue-900">First Bank Nigeria</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-blue-700">Account Name:</span>
+                        <span className="text-blue-900">YourStore Limited</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-blue-700">Account Number:</span>
+                        <span className="text-blue-900 font-mono">2034567890</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-blue-700">Sort Code:</span>
+                        <span className="text-blue-900 font-mono">011-234-567</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
+                    <h3 className="text-xl font-bold text-orange-800 mb-4">Cryptocurrency Addresses</h3>
+                    <div className="space-y-4">
+                      <div className="bg-white p-4 rounded-lg border">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-orange-700">Bitcoin (BTC):</span>
+                          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">BTC</span>
+                        </div>
+                        <div className="font-mono text-sm text-orange-900 break-all">
+                          bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+                        </div>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg border">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-orange-700">Tether (USDT):</span>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">USDT</span>
+                        </div>
+                        <div className="font-mono text-sm text-orange-900 break-all">
+                          TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Bold Description */}
                 <div className="text-center mb-6">
