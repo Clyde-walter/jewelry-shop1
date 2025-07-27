@@ -133,6 +133,11 @@ export function Cart() {
                 <span>${(total + (total > 50 ? 0 : 9.99) + (total * 0.08)).toFixed(2)}</span>
               </div>
               <div className="space-y-3">
+                <Link to="/cpt-checkout">
+                  <Button variant="outline" className="w-full">
+                    CPT to Checkout
+                  </Button>
+                </Link>
                 <Link to="/flutterwave-checkout">
                   <Button className="w-full bg-primary hover:bg-primary/90">
                     Proceed to Checkout
