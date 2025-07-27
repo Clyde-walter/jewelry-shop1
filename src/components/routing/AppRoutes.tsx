@@ -22,6 +22,7 @@ import { AdminWarranty } from "@/pages/admin/AdminWarranty";
 import { AdminContact } from "@/pages/admin/AdminContact";
 import { AdminReturns } from "@/pages/admin/AdminReturns";
 import { AdminFeatured } from "@/pages/admin/AdminFeatured";
+import AdminCPTPayments from "@/pages/admin/AdminCPTPayments";
 
 import { PublicRoutes } from "./PublicRoutes";
 
@@ -54,6 +55,7 @@ export function AppRoutes() {
               <Route path="shipping" element={<AdminShipping />} />
               <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="emails" element={<AdminEmails />} />
+              <Route path="cpt-payments" element={<AdminCPTPayments />} />
               
               <Route path="settings" element={<AdminSettings />} />
             </Routes>
