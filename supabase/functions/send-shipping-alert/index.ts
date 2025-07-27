@@ -16,6 +16,20 @@ interface ShippingAlertRequest {
   trackingNumber?: string;
   estimatedDelivery?: string;
   shippingCarrier?: string;
+  orderItems?: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    image?: string;
+  }>;
+  totalAmount?: number;
+  shippingAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 }
 
 const getStatusMessage = (status: string) => {
@@ -67,13 +81,57 @@ const handler = async (req: Request): Promise<Response> => {
       status,
       trackingNumber,
       estimatedDelivery,
-      shippingCarrier
+      shippingCarrier,
+      orderItems = [],
+      totalAmount = 0,
+      shippingAddress
     }: ShippingAlertRequest = await req.json();
 
     console.log('Sending shipping alert email for:', orderNumber, 'Status:', status);
 
     const statusMessage = getStatusMessage(status);
     const statusColor = getStatusColor(status);
+    
+    // Generate product items section
+    const productItemsSection = orderItems.length > 0 ? `
+      <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #333; margin-top: 0;">Your Order Items</h3>
+        ${orderItems.map(item => `
+          <div style="display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #e5e5e5;">
+            ${item.image ? `
+              <img src="${item.image}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
+            ` : `
+              <div style="width: 80px; height: 80px; background: #e5e5e5; border-radius: 8px; margin-right: 15px; display: flex; align-items: center; justify-content: center; color: #999;">
+                <span style="font-size: 12px;">No Image</span>
+              </div>
+            `}
+            <div style="flex: 1;">
+              <h4 style="margin: 0 0 5px 0; color: #333; font-size: 16px;">${item.name}</h4>
+              <p style="margin: 0; color: #666;">Quantity: ${item.quantity}</p>
+              <p style="margin: 5px 0 0 0; font-weight: bold; color: #3AAEE0;">$${item.price.toFixed(2)} each</p>
+            </div>
+          </div>
+        `).join('')}
+        ${totalAmount > 0 ? `
+          <div style="text-align: right; margin-top: 20px; padding-top: 15px; border-top: 2px solid #3AAEE0;">
+            <h3 style="margin: 0; color: #333; font-size: 20px;">Total: $${totalAmount.toFixed(2)}</h3>
+          </div>
+        ` : ''}
+      </div>
+    ` : '';
+
+    // Generate shipping address section
+    const shippingSection = shippingAddress ? `
+      <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #333; margin-top: 0;">Shipping Address</h3>
+        <p style="margin: 5px 0; line-height: 1.4;">
+          ${shippingAddress.street}<br>
+          ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}<br>
+          ${shippingAddress.country}
+        </p>
+      </div>
+    ` : '';
+    
     const trackingSection = trackingNumber ? `
       <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h3 style="color: #333; margin-top: 0;">Tracking Information</h3>
@@ -90,23 +148,31 @@ const handler = async (req: Request): Promise<Response> => {
           <meta charset="utf-8">
           <title>Order Update - ${orderNumber}</title>
         </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+          <!-- Logo Header -->
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px 0; border-bottom: 3px solid #3AAEE0;">
+            <img src="https://kirxlakwwzpkrmipdelj.supabase.co/storage/v1/object/public/product-images/jewelry-port-logo.png" alt="Jewelry Port" style="max-width: 200px; height: auto;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display: none; font-size: 28px; font-weight: bold; color: #3AAEE0; margin: 10px 0;">Jewelry Port</div>
+          </div>
+
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #3AAEE0; margin-bottom: 10px;">Order Update</h1>
+            <h1 style="color: #3AAEE0; margin-bottom: 10px; font-size: 24px;">Order Update</h1>
             <p style="font-size: 18px; color: #666;">Hi ${customerName},</p>
           </div>
           
           <div style="background: ${statusColor}; color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; text-align: center;">
-            <h2 style="margin: 0; text-transform: capitalize;">${status.replace('_', ' ')}</h2>
+            <h2 style="margin: 0; text-transform: capitalize; font-size: 22px;">${status.replace('_', ' ')}</h2>
             <p style="margin: 10px 0 0 0; font-size: 16px;">${statusMessage}</p>
           </div>
 
-          <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+          <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #333; margin-top: 0;">Order Details</h3>
             <p><strong>Order Number:</strong> ${orderNumber}</p>
             <p><strong>Current Status:</strong> ${status.replace('_', ' ').toUpperCase()}</p>
           </div>
 
+          ${productItemsSection}
+          ${shippingSection}
           ${trackingSection}
 
           <div style="text-align: center; margin-top: 40px;">
