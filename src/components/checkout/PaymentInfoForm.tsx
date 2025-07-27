@@ -47,6 +47,19 @@ export function PaymentInfoForm({ paymentMethod = 'flutterwave', onPaymentMethod
                   </div>
                 </Label>
               </div>
+              
+              <div className="flex items-center space-x-2 p-4 border-2 border-blue-200 bg-blue-50 rounded-lg">
+                <RadioGroupItem value="cpt" id="cpt" />
+                <Label htmlFor="cpt" className="flex items-center gap-3 flex-1 cursor-pointer">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    📸
+                  </div>
+                  <div>
+                    <div className="font-medium text-blue-800">CPT Payment</div>
+                    <div className="text-sm text-blue-600">Upload payment confirmation screenshot</div>
+                  </div>
+                </Label>
+              </div>
             </div>
           </RadioGroup>
         </div>

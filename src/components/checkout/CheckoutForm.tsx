@@ -8,6 +8,7 @@ import { PaymentInfoForm } from './PaymentInfoForm';
 import { OrderSummary } from './OrderSummary';
 import { PaystackPayment } from './PaystackPayment';
 import { FlutterwavePayment } from './FlutterwavePayment';
+import { CPTPaymentForm } from './CPTPaymentForm';
 
 interface CheckoutFormProps {
   onOrderCreated: (order: any) => void;
@@ -88,7 +89,39 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     return validateRequiredFields();
   };
 
+  const handleCPTPayment = (formData: any, method: string) => {
+    if (!validateRequiredFields()) return;
+    
+    setIsProcessing(true);
+    // Simulate CPT payment processing
+    setTimeout(() => {
+      setIsProcessing(false);
+      const order = {
+        id: `CPT-${Date.now()}`,
+        items: cart,
+        total: finalTotal,
+        customerInfo,
+        paymentMethod: `cpt-${method}`,
+        status: 'pending-verification'
+      };
+      handlePaymentSuccess(order);
+      toast({
+        title: "CPT Payment submitted",
+        description: "We'll verify your payment and process your order shortly",
+      });
+    }, 2000);
+  };
+
   const renderPaymentButton = () => {
+    if (paymentMethod === 'cpt') {
+      return (
+        <CPTPaymentForm
+          onSubmit={handleCPTPayment}
+          isProcessing={isProcessing}
+        />
+      );
+    }
+    
     return (
       <FlutterwavePayment
         amount={finalTotal}

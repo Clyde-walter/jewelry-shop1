@@ -32,7 +32,6 @@ import { ManageAddresses } from "@/pages/ManageAddresses";
 import { PaymentMethods } from "@/pages/PaymentMethods";
 import { EditInformation } from "@/pages/EditInformation";
 import { FlutterwaveCheckout } from "@/pages/FlutterwaveCheckout";
-import CPTCheckout from "@/pages/CPTCheckout";
 import NotFound from "@/pages/NotFound";
 
 export function PublicRoutes() {
@@ -69,11 +68,6 @@ export function PublicRoutes() {
           <Route path="/flutterwave-checkout" element={
             <ProtectedRoute>
               <FlutterwaveCheckout />
-            </ProtectedRoute>
-          } />
-          <Route path="/cpt-checkout" element={
-            <ProtectedRoute>
-              <CPTCheckout />
             </ProtectedRoute>
           } />
           <Route path="/orders" element={
