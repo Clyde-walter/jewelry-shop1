@@ -118,16 +118,13 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
         .from('product-images')
         .getPublicUrl(`payment-screenshots/${fileName}`);
 
-      // Generate order number using database function
-      const { data: orderNumberData, error: orderNumberError } = await supabase
-        .rpc('generate_order_number');
-
-      if (orderNumberError) throw orderNumberError;
-
+      // Create order with a simple order number first, then update with proper number
+      const tempOrderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
       // Create order first
       const orderData = {
         user_id: user?.id || null,
-        order_number: orderNumberData,
+        order_number: tempOrderNumber,
         items: cart.map(item => ({
           id: item.id,
           name: item.name,
@@ -144,6 +141,8 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
         },
         status: 'awaiting_confirmation'
       };
+
+      console.log('Creating order with data:', orderData);
 
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -175,9 +174,15 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       
     } catch (error) {
       console.error('Error submitting CPT payment:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       toast({
         title: "Submission Failed",
-        description: "Failed to submit payment confirmation. Please try again.",
+        description: `Failed to submit payment confirmation: ${error.message}. Please try again.`,
         variant: "destructive"
       });
     } finally {
