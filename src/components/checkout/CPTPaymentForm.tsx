@@ -16,6 +16,7 @@ interface PaymentConfirmationForm {
 interface CPTPaymentFormProps {
   onSubmit: (formData: PaymentConfirmationForm, method: string) => void;
   isProcessing: boolean;
+  totalAmount: number;
 }
 
 interface PaymentSettings {
@@ -27,17 +28,19 @@ interface PaymentSettings {
   usdt_address: string;
 }
 
-export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) {
+export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPaymentFormProps) {
   const [activeTab, setActiveTab] = useState('bank-transfer');
   const [formData, setFormData] = useState<PaymentConfirmationForm>({
     screenshot: null,
     notes: ''
   });
   const [settings, setSettings] = useState<PaymentSettings | null>(null);
+  const [cryptoRates, setCryptoRates] = useState<{ btc: number; usdt: number } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchPaymentSettings();
+    fetchCryptoRates();
   }, []);
 
   const fetchPaymentSettings = async () => {
@@ -51,6 +54,21 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
       if (data) setSettings(data);
     } catch (error) {
       console.error('Error fetching payment settings:', error);
+    }
+  };
+
+  const fetchCryptoRates = async () => {
+    try {
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,tether&vs_currencies=usd');
+      const data = await response.json();
+      setCryptoRates({
+        btc: data.bitcoin?.usd || 0,
+        usdt: data.tether?.usd || 1
+      });
+    } catch (error) {
+      console.error('Error fetching crypto rates:', error);
+      // Fallback rates
+      setCryptoRates({ btc: 50000, usdt: 1 });
     }
   };
 
@@ -178,11 +196,46 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
                   </div>
                 ) : (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
-                    <h3 className="text-xl font-bold text-orange-800 mb-4">Cryptocurrency Addresses</h3>
+                    <h3 className="text-xl font-bold text-orange-800 mb-4">Cryptocurrency Payment</h3>
+                    
+                    {/* Payment Instructions */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-blue-800 mb-2">Payment Instructions:</h4>
+                      <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                        <li>Choose your preferred cryptocurrency (BTC or USDT)</li>
+                        <li>Send the exact amount shown below to the corresponding address</li>
+                        <li>Take a screenshot of your transaction confirmation</li>
+                        <li>Upload the screenshot and submit this form</li>
+                      </ol>
+                    </div>
+
+                    {/* Amount Conversion */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-green-800 mb-3">Amount to Send:</h4>
+                      <div className="text-lg font-bold text-center mb-2">
+                        USD ${totalAmount.toFixed(2)}
+                      </div>
+                      {cryptoRates ? (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-white p-3 rounded border text-center">
+                            <div className="text-orange-600 font-semibold text-sm">Bitcoin</div>
+                            <div className="font-mono text-lg">{(totalAmount / cryptoRates.btc).toFixed(8)} BTC</div>
+                          </div>
+                          <div className="bg-white p-3 rounded border text-center">
+                            <div className="text-green-600 font-semibold text-sm">USDT</div>
+                            <div className="font-mono text-lg">{(totalAmount / cryptoRates.usdt).toFixed(2)} USDT</div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center text-gray-500">Loading conversion rates...</div>
+                      )}
+                    </div>
+
+                    {/* Cryptocurrency Addresses */}
                     <div className="space-y-4">
                       <div className="bg-white p-4 rounded-lg border">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-orange-700">Bitcoin (BTC):</span>
+                          <span className="font-semibold text-orange-700">Bitcoin (BTC) Address:</span>
                           <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">BTC</span>
                         </div>
                         <div className="flex items-center justify-between">
@@ -203,7 +256,7 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
                       </div>
                       <div className="bg-white p-4 rounded-lg border">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-orange-700">Tether (USDT):</span>
+                          <span className="font-semibold text-orange-700">USDT Address:</span>
                           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">USDT</span>
                         </div>
                         <div className="flex items-center justify-between">

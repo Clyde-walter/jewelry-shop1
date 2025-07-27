@@ -182,10 +182,11 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   const renderPaymentButton = () => {
     if (paymentMethod === 'cpt') {
       return (
-        <CPTPaymentForm
-          onSubmit={handleCPTPayment}
-          isProcessing={isProcessing}
-        />
+              <CPTPaymentForm 
+                onSubmit={handleCPTPayment}
+                isProcessing={isProcessing}
+                totalAmount={finalTotal}
+              />
       );
     }
     
