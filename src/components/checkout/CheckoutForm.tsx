@@ -136,7 +136,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
           phone: customerInfo.phone || '',
           address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.zipCode}, ${customerInfo.country}`
         },
-        status: 'pending'
+        status: 'awaiting_confirmation'
       };
 
       const { data: order, error: orderError } = await supabase
@@ -161,7 +161,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
 
       toast({
         title: "Payment Confirmation Submitted",
-        description: "Your payment confirmation has been submitted for review. We'll contact you once verified.",
+        description: "Your payment confirmation has been submitted for admin review. Your order will be processed once payment is confirmed.",
       });
       
       handlePaymentSuccess(order);

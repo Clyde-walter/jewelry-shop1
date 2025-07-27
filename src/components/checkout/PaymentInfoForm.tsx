@@ -55,7 +55,7 @@ export function PaymentInfoForm({ paymentMethod = 'flutterwave', onPaymentMethod
                     📸
                   </div>
                   <div>
-                    <div className="font-medium text-blue-800">CPT Payment</div>
+                    <div className="font-medium text-blue-800">Bank transfer /BTC & USDT</div>
                     <div className="text-sm text-blue-600">Upload payment confirmation screenshot</div>
                   </div>
                 </Label>
