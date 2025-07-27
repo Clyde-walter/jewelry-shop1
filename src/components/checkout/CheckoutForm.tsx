@@ -118,10 +118,16 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
         .from('product-images')
         .getPublicUrl(`payment-screenshots/${fileName}`);
 
+      // Generate order number using database function
+      const { data: orderNumberData, error: orderNumberError } = await supabase
+        .rpc('generate_order_number');
+
+      if (orderNumberError) throw orderNumberError;
+
       // Create order first
       const orderData = {
         user_id: user?.id || null,
-        order_number: `ORD-${Date.now()}`,
+        order_number: orderNumberData,
         items: cart.map(item => ({
           id: item.id,
           name: item.name,
