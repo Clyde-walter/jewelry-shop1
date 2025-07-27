@@ -216,14 +216,18 @@ export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPayme
                         USD ${totalAmount.toFixed(2)}
                       </div>
                       {cryptoRates ? (
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-white p-3 rounded border text-center">
-                            <div className="text-orange-600 font-semibold text-sm">Bitcoin</div>
-                            <div className="font-mono text-lg">{(totalAmount / cryptoRates.btc).toFixed(8)} BTC</div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="bg-white p-4 rounded-lg border text-center">
+                            <div className="text-orange-600 font-semibold text-sm mb-2">Bitcoin</div>
+                            <div className="font-mono text-base sm:text-lg font-bold break-all">
+                              {(totalAmount / cryptoRates.btc).toFixed(8)} BTC
+                            </div>
                           </div>
-                          <div className="bg-white p-3 rounded border text-center">
-                            <div className="text-green-600 font-semibold text-sm">USDT</div>
-                            <div className="font-mono text-lg">{(totalAmount / cryptoRates.usdt).toFixed(2)} USDT</div>
+                          <div className="bg-white p-4 rounded-lg border text-center">
+                            <div className="text-green-600 font-semibold text-sm mb-2">USDT</div>
+                            <div className="font-mono text-base sm:text-lg font-bold break-all">
+                              {(totalAmount / cryptoRates.usdt).toFixed(2)} USDT
+                            </div>
                           </div>
                         </div>
                       ) : (
