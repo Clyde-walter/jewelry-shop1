@@ -32,6 +32,7 @@ import { AdminWarranty } from './admin/AdminWarranty';
 import { AdminContact } from './admin/AdminContact';
 import { AdminReturns } from './admin/AdminReturns';
 import { AdminFeatured } from './admin/AdminFeatured';
+import AdminCPTPayments from './admin/AdminCPTPayments';
 
 function AdminDashboard() {
   const location = useLocation();
@@ -44,6 +45,7 @@ function AdminDashboard() {
     { path: '/admin/featured', icon: Star, label: 'Featured', color: 'bg-yellow-500', badge: 'New' },
     { path: '/admin/shipping', icon: Truck, label: 'Shipping', color: 'bg-teal-500' },
     { path: '/admin/emails', icon: Mail, label: 'Email Marketing', color: 'bg-pink-500' },
+    { path: '/admin/cpt-payments', icon: ShoppingCart, label: 'CPT Payments', color: 'bg-cyan-500', badge: 'New' },
     { path: '/admin/support', icon: MessageSquare, label: 'Support', color: 'bg-indigo-500' },
     { path: '/admin/warranty', icon: Shield, label: 'Warranty', color: 'bg-yellow-500' },
     { path: '/admin/contact', icon: Phone, label: 'Contact', color: 'bg-red-500' },
@@ -127,6 +129,7 @@ export default function Admin() {
       <Route path="featured" element={<AdminFeatured />} />
       <Route path="shipping/*" element={<AdminShipping />} />
       <Route path="emails/*" element={<AdminEmails />} />
+      <Route path="cpt-payments" element={<AdminCPTPayments />} />
       <Route path="support" element={<AdminSupport />} />
       <Route path="warranty" element={<AdminWarranty />} />
       <Route path="contact" element={<AdminContact />} />

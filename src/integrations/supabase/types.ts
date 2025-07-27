@@ -137,6 +137,53 @@ export type Database = {
         }
         Relationships: []
       }
+      cpt_payment_confirmations: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          order_id: string | null
+          payment_method: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          screenshot_url: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          payment_method: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_url: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          payment_method?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_url?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cpt_payment_confirmations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           created_at: string
@@ -372,6 +419,42 @@ export type Database = {
           created_at?: string
           last_failed_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      payment_settings: {
+        Row: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          btc_address: string
+          created_at: string
+          id: string
+          sort_code: string | null
+          updated_at: string
+          usdt_address: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          btc_address: string
+          created_at?: string
+          id?: string
+          sort_code?: string | null
+          updated_at?: string
+          usdt_address: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          bank_name?: string
+          btc_address?: string
+          created_at?: string
+          id?: string
+          sort_code?: string | null
+          updated_at?: string
+          usdt_address?: string
         }
         Relationships: []
       }

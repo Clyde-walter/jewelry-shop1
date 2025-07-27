@@ -1,7 +1,10 @@
 
 import React, { useState } from 'react';
 import { useStore } from '@/contexts/StoreContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { CustomerInfoForm } from './CustomerInfoForm';
 import { ShippingAddressForm } from './ShippingAddressForm';
 import { PaymentInfoForm } from './PaymentInfoForm';
@@ -16,11 +19,14 @@ interface CheckoutFormProps {
 
 export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   const { cart, getCartTotal, createOrder } = useStore();
+  const { user } = useAuth();
+  const { clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('flutterwave');
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
+    phone: '',
     address: '',
     city: '',
     zipCode: '',
@@ -89,27 +95,88 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     return validateRequiredFields();
   };
 
-  const handleCPTPayment = (formData: any, method: string) => {
+  const handleCPTPayment = async (cptFormData: any, method: string) => {
     if (!validateRequiredFields()) return;
     
     setIsProcessing(true);
-    // Simulate CPT payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      const order = {
-        id: `CPT-${Date.now()}`,
-        items: cart,
-        total: finalTotal,
-        customerInfo,
-        paymentMethod: `cpt-${method}`,
-        status: 'pending-verification'
+    
+    try {
+      if (!cptFormData?.screenshot) {
+        throw new Error('Screenshot is required for CPT payment');
+      }
+
+      // Upload screenshot to storage
+      const fileExt = cptFormData.screenshot.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(`payment-screenshots/${fileName}`, cptFormData.screenshot);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(`payment-screenshots/${fileName}`);
+
+      // Create order first
+      const orderData = {
+        user_id: user?.id || null,
+        order_number: `ORD-${Date.now()}`,
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image
+        })),
+        total: Number(finalTotal.toFixed(2)),
+        customer_info: {
+          name: customerInfo.name,
+          email: customerInfo.email,
+          phone: customerInfo.phone || '',
+          address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.zipCode}, ${customerInfo.country}`
+        },
+        status: 'pending'
       };
-      handlePaymentSuccess(order);
+
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Save payment confirmation
+      const { error: confirmationError } = await supabase
+        .from('cpt_payment_confirmations')
+        .insert({
+          order_id: order.id,
+          payment_method: method,
+          screenshot_url: publicUrl,
+          notes: cptFormData.notes || ''
+        });
+
+      if (confirmationError) throw confirmationError;
+
       toast({
-        title: "CPT Payment submitted",
-        description: "We'll verify your payment and process your order shortly",
+        title: "Payment Confirmation Submitted",
+        description: "Your payment confirmation has been submitted for review. We'll contact you once verified.",
       });
-    }, 2000);
+      
+      handlePaymentSuccess(order);
+      clearCart();
+      
+    } catch (error) {
+      console.error('Error submitting CPT payment:', error);
+      toast({
+        title: "Submission Failed",
+        description: "Failed to submit payment confirmation. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const renderPaymentButton = () => {

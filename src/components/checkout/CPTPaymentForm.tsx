@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, CheckCircle } from 'lucide-react';
+import { Upload, CheckCircle, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PaymentConfirmationForm {
   screenshot: File | null;
@@ -17,13 +18,41 @@ interface CPTPaymentFormProps {
   isProcessing: boolean;
 }
 
+interface PaymentSettings {
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  sort_code: string;
+  btc_address: string;
+  usdt_address: string;
+}
+
 export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) {
   const [activeTab, setActiveTab] = useState('bank-transfer');
   const [formData, setFormData] = useState<PaymentConfirmationForm>({
     screenshot: null,
     notes: ''
   });
+  const [settings, setSettings] = useState<PaymentSettings | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchPaymentSettings();
+  }, []);
+
+  const fetchPaymentSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('payment_settings')
+        .select('*')
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) setSettings(data);
+    } catch (error) {
+      console.error('Error fetching payment settings:', error);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,6 +69,22 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
       toast({
         title: "Screenshot uploaded",
         description: "Payment screenshot ready for submission",
+      });
+    }
+  };
+
+  const copyToClipboard = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: `${type} copied to clipboard`,
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Unable to copy to clipboard",
+        variant: "destructive"
       });
     }
   };
@@ -91,19 +136,43 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="font-semibold text-blue-700">Bank Name:</span>
-                        <span className="text-blue-900">First Bank Nigeria</span>
+                        <span className="text-blue-900">{settings?.bank_name || 'Loading...'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-semibold text-blue-700">Account Name:</span>
-                        <span className="text-blue-900">YourStore Limited</span>
+                        <span className="text-blue-900">{settings?.account_name || 'Loading...'}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="font-semibold text-blue-700">Account Number:</span>
-                        <span className="text-blue-900 font-mono">2034567890</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-900 font-mono">{settings?.account_number || 'Loading...'}</span>
+                          {settings?.account_number && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(settings.account_number, 'Account number')}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="font-semibold text-blue-700">Sort Code:</span>
-                        <span className="text-blue-900 font-mono">011-234-567</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-900 font-mono">{settings?.sort_code || 'Loading...'}</span>
+                          {settings?.sort_code && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(settings.sort_code, 'Sort code')}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -116,8 +185,20 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
                           <span className="font-semibold text-orange-700">Bitcoin (BTC):</span>
                           <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">BTC</span>
                         </div>
-                        <div className="font-mono text-sm text-orange-900 break-all">
-                          bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+                        <div className="flex items-center justify-between">
+                          <div className="font-mono text-sm text-orange-900 break-all flex-1 mr-2">
+                            {settings?.btc_address || 'Loading...'}
+                          </div>
+                          {settings?.btc_address && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(settings.btc_address, 'Bitcoin address')}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                       <div className="bg-white p-4 rounded-lg border">
@@ -125,8 +206,20 @@ export function CPTPaymentForm({ onSubmit, isProcessing }: CPTPaymentFormProps) 
                           <span className="font-semibold text-orange-700">Tether (USDT):</span>
                           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">USDT</span>
                         </div>
-                        <div className="font-mono text-sm text-orange-900 break-all">
-                          TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE
+                        <div className="flex items-center justify-between">
+                          <div className="font-mono text-sm text-orange-900 break-all flex-1 mr-2">
+                            {settings?.usdt_address || 'Loading...'}
+                          </div>
+                          {settings?.usdt_address && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(settings.usdt_address, 'USDT address')}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
