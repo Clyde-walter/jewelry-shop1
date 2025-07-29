@@ -98,6 +98,15 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
   const handleCPTPayment = async (formData: any, method: string) => {
     if (!validateRequiredFields()) return;
     
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to submit payment confirmation.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsProcessing(true);
     
     try {
@@ -118,10 +127,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
         .from('product-images')
         .getPublicUrl(`payment-screenshots/${fileName}`);
 
-      // Create order with a simple order number first, then update with proper number
-      const tempOrderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Instead of creating order directly, use the Store context's createOrder function
+      // Create order using Store context's createOrder function
       console.log('Using Store context createOrder for CPT payment');
       console.log('Cart items:', cart);
       console.log('Customer info:', customerInfo);
@@ -134,10 +140,20 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       }
       
       console.log('Order created successfully:', order);
+      console.log('Order ID for payment confirmation:', order.id);
 
       // Order already created above using Store context
 
-      // Save payment confirmation
+      // Save payment confirmation - ensure all required fields are properly set
+      console.log('Inserting payment confirmation with:', {
+        order_id: order.id,
+        user_id: user?.id,
+        payment_method: method === 'bank-transfer' ? 'bank-transfer' : 'crypto',
+        payment_type: method === 'bank-transfer' ? null : method,
+        screenshot_url: publicUrl,
+        notes: formData.notes || ''
+      });
+
       const { error: confirmationError } = await supabase
         .from('payment_confirmations')
         .insert({
@@ -149,7 +165,12 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
           notes: formData.notes || ''
         });
 
-      if (confirmationError) throw confirmationError;
+      if (confirmationError) {
+        console.error('Payment confirmation error:', confirmationError);
+        throw confirmationError;
+      }
+
+      console.log('Payment confirmation saved successfully');
 
       toast({
         title: "Payment Confirmation Submitted",
