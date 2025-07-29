@@ -154,10 +154,12 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
 
       // Save payment confirmation
       const { error: confirmationError } = await supabase
-        .from('cpt_payment_confirmations')
+        .from('payment_confirmations')
         .insert({
           order_id: order.id,
-          payment_method: method,
+          user_id: user?.id,
+          payment_method: method === 'bank-transfer' ? 'bank-transfer' : 'crypto',
+          payment_type: method === 'bank-transfer' ? null : method,
           screenshot_url: publicUrl,
           notes: formData.notes || ''
         });
