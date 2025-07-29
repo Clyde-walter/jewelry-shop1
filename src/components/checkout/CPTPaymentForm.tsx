@@ -253,22 +253,40 @@ export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPayme
                       )}
                     </div>
 
-                    {/* Cryptocurrency Addresses */}
-                    <div className="space-y-4">
-                      <div className="bg-white p-4 rounded-lg border">
+                    {/* Selected Cryptocurrency Address */}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-yellow-800 mb-2">
+                        Send Payment To This Address:
+                      </h4>
+                      <div className="bg-white p-4 rounded-lg border-2 border-yellow-300">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-orange-700">Bitcoin (BTC) Address:</span>
-                          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">BTC</span>
+                          <span className="font-semibold text-orange-700">
+                            {cryptoType === 'btc' ? 'Bitcoin (BTC) Address:' : 'USDT Address:'}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            cryptoType === 'btc' 
+                              ? 'bg-orange-100 text-orange-800' 
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {cryptoType.toUpperCase()}
+                          </span>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="font-mono text-sm text-orange-900 break-all flex-1 mr-2">
-                            {settings?.btc_address || 'Loading...'}
+                            {cryptoType === 'btc' 
+                              ? (settings?.btc_address || 'Loading...') 
+                              : (settings?.usdt_address || 'Loading...')
+                            }
                           </div>
-                          {settings?.btc_address && (
+                          {((cryptoType === 'btc' && settings?.btc_address) || 
+                            (cryptoType === 'usdt' && settings?.usdt_address)) && (
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => copyToClipboard(settings.btc_address, 'Bitcoin address')}
+                              onClick={() => copyToClipboard(
+                                cryptoType === 'btc' ? settings!.btc_address : settings!.usdt_address, 
+                                `${cryptoType.toUpperCase()} address`
+                              )}
                               className="h-8 w-8 p-0"
                             >
                               <Copy className="h-4 w-4" />
@@ -276,27 +294,9 @@ export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPayme
                           )}
                         </div>
                       </div>
-                      <div className="bg-white p-4 rounded-lg border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-orange-700">USDT Address:</span>
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">USDT</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="font-mono text-sm text-orange-900 break-all flex-1 mr-2">
-                            {settings?.usdt_address || 'Loading...'}
-                          </div>
-                          {settings?.usdt_address && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(settings.usdt_address, 'USDT address')}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+                      <p className="text-sm text-yellow-700 mt-2 font-medium">
+                        ⚠️ Only send {cryptoType.toUpperCase()} to this address. Sending other cryptocurrencies will result in permanent loss.
+                      </p>
                     </div>
                   </div>
                 )}
