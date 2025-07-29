@@ -121,36 +121,21 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       // Create order with a simple order number first, then update with proper number
       const tempOrderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
-      // Create order first
-      const orderData = {
-        user_id: user?.id || null,
-        order_number: tempOrderNumber,
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image
-        })),
-        total: Number(finalTotal.toFixed(2)),
-        customer_info: {
-          name: customerInfo.name,
-          email: customerInfo.email,
-          phone: customerInfo.phone || '',
-          address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.zipCode}, ${customerInfo.country}`
-        },
-        status: 'pending'
-      };
+      // Instead of creating order directly, use the Store context's createOrder function
+      console.log('Using Store context createOrder for CPT payment');
+      console.log('Cart items:', cart);
+      console.log('Customer info:', customerInfo);
+      console.log('Final total:', finalTotal);
+      
+      const order = await createOrder(customerInfo, cart, finalTotal);
+      
+      if (!order) {
+        throw new Error('Failed to create order through Store context');
+      }
+      
+      console.log('Order created successfully:', order);
 
-      console.log('Creating order with data:', orderData);
-
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert(orderData)
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
+      // Order already created above using Store context
 
       // Save payment confirmation
       const { error: confirmationError } = await supabase
@@ -172,7 +157,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       });
       
       handlePaymentSuccess(order);
-      clearCart();
+      // Cart is automatically cleared by Store context after successful order creation
       
     } catch (error) {
       console.error('Error submitting CPT payment:', error);
