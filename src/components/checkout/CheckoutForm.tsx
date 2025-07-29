@@ -145,13 +145,28 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
       // Order already created above using Store context
 
       // Save payment confirmation - ensure all required fields are properly set
+      // The method parameter now comes as: 'bank-transfer', 'btc', or 'usdt'
+      
+      let paymentMethod, paymentType;
+      
+      if (method === 'bank-transfer') {
+        paymentMethod = 'bank-transfer';
+        paymentType = null;
+      } else if (method === 'btc' || method === 'usdt') {
+        paymentMethod = 'crypto';
+        paymentType = method;
+      } else {
+        throw new Error(`Invalid payment method: ${method}`);
+      }
+
       console.log('Inserting payment confirmation with:', {
         order_id: order.id,
         user_id: user?.id,
-        payment_method: method === 'bank-transfer' ? 'bank-transfer' : 'crypto',
-        payment_type: method === 'bank-transfer' ? null : method,
+        payment_method: paymentMethod,
+        payment_type: paymentType,
         screenshot_url: publicUrl,
-        notes: formData.notes || ''
+        notes: formData.notes || '',
+        method_received: method
       });
 
       const { error: confirmationError } = await supabase
@@ -159,8 +174,8 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
         .insert({
           order_id: order.id,
           user_id: user?.id,
-          payment_method: method === 'bank-transfer' ? 'bank-transfer' : 'crypto',
-          payment_type: method === 'bank-transfer' ? null : method,
+          payment_method: paymentMethod,
+          payment_type: paymentType,
           screenshot_url: publicUrl,
           notes: formData.notes || ''
         });

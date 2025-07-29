@@ -30,6 +30,7 @@ interface PaymentSettings {
 
 export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPaymentFormProps) {
   const [activeTab, setActiveTab] = useState('bank-transfer');
+  const [cryptoType, setCryptoType] = useState('btc'); // Track specific crypto type
   const [formData, setFormData] = useState<PaymentConfirmationForm>({
     screenshot: null,
     notes: ''
@@ -116,7 +117,10 @@ export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPayme
       });
       return;
     }
-    onSubmit(formData, activeTab);
+    
+    // Pass the specific payment method: 'bank-transfer', 'btc', or 'usdt'
+    const method = activeTab === 'bank-transfer' ? 'bank-transfer' : cryptoType;
+    onSubmit(formData, method);
   };
 
   const paymentMethods = [
@@ -202,8 +206,8 @@ export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPayme
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                       <h4 className="font-semibold text-blue-800 mb-2">Payment Instructions:</h4>
                       <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
-                        <li>Choose your preferred cryptocurrency (BTC or USDT)</li>
-                        <li>Send the exact amount shown below to the corresponding address</li>
+                        <li>Choose your preferred cryptocurrency (BTC or USDT) by clicking on it below</li>
+                        <li>Send the exact amount shown to the corresponding address</li>
                         <li>Take a screenshot of your transaction confirmation</li>
                         <li>Upload the screenshot and submit this form</li>
                       </ol>
@@ -215,16 +219,30 @@ export function CPTPaymentForm({ onSubmit, isProcessing, totalAmount }: CPTPayme
                       <div className="text-lg font-bold text-center mb-2">
                         USD ${totalAmount.toFixed(2)}
                       </div>
-                      {cryptoRates ? (
+                     {cryptoRates ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="bg-white p-4 rounded-lg border text-center">
-                            <div className="text-orange-600 font-semibold text-sm mb-2">Bitcoin</div>
+                          <div 
+                            className={`bg-white p-4 rounded-lg border text-center cursor-pointer transition-all ${
+                              cryptoType === 'btc' ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-50'
+                            }`}
+                            onClick={() => setCryptoType('btc')}
+                          >
+                            <div className="text-orange-600 font-semibold text-sm mb-2">
+                              Bitcoin {cryptoType === 'btc' && '✓'}
+                            </div>
                             <div className="font-mono text-base sm:text-lg font-bold break-all">
                               {(totalAmount / cryptoRates.btc).toFixed(8)} BTC
                             </div>
                           </div>
-                          <div className="bg-white p-4 rounded-lg border text-center">
-                            <div className="text-green-600 font-semibold text-sm mb-2">USDT</div>
+                          <div 
+                            className={`bg-white p-4 rounded-lg border text-center cursor-pointer transition-all ${
+                              cryptoType === 'usdt' ? 'ring-2 ring-green-500 bg-green-50' : 'hover:bg-gray-50'
+                            }`}
+                            onClick={() => setCryptoType('usdt')}
+                          >
+                            <div className="text-green-600 font-semibold text-sm mb-2">
+                              USDT {cryptoType === 'usdt' && '✓'}
+                            </div>
                             <div className="font-mono text-base sm:text-lg font-bold break-all">
                               {(totalAmount / cryptoRates.usdt).toFixed(2)} USDT
                             </div>
