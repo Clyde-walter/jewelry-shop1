@@ -95,22 +95,22 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
     return validateRequiredFields();
   };
 
-  const handleCPTPayment = async (cptFormData: any, method: string) => {
+  const handleCPTPayment = async (formData: any, method: string) => {
     if (!validateRequiredFields()) return;
     
     setIsProcessing(true);
     
     try {
-      if (!cptFormData?.screenshot) {
+      if (!formData?.screenshot) {
         throw new Error('Screenshot is required for CPT payment');
       }
 
       // Upload screenshot to storage
-      const fileExt = cptFormData.screenshot.name.split('.').pop();
+      const fileExt = formData.screenshot.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('product-images')
-        .upload(`payment-screenshots/${fileName}`, cptFormData.screenshot);
+        .upload(`payment-screenshots/${fileName}`, formData.screenshot);
 
       if (uploadError) throw uploadError;
 
@@ -159,7 +159,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
           order_id: order.id,
           payment_method: method,
           screenshot_url: publicUrl,
-          notes: cptFormData.notes || ''
+          notes: formData.notes || ''
         });
 
       if (confirmationError) throw confirmationError;
