@@ -139,7 +139,7 @@ export function CheckoutForm({ onOrderCreated }: CheckoutFormProps) {
           phone: customerInfo.phone || '',
           address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.zipCode}, ${customerInfo.country}`
         },
-        status: 'awaiting_confirmation'
+        status: 'pending'
       };
 
       console.log('Creating order with data:', orderData);
