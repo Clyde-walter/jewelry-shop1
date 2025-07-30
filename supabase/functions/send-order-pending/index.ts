@@ -77,8 +77,8 @@ const handler = async (req: Request): Promise<Response> => {
             
             <!-- Header -->
             <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <img src="https://kirxlakwwzpkrmipdelj.supabase.co/storage/v1/object/public/product-images/06008771-3946-4cde-95f5-eed2a260f2ae.png" alt="Jewelry Port" style="height: 40px; margin-bottom: 10px;">
-              <div style="color: #f97316; font-size: 14px; font-weight: 500;">Jewelry | Accessories | Wedding | Craft Supplies</div>
+              <img src="https://kirxlakwwzpkrmipdelj.supabase.co/storage/v1/object/public/product-images/06008771-3946-4cde-95f5-eed2a260f2ae.png" alt="Jewelry Port" style="height: 50px; width: auto; display: block; margin: 0 auto 10px auto;">
+              <div style="color: hsl(240, 5.9%, 10%); font-size: 14px; font-weight: 500;">Jewelry | Accessories | Wedding | Craft Supplies</div>
             </div>
 
             <!-- Main Message -->
@@ -97,43 +97,43 @@ const handler = async (req: Request): Promise<Response> => {
             <!-- Progress -->
             <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 18px; font-weight: 600; text-align: center;">Order Progress</h2>
-              <div class="progress-container" style="display: flex; align-items: center; justify-content: space-between;">
+              <div class="progress-container" style="display: flex; align-items: center; justify-content: center; max-width: 400px; margin: 0 auto;">
                 
                 <div class="progress-step" style="text-align: center; flex: 1;">
-                  <div style="width: 30px; height: 30px; background: #f59e0b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: bold;">⏳</div>
-                  <div style="font-size: 12px; font-weight: 600; color: #111827;">Pending</div>
-                  <div style="font-size: 10px; color: #6b7280;">Awaiting review</div>
+                  <div style="width: 32px; height: 32px; background: hsl(240, 5.9%, 10%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: bold; font-size: 16px;">1</div>
+                  <div style="font-size: 12px; font-weight: 600; color: hsl(240, 5.9%, 10%);">Pending</div>
+                  <div style="font-size: 10px; color: hsl(240, 3.8%, 46.1%);">Awaiting review</div>
                 </div>
                 
-                <div style="flex: 1; height: 2px; background: #e5e7eb; margin: 0 10px;"></div>
+                <div style="flex: 0.5; height: 2px; background: hsl(240, 5.9%, 90%); margin: 0 8px;"></div>
                 
                 <div class="progress-step" style="text-align: center; flex: 1;">
-                  <div style="width: 30px; height: 30px; background: #e5e7eb; color: #6b7280; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">2</div>
-                  <div style="font-size: 12px; font-weight: 600; color: #6b7280;">Processing</div>
-                  <div style="font-size: 10px; color: #9ca3af;">Next step</div>
+                  <div style="width: 32px; height: 32px; background: hsl(240, 5.9%, 90%); color: hsl(240, 3.8%, 46.1%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 14px;">2</div>
+                  <div style="font-size: 12px; font-weight: 600; color: hsl(240, 3.8%, 46.1%);">Processing</div>
+                  <div style="font-size: 10px; color: hsl(240, 3.8%, 46.1%);">Next step</div>
                 </div>
                 
-                <div style="flex: 1; height: 2px; background: #e5e7eb; margin: 0 10px;"></div>
+                <div style="flex: 0.5; height: 2px; background: hsl(240, 5.9%, 90%); margin: 0 8px;"></div>
                 
                 <div class="progress-step" style="text-align: center; flex: 1;">
-                  <div style="width: 30px; height: 30px; background: #e5e7eb; color: #6b7280; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">3</div>
-                  <div style="font-size: 12px; font-weight: 600; color: #6b7280;">Shipped</div>
-                  <div style="font-size: 10px; color: #9ca3af;">Soon</div>
+                  <div style="width: 32px; height: 32px; background: hsl(240, 5.9%, 90%); color: hsl(240, 3.8%, 46.1%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 14px;">3</div>
+                  <div style="font-size: 12px; font-weight: 600; color: hsl(240, 3.8%, 46.1%);">Shipped</div>
+                  <div style="font-size: 10px; color: hsl(240, 3.8%, 46.1%);">Soon</div>
                 </div>
                 
-                <div style="flex: 1; height: 2px; background: #e5e7eb; margin: 0 10px;"></div>
+                <div style="flex: 0.5; height: 2px; background: hsl(240, 5.9%, 90%); margin: 0 8px;"></div>
                 
                 <div class="progress-step" style="text-align: center; flex: 1;">
-                  <div style="width: 30px; height: 30px; background: #e5e7eb; color: #6b7280; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">4</div>
-                  <div style="font-size: 12px; font-weight: 600; color: #6b7280;">Delivered</div>
-                  <div style="font-size: 10px; color: #9ca3af;">Final step</div>
+                  <div style="width: 32px; height: 32px; background: hsl(240, 5.9%, 90%); color: hsl(240, 3.8%, 46.1%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 14px;">4</div>
+                  <div style="font-size: 12px; font-weight: 600; color: hsl(240, 3.8%, 46.1%);">Delivered</div>
+                  <div style="font-size: 10px; color: hsl(240, 3.8%, 46.1%);">Final step</div>
                 </div>
               </div>
             </div>
 
             <!-- Action Button -->
             <div style="text-align: center; margin-bottom: 30px;">
-              <a href="https://jewelryport.com/orders/${orderNumber}" class="button" style="display: inline-block; background: #f59e0b; color: white; padding: 14px 28px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 16px;">
+              <a href="https://jewelryport.com/orders/${orderNumber}" class="button" style="display: inline-block; background: hsl(240, 5.9%, 10%); color: hsl(0, 0%, 98%); padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
                 Track Your Order
               </a>
             </div>
@@ -148,35 +148,35 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
 
             <!-- Summary -->
-            <div style="display: flex; gap: 15px; margin-bottom: 30px;">
-              <div style="flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">Shipping address</h3>
-                <div style="color: #6b7280; line-height: 1.5;">
-                  <div style="font-weight: 600; color: #374151;">${shippingAddress?.fullName || customerName}</div>
+            <div style="margin-bottom: 30px;">
+              <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center;">
+                <h3 style="margin: 0 0 15px 0; color: hsl(240, 10%, 3.9%); font-size: 16px; font-weight: 600;">Shipping Address</h3>
+                <div style="color: hsl(240, 3.8%, 46.1%); line-height: 1.5;">
+                  <div style="font-weight: 600; color: hsl(240, 10%, 3.9%);">${shippingAddress?.fullName || customerName}</div>
                   ${shippingAddress?.address}<br>
                   ${shippingAddress?.city}, ${shippingAddress?.state} ${shippingAddress?.zipCode}<br>
                   ${shippingAddress?.country}
                 </div>
               </div>
               
-              <div style="flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">Payment</h3>
+              <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="margin: 0 0 15px 0; color: hsl(240, 10%, 3.9%); font-size: 16px; font-weight: 600;">Payment Details</h3>
                 <div style="margin-bottom: 15px;">
                   <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="color: #6b7280;">Subtotal</span>
-                    <span style="color: #374151;">$${(orderTotal * 0.85).toFixed(2)}</span>
+                    <span style="color: hsl(240, 3.8%, 46.1%);">Subtotal</span>
+                    <span style="color: hsl(240, 10%, 3.9%);">$${(orderTotal * 0.85).toFixed(2)}</span>
                   </div>
                   <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="color: #6b7280;">Tax</span>
-                    <span style="color: #374151;">$${(orderTotal * 0.08).toFixed(2)}</span>
+                    <span style="color: hsl(240, 3.8%, 46.1%);">Tax</span>
+                    <span style="color: hsl(240, 10%, 3.9%);">$${(orderTotal * 0.08).toFixed(2)}</span>
                   </div>
                   <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="color: #6b7280;">Shipping</span>
-                    <span style="color: #374151;">$${(orderTotal * 0.07).toFixed(2)}</span>
+                    <span style="color: hsl(240, 3.8%, 46.1%);">Shipping</span>
+                    <span style="color: hsl(240, 10%, 3.9%);">$${(orderTotal * 0.07).toFixed(2)}</span>
                   </div>
                 </div>
-                <div style="border-top: 1px solid #e5e7eb; padding-top: 10px;">
-                  <div style="display: flex; justify-content: space-between; font-weight: 600; color: #111827;">
+                <div style="border-top: 1px solid hsl(240, 5.9%, 90%); padding-top: 10px;">
+                  <div style="display: flex; justify-content: space-between; font-weight: 600; color: hsl(240, 10%, 3.9%);">
                     <span>Total (${orderItems.length} item${orderItems.length > 1 ? 's' : ''})</span>
                     <span>$${orderTotal.toFixed(2)}</span>
                   </div>
@@ -188,7 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="background: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Need help with your order?</h2>
               <p style="margin: 0 0 15px 0; color: #6b7280;">If you're experiencing difficulty with this order, please contact us.</p>
-              <a href="mailto:support@jewelryport.com" style="color: #f59e0b; text-decoration: none; font-weight: 600;">support@jewelryport.com</a>
+              <a href="mailto:support@jewelryport.com" style="color: hsl(240, 5.9%, 10%); text-decoration: none; font-weight: 600;">support@jewelryport.com</a>
             </div>
 
             <!-- Footer -->
