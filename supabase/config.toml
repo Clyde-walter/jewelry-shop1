@@ -15,3 +15,39 @@ verify_jwt = false
 
 [functions.send-verification-email]
 verify_jwt = false
+
+[functions.send-order-confirmation]
+verify_jwt = false
+
+[functions.send-order-pending]
+verify_jwt = false
+
+[functions.send-order-processing]
+verify_jwt = false
+
+[functions.send-order-shipped]
+verify_jwt = false
+
+[functions.send-order-delivered]
+verify_jwt = false
+
+[functions.send-order-cancelled]
+verify_jwt = false
+
+[functions.send-password-reset]
+verify_jwt = false
+
+[functions.send-shipping-alert]
+verify_jwt = false
+
+[functions.custom-auth-emails]
+verify_jwt = false
+
+[functions.send-custom-email]
+verify_jwt = true
+
+[functions.create-paystack-payment]
+verify_jwt = true
+
+[functions.verify-paystack-payment]
+verify_jwt = true
