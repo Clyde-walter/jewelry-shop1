@@ -171,23 +171,57 @@ export function useOrderOperations() {
       
       const order = orders.find(o => o.id === orderId);
       
-      // Send shipping alert email for status changes
-      if (order && ['confirmed', 'processing', 'shipped', 'in_transit', 'delivered'].includes(status)) {
+      // Send appropriate status email based on order status
+      if (order) {
         try {
-          await supabase.functions.invoke('send-shipping-alert', {
-            body: {
-              customerName: order.customerInfo?.name || 'Customer',
-              customerEmail: order.customerInfo?.email,
-              orderNumber: order.orderNumber,
-              status: status,
-              trackingNumber: undefined,
-              estimatedDelivery: undefined,
-              shippingCarrier: undefined
-            }
-          });
-          console.log('Shipping alert email sent for:', order.orderNumber, 'Status:', status);
+          let functionName = '';
+          let emailData: any = {
+            customerName: order.customerInfo?.name || 'Customer',
+            customerEmail: order.customerInfo?.email,
+            orderNumber: order.orderNumber,
+            orderTotal: order.total,
+            orderItems: order.items.map(item => ({
+              name: item.product.name,
+              price: item.product.price,
+              quantity: item.quantity
+            })),
+            shippingAddress: order.customerInfo
+          };
+
+          switch (status) {
+            case 'pending':
+              functionName = 'send-order-pending';
+              break;
+            case 'processing':
+              functionName = 'send-order-processing';
+              break;
+            case 'shipped':
+              functionName = 'send-order-shipped';
+              emailData.trackingNumber = 'TRK' + Date.now().toString().slice(-8);
+              emailData.estimatedDelivery = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+              break;
+            case 'delivered':
+              functionName = 'send-order-delivered';
+              emailData.deliveryDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+              break;
+            case 'cancelled':
+              functionName = 'send-order-cancelled';
+              emailData.cancellationReason = 'Order status changed to cancelled';
+              emailData.refundAmount = order.total * 0.97;
+              break;
+            default:
+              // For other statuses, don't send email
+              break;
+          }
+
+          if (functionName && order.customerInfo?.email) {
+            await supabase.functions.invoke(functionName, {
+              body: emailData
+            });
+            console.log(`${status} email sent successfully for order ${order.orderNumber}`);
+          }
         } catch (emailError) {
-          console.error('Error sending shipping alert email:', emailError);
+          console.error(`Error sending ${status} email:`, emailError);
           // Don't fail the status update if email fails
         }
       }
