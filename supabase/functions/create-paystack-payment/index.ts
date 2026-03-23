@@ -4,8 +4,36 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+function validatePaymentInput(data: any): { valid: boolean; error?: string } {
+  if (!data || typeof data !== 'object') return { valid: false, error: 'Invalid request body' };
+  if (typeof data.amount !== 'number' || data.amount <= 0 || data.amount > 1000000) {
+    return { valid: false, error: 'Amount must be a positive number up to 1,000,000' };
+  }
+  if (typeof data.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) || data.email.length > 255) {
+    return { valid: false, error: 'Invalid email address' };
+  }
+  if (!data.customerInfo || typeof data.customerInfo !== 'object') {
+    return { valid: false, error: 'Customer info is required' };
+  }
+  if (typeof data.customerInfo.name !== 'string' || data.customerInfo.name.trim().length === 0 || data.customerInfo.name.length > 100) {
+    return { valid: false, error: 'Customer name is required and must be under 100 characters' };
+  }
+  if (!Array.isArray(data.cartItems) || data.cartItems.length === 0 || data.cartItems.length > 50) {
+    return { valid: false, error: 'Cart must have 1-50 items' };
+  }
+  for (const item of data.cartItems) {
+    if (!item || typeof item.quantity !== 'number' || item.quantity < 1 || item.quantity > 100) {
+      return { valid: false, error: 'Each cart item must have a valid quantity (1-100)' };
+    }
+    if (typeof item.price !== 'number' || item.price <= 0) {
+      return { valid: false, error: 'Each cart item must have a valid positive price' };
+    }
+  }
+  return { valid: true };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -29,7 +57,27 @@ serve(async (req) => {
     }
 
     const { amount, email, customerInfo, cartItems } = await req.json();
-    
+
+    // Validate input
+    const validation = validatePaymentInput({ amount, email, customerInfo, cartItems });
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // Server-side price verification: recalculate total from cart items
+    const calculatedTotal = cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+    const roundedAmount = Math.round(amount * 100) / 100;
+    const roundedCalculated = Math.round(calculatedTotal * 100) / 100;
+    if (Math.abs(roundedAmount - roundedCalculated) > 0.01) {
+      return new Response(
+        JSON.stringify({ error: 'Amount mismatch: total does not match cart items' }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!paystackSecretKey) {
       throw new Error("Paystack secret key not configured");
